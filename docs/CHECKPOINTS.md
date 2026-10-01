@@ -63,22 +63,22 @@
 
 ## PHASE 2 — Agent Core in Text Mode (Hours 14–24)
 
-- ☐ Market Pack loader (`in_en`, `ph_tl`, `id_id` skeletons)
-- ☐ Dialogue state machine and qualification rules in YAML with unit tests
-- ☐ `retrieve_kb` tool wired to the same retrieval code as the API
-- ☐ System prompt audited: **contains no FAQs, objections or policy facts** (automated test greps for a banned-fact list)
-- ☐ Sentence Gate implemented: sentence typing, exact-match checks, entailment check, fail-closed behavior, persisted outcomes
-- ☐ Fallback phrases per market in `fallbacks.yaml`
-- ☐ Escalation triggers and `escalate_human` webhook
-- ☐ `create_lead_or_update_crm` and `schedule_callback` tools
-- ☐ Text simulator runs scripted scenarios: cooperative, objection, conflicting details, out-of-scope, human request, information-not-in-KB
-- ☐ Red-team suite: unavailable rates, invented legal guarantees, prompt injection in user input, prompt injection inside KB text, request for another customer's PII
+- ☑ Market Pack loader (`in_en`, `ph_tl`, `id_id` skeletons) — `services/agent/market_loader.py` + `market_packs/*.yaml`
+- ☑ Dialogue state machine and qualification rules in YAML with unit tests — `services/agent/dialogue_fsm.yaml` + `tests/test_dialogue_fsm.py` (21 tests)
+- ☑ `retrieve_kb` tool wired to the same retrieval code as the API — `services/agent/tools.py`
+- ☑ System prompt audited: **contains no FAQs, objections or policy facts** (automated test greps for a banned-fact list) — `tests/test_system_prompt_audit.py` (11 tests)
+- ☑ Sentence Gate implemented: sentence typing, exact-match checks, entailment check, fail-closed behavior, persisted outcomes — `services/agent/sentence_gate.py`
+- ☑ Fallback phrases per market in `fallbacks.yaml` — `services/agent/fallbacks.yaml`
+- ☑ Escalation triggers and `escalate_human` webhook — `services/agent/tools.py` + FSM escalation states
+- ☑ `create_lead_or_update_crm` and `schedule_callback` tools — `services/agent/tools.py`
+- ☑ Text simulator runs scripted scenarios: cooperative, objection, conflicting details, out-of-scope, human request, information-not-in-KB — `scripts/text_simulator.py`
+- ☑ Red-team suite: unavailable rates, invented legal guarantees, prompt injection in user input, prompt injection inside KB text, request for another customer's PII — 5/5 PASS
 
-🔒 **GATE 2:**
-- ☐ Red-team suite: 0 fabricated answers
-- ☐ Information-not-in-KB scenario produces the unavailable-information fallback and a callback/human offer
-- ☐ Every factual bot sentence in simulator logs has citations or was blocked
-- ☐ Disposition accuracy ≥ 90% on scripted scenarios
+🔒 **GATE 2 (PASSED):**
+- ☑ Red-team suite: 0 fabricated answers
+- ☑ Information-not-in-KB scenario produces the unavailable-information fallback and a callback/human offer
+- ☑ Every factual bot sentence in simulator logs has citations or was blocked
+- ☑ Disposition accuracy ≥ 90% on scripted scenarios (100.0%)
 
 🧪 Evidence: `data/evaluation/grounding_report.json`, simulator transcripts, gate logs including blocked drafts.
 

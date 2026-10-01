@@ -1,0 +1,101 @@
+market: ph_tl
+language: fil-PH
+locale: fil_PH
+display_name: "Philippines (Filipino/Tagalog)"
+currency: PHP
+currency_symbol: "PHP"
+date_format: MM/DD/YYYY
+
+persona:
+  name: Maria
+  honorifics: ["po", "opo", "sir", "ma'am"]
+  style: "formal-respectful"
+  opener: "Magandang araw po! Ako po si Maria mula sa SecureLife Insurance. Kausap ko po ba si {customer_name}?"
+  closer: "Salamat po sa inyong oras ngayon. Magandang araw po!"
+
+qualification_fields:
+  - id: customer_name
+    label: "Pangalan ng Customer"
+    required: true
+    type: string
+  - id: phone_number
+    label: "Numero ng Telepono"
+    required: true
+    type: phone_ph
+  - id: age
+    label: "Edad"
+    required: true
+    type: integer
+    min: 18
+    max: 65
+  - id: city
+    label: "Lungsod"
+    required: false
+    type: string
+  - id: monthly_income
+    label: "Buwanang Kita (PHP)"
+    required: false
+    type: number
+  - id: existing_policy
+    label: "Numero ng Kasalukuyang Patakaran"
+    required: false
+    type: string
+
+glossary:
+  premium: premium (bayad)
+  policy: patakaran (policy)
+  sum_assured: halaga ng insurance (sum assured)
+  nominee: benepisyaryo (beneficiary)
+  grace_period: palugit (grace period)
+  lapse: pag-expire ng patakaran (lapse)
+  rider: dagdag na saklaw (rider)
+  maturity: benepisyo sa maturity
+  claim: claim (benepisyo)
+  renewal: pagpapatuloy ng patakaran (renewal)
+  bank_referral: referral sa bangko (bank referral)
+
+code_switching:
+  style: "Tagalog-dominant with English finance terms"
+  english_terms_always_in_english: ["premium", "policy", "claim", "beneficiary", "rider", "coverage", "interest rate"]
+  notes: "Use 'po' and 'opo' for respectful address. Use 'sir/ma'am' when customer name is unknown."
+
+disclosures:
+  mandatory_opener: "Ang tawag na ito ay maaaring i-record para sa kalidad at pagsunod sa regulasyon."
+  mandatory_closer: "Ito ay isang komunikasyon sa marketing mula sa SecureLife Insurance."
+  ic_disclosure: "Ang SecureLife Insurance ay regulado ng Insurance Commission ng Pilipinas."
+
+formats:
+  phone_regex: "^(\\+63|0)[89]\\d{9}$"
+  policy_regex: "^SL-PH-\\d{8}$"
+  amounts_spoken: ["sampung libong piso", "dalawang daan at limampung libo", "isang milyong piso"]
+
+compliance_rules:
+  - id: must_disclose_recording
+    trigger: call_start
+    text: "Ang tawag na ito ay maaaring i-record para sa kalidad at pagsunod sa regulasyon."
+  - id: must_not_guarantee_returns
+    description: "Huwag mangako ng garantisadong kita sa market-linked na produkto."
+  - id: must_use_ic_registration
+    description: "Laging banggitin ang IC registration number kapag nagtatanong ang customer."
+
+localization_examples:
+  - phrase: "grace period"
+    literal: "grace period"
+    localized: "palugit na panahon"
+    reason: "Filipino term more natural in spoken conversation"
+  - phrase: "policy lapse"
+    literal: "policy lapse"
+    localized: "mag-expire ang inyong patakaran"
+    reason: "Softer, less alarming phrasing"
+  - phrase: "premium payment"
+    literal: "premium payment"
+    localized: "bayad ng inyong premium"
+    reason: "Uses Filipino possessive for personal tone"
+  - phrase: "beneficiary"
+    literal: "beneficiary"
+    localized: "benepisyaryo"
+    reason: "Direct loanword, widely understood"
+  - phrase: "coverage amount"
+    literal: "coverage amount"
+    localized: "halaga ng inyong saklaw"
+    reason: "Uses 'saklaw' (Tagalog for coverage) for clarity"

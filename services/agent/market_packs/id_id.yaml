@@ -1,0 +1,131 @@
+market: id_id
+language: id-ID
+locale: id_ID
+display_name: "Indonesia (Bahasa Indonesia)"
+currency: IDR
+currency_symbol: "IDR"
+date_format: DD/MM/YYYY
+
+persona:
+  name: Sari
+  honorifics: ["Bapak", "Ibu", "Kak"]
+  style: "formal-respectful"
+  opener: "Selamat siang! Perkenalkan, saya Sari dari SecureLife Insurance. Apakah benar saya berbicara dengan {customer_name}?"
+  closer: "Terima kasih atas waktunya, {honorific} {customer_name}. Semoga hari Anda menyenangkan!"
+
+qualification_fields:
+  - id: customer_name
+    label: "Nama Nasabah"
+    required: true
+    type: string
+  - id: phone_number
+    label: "Nomor Telepon"
+    required: true
+    type: phone_id
+  - id: age
+    label: "Usia"
+    required: true
+    type: integer
+    min: 17
+    max: 65
+  - id: city
+    label: "Kota"
+    required: false
+    type: string
+  - id: monthly_income
+    label: "Penghasilan Bulanan (IDR)"
+    required: false
+    type: number
+  - id: existing_policy
+    label: "Nomor Polis yang Ada"
+    required: false
+    type: string
+
+glossary:
+  premium: premi (premium)
+  policy: polis asuransi (policy)
+  sum_assured: uang pertanggungan (sum assured)
+  nominee: ahli waris / penerima manfaat (beneficiary)
+  grace_period: masa tenggang (grace period)
+  lapse: polis hangus / tidak aktif (lapse)
+  rider: manfaat tambahan / rider
+  maturity: manfaat jatuh tempo (maturity benefit)
+  claim: klaim (claim)
+  renewal: perpanjangan polis (renewal)
+  installment: cicilan / angsuran
+  down_payment: uang muka / DP
+  due_date: tanggal jatuh tempo
+  financing: pembiayaan
+  tenor: tenor / jangka waktu
+
+numerals_parsing:
+  examples:
+    - spoken: "tiga juta lima ratus"
+      value: 3500000
+      currency: IDR
+    - spoken: "3,5 jt"
+      value: 3500000
+      currency: IDR
+    - spoken: "dua ratus lima puluh ribu"
+      value: 250000
+      currency: IDR
+    - spoken: "satu miliar"
+      value: 1000000000
+      currency: IDR
+
+register_rules:
+  formal_address: "Use Bapak (for men), Ibu (for women), Kak (neutral/casual)"
+  formal_vs_colloquial:
+    - formal: "Apakah Bapak berminat?"
+      colloquial: "Bapak tertarik?"
+      use: "Use formal in opening, colloquial acceptable after rapport established"
+  collections_conduct:
+    - rule: "Dilarang mengancam nasabah secara langsung maupun tidak langsung"
+      description: "No threats, direct or indirect, to customer"
+    - rule: "Dilarang mengungkapkan informasi nasabah ke pihak ketiga"
+      description: "No third-party disclosure of customer information"
+    - rule: "Dilarang menghubungi nasabah di luar jam 08.00-21.00 WIB"
+      description: "No contact outside 08:00-21:00 WIB"
+
+disclosures:
+  mandatory_opener: "Pembicaraan ini mungkin direkam untuk keperluan kualitas dan kepatuhan."
+  mandatory_closer: "Ini adalah komunikasi pemasaran dari SecureLife Insurance."
+  ojk_disclosure: "SecureLife Insurance diawasi oleh Otoritas Jasa Keuangan (OJK). Nomor izin: ASURANSI-2024-001."
+
+formats:
+  phone_regex: "^(\\+62|0)[2-9]\\d{7,11}$"
+  policy_regex: "^SL-ID-\\d{8}$"
+  amounts_spoken: ["tiga juta lima ratus", "dua ratus lima puluh ribu", "satu miliar"]
+
+compliance_rules:
+  - id: must_disclose_recording
+    trigger: call_start
+    text: "Pembicaraan ini mungkin direkam untuk keperluan kualitas dan kepatuhan."
+  - id: must_not_guarantee_returns
+    description: "Jangan menjanjikan imbal hasil yang dijamin pada produk berbasis pasar."
+  - id: must_use_ojk_registration
+    description: "Selalu sebutkan nomor izin OJK bila nasabah meminta."
+  - id: no_third_party_disclosure
+    description: "Jangan ungkapkan informasi nasabah kepada pihak ketiga."
+
+localization_examples:
+  - phrase: "grace period"
+    literal: "grace period"
+    localized: "masa tenggang"
+    reason: "Standard Indonesian financial term, widely understood"
+  - phrase: "policy lapse"
+    literal: "policy lapse"
+    localized: "polis hangus"
+    reason: "Direct Indonesian equivalent, clearer than loanword"
+  - phrase: "installment"
+    literal: "installment"
+    localized: "cicilan"
+    reason: "Everyday Indonesian word, more relatable than 'angsuran'"
+  - phrase: "due date"
+    literal: "due date"
+    localized: "tanggal jatuh tempo"
+    reason: "Formal financial term; abbreviated to 'jatuh tempo' in speech"
+  - phrase: "beneficiary"
+    literal: "beneficiary"
+    localized: "ahli waris"
+    reason: "Legal Indonesian term; 'penerima manfaat' used in simpler contexts"

@@ -1,0 +1,73 @@
+market: in_en
+language: en-IN
+locale: en_IN
+display_name: "India (English)"
+currency: INR
+currency_symbol: "INR"
+date_format: DD/MM/YYYY
+
+persona:
+  name: Priya
+  honorifics: ["ji", "sir", "ma'am"]
+  style: "formal-warm"
+  opener: "Namaste! This is Priya from SecureLife Insurance. Am I speaking with {customer_name}?"
+  closer: "Thank you for your time today. Have a wonderful day! Dhanyavad."
+
+qualification_fields:
+  - id: customer_name
+    label: "Customer Name"
+    required: true
+    type: string
+  - id: phone_number
+    label: "Phone Number"
+    required: true
+    type: phone_in
+  - id: age
+    label: "Age"
+    required: true
+    type: integer
+    min: 18
+    max: 70
+  - id: city
+    label: "City"
+    required: false
+    type: string
+  - id: annual_income
+    label: "Annual Income (INR)"
+    required: false
+    type: number
+  - id: existing_policy
+    label: "Existing Policy Number"
+    required: false
+    type: string
+
+glossary:
+  premium: premium
+  policy: policy
+  sum_assured: sum assured
+  nominee: nominee
+  grace_period: grace period
+  lapse: lapse
+  rider: rider
+  maturity: maturity benefit
+  claim: claim
+  renewal: renewal
+
+disclosures:
+  mandatory_opener: "This call may be recorded for quality and compliance purposes."
+  mandatory_closer: "This is a marketing communication from SecureLife Insurance."
+  irda_disclosure: "SecureLife Insurance is regulated by IRDAI. Registration number: LIFE-2024-001."
+
+formats:
+  phone_regex: "^[6-9]\\d{9}$"
+  policy_regex: "^SL-\\d{8}$"
+  amounts_spoken: ["ten lakh", "twenty five thousand", "one crore"]
+
+compliance_rules:
+  - id: must_disclose_recording
+    trigger: call_start
+    text: "This call may be recorded for quality and compliance purposes."
+  - id: must_not_guarantee_returns
+    description: "Never promise guaranteed returns on ULIP or market-linked products."
+  - id: must_disclose_charges
+    description: "Always mention applicable charges when discussing premiums."

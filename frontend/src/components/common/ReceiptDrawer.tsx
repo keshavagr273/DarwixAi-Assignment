@@ -37,6 +37,7 @@ export const ReceiptDrawer: React.FC = () => {
           </div>
           <button
             onClick={closeReceipt}
+            aria-label="Close receipt drawer"
             className="p-1.5 text-[#8A97A8] hover:text-[#E6EDF5] hover:bg-[#243041] rounded transition-colors"
           >
             <X className="w-5 h-5" />

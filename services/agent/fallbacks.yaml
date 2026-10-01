@@ -1,0 +1,96 @@
+---
+# Fallback phrases per market
+# Used when: information not in KB, gate blocked, out of scope, escalation
+
+in_en:
+  unavailable_info_fallback:
+    - "I'm sorry, I don't have that specific information readily available. Let me connect you with our specialist who can help. Shall I arrange a callback at a convenient time?"
+    - "That's a great question, but I'm afraid I don't have that detail on hand. I'd like to arrange for one of our senior specialists to get back to you. Would that work?"
+    - "I want to give you accurate information and I don't have that particular detail available right now. I can schedule a callback with someone who can answer precisely. Is that alright?"
+
+  out_of_scope_fallback:
+    - "I'm afraid that's outside the scope of what I can help with today. I'm here specifically to assist with SecureLife Insurance products. Is there something about our insurance offerings I can help you with?"
+    - "That's not something I'm able to assist with at the moment. My expertise is in SecureLife Insurance products and policies. May I help you with anything related to that?"
+
+  gate_blocked_fallback:
+    - "I want to make sure I give you completely accurate information. Let me check with our specialist team on that. Can I arrange a callback for you?"
+    - "I'd like to verify that before giving you a definitive answer. Shall I have a specialist follow up with you?"
+
+  escalation_message:
+    - "Absolutely, let me transfer you to one of our senior agents now. Please hold on for a moment."
+    - "Of course, I'll connect you with a specialist right away. Please stay on the line."
+
+  not_eligible_message:
+    - "Thank you for sharing that information. Based on what you've told me, our current plans may not be the best fit. However, I'd recommend speaking with our advisor for personalized guidance."
+
+  low_income_message:
+    - "Thank you for your time. We do have some plans that might be more suited to your budget. May I have a specialist reach out to you with more options?"
+
+  opt_out_acknowledgment:
+    - "I completely understand and respect your decision. You've been removed from our contact list. Have a wonderful day!"
+
+  wrong_number_apology:
+    - "I'm so sorry for the inconvenience! It seems we have the wrong number. I'll make sure this is corrected in our records. Have a great day!"
+
+  soft_end_message:
+    - "Thank you so much for your time today. If you ever change your mind or have questions about insurance in the future, please don't hesitate to reach out. Have a wonderful day!"
+
+ph_tl:
+  unavailable_info_fallback:
+    - "Pasensya na po, wala akong eksaktong impormasyon tungkol doon. Maaari ko po kayong ikonekta sa aming espesyalista. Gusto po ba ninyong mag-schedule ng callback?"
+    - "Magandang tanong po iyan, ngunit sa kasalukuyan ay wala akong detalye tungkol doon. Mayroon po kaming eksperto na makakatulong. Okay lang po ba kung makipag-ugnayan sila sa inyo?"
+    - "Nais ko pong mabigyan kayo ng tamang impormasyon. Hindi ko po ito masagot nang sigurado ngayon. Pwede po bang mag-arrange ng callback para sa inyo?"
+
+  out_of_scope_fallback:
+    - "Paumanhin po, hindi po iyon nasa aking saklaw ngayon. Nakatuon po ako sa mga produkto ng SecureLife Insurance. May maitutulong pa po ba ako tungkol sa aming mga insurance?"
+    - "Hindi po iyon ang aking espesyalidad. Narito po ako para sa SecureLife Insurance. Maaari ko po ba kayong tulungan sa ibang bagay?"
+
+  gate_blocked_fallback:
+    - "Gusto ko pong makasiguro na tama ang impormasyong ibibigay ko. Hayaan po ninyo akong makipag-ugnayan muna sa aming team. Pwede po bang mag-arrange ng callback?"
+    - "Kailangan ko pong i-verify iyon bago sagutin. Maaari po bang makipag-usap ang aming espesyalista sa inyo?"
+
+  escalation_message:
+    - "Oo naman po! Ililipat ko po kayo sa aming senior agent ngayon. Sandali lang po."
+    - "Sige po, ikokonekta ko kayo sa aming espesyalista. Pakiantay lang po saglit."
+
+  not_eligible_message:
+    - "Salamat po sa pagbabahagi ng impormasyon. Batay sa inyong sitwasyon, maaaring may mas angkop na plano para sa inyo. Maaari po ba naming ipakilala kayo sa aming advisor?"
+
+  soft_end_message:
+    - "Maraming salamat po sa inyong oras ngayon. Kung magbabago po ang isip ninyo o may katanungan kayo sa insurance sa hinaharap, huwag po kayong mag-atubiling makipag-ugnayan sa amin. Magandang araw po!"
+
+  opt_out_acknowledgment:
+    - "Naiintindihan po namin at iginagalang ang inyong desisyon. Tinanggal na po kayo sa aming listahan ng contact. Magandang araw po!"
+
+  wrong_number_apology:
+    - "Pasensya na po sa abala! Tila mali ang numero na aming na-dial. Aayusin po namin ito sa aming records. Magandang araw po!"
+
+id_id:
+  unavailable_info_fallback:
+    - "Mohon maaf, saya tidak memiliki informasi spesifik mengenai hal tersebut saat ini. Boleh saya atur agar spesialis kami menghubungi Bapak/Ibu pada waktu yang nyaman?"
+    - "Pertanyaan yang bagus, namun saya belum memiliki detailnya sekarang. Kami memiliki ahli yang dapat membantu. Apakah Bapak/Ibu bersedia dihubungi kembali?"
+    - "Saya ingin memberikan informasi yang akurat. Saat ini saya tidak dapat menjawab dengan pasti. Boleh saya jadwalkan callback untuk Bapak/Ibu?"
+
+  out_of_scope_fallback:
+    - "Mohon maaf, hal tersebut di luar cakupan yang dapat saya bantu saat ini. Saya bertugas untuk membantu terkait produk SecureLife Insurance. Apakah ada yang bisa saya bantu terkait asuransi kami?"
+    - "Itu bukan spesialisasi saya. Saya hadir untuk SecureLife Insurance. Boleh saya bantu dengan informasi produk kami?"
+
+  gate_blocked_fallback:
+    - "Saya ingin memastikan informasi yang saya berikan akurat. Izinkan saya menghubungi tim kami terlebih dahulu. Apakah Bapak/Ibu bersedia dijadwalkan callback?"
+    - "Perlu saya verifikasi dulu sebelum menjawab. Boleh spesialis kami menindaklanjuti?"
+
+  escalation_message:
+    - "Tentu saja! Izinkan saya mengalihkan Bapak/Ibu ke agen senior kami sekarang. Mohon tunggu sebentar."
+    - "Baik, saya akan menghubungkan Bapak/Ibu dengan spesialis kami. Mohon tunggu sejenak."
+
+  not_eligible_message:
+    - "Terima kasih atas informasinya. Berdasarkan yang Bapak/Ibu sampaikan, mungkin ada produk yang lebih sesuai. Boleh kami kenalkan kepada advisor kami?"
+
+  soft_end_message:
+    - "Terima kasih banyak atas waktunya. Jika Bapak/Ibu berubah pikiran atau memiliki pertanyaan tentang asuransi di masa mendatang, jangan ragu untuk menghubungi kami. Semoga hari Anda menyenangkan!"
+
+  opt_out_acknowledgment:
+    - "Kami memahami dan menghormati keputusan Bapak/Ibu. Nomor Anda telah dihapus dari daftar kontak kami. Semoga hari Anda menyenangkan!"
+
+  wrong_number_apology:
+    - "Mohon maaf atas gangguan ini! Sepertinya kami salah menghubungi nomor. Akan kami perbaiki dalam catatan kami. Semoga hari Anda menyenangkan!"

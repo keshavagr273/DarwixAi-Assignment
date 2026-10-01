@@ -73,8 +73,34 @@ class HybridRetriever:
             # Strict fail-closed refusal on out-of-scope requests
             return [], True
 
+        # PII exfiltration / customer data requests — strict refusal
+        pii_patterns = [
+            r"(phone number|policy number|email|address)\s+(for|of)\s+\w+",
+            r"(tell|give|show|share)\s+me.*(policy number|phone|email|id number|personal).*(for|of|belonging)",
+            r"another customer",
+            r"other customer",
+            r"someone else.*(policy|account|details)",
+            r"(lookup|look up|find)\s+\w+\s+(policy|account|details|information)",
+        ]
+        if any(re.search(p, q_lower, re.IGNORECASE) for p in pii_patterns):
+            return [], True
+
+        # Prompt injection patterns — fail-closed
+        injection_patterns = [
+            r"ignore (all )?(previous|prior) instructions",
+            r"you are now (DAN|a different|an unrestricted|a new)",
+            r"disregard (all )?(previous|prior|your)",
+            r"jailbreak",
+            r"pretend you (are|have no)",
+            r"(reveal|show|print|output|tell me|expose).*(system prompt|instructions|rules|constraints)",
+            r"act as (an? )?(unfiltered|unrestricted|different)",
+        ]
+        if any(re.search(p, q_lower, re.IGNORECASE) for p in injection_patterns):
+            return [], True
+
         rewritten_query = self.rewrite_query(query, market)
         return self.index.search(rewritten_query, top_k=top_k, min_threshold=threshold)
+
 
 # Singleton retriever instance for services
 _GLOBAL_RETRIEVER: Optional[HybridRetriever] = None

@@ -1,0 +1,304 @@
+---
+# Dialogue State Machine for PARLEY Voice Agent
+# Each state defines: transitions, allowed_intents, required_slots
+
+initial_state: GREETING
+
+states:
+
+  GREETING:
+    description: "Agent introduces itself and verifies caller identity"
+    required_slots: [customer_name]
+    actions:
+      - speak: opener
+      - collect: customer_name
+    transitions:
+      - on: name_confirmed
+        to: COMPLIANCE_DISCLOSURE
+      - on: name_rejected
+        to: WRONG_NUMBER
+      - on: no_answer
+        to: GREETING
+      - on: human_request
+        to: ESCALATE_HUMAN
+
+  COMPLIANCE_DISCLOSURE:
+    description: "Mandatory call recording disclosure"
+    required_slots: []
+    actions:
+      - speak: mandatory_opener_disclosure
+    transitions:
+      - on: disclosure_acknowledged
+        to: QUALIFICATION
+      - on: human_request
+        to: ESCALATE_HUMAN
+      - on: opt_out
+        to: OPT_OUT_END
+
+  QUALIFICATION:
+    description: "Collect qualification data; probe interest"
+    required_slots: [age]
+    optional_slots: [city, annual_income, monthly_income, existing_policy]
+    qualification_rules:
+      - id: age_check
+        field: age
+        rule: "18 <= age <= 70"
+        fail_to: NOT_ELIGIBLE
+      - id: income_softcheck
+        field: annual_income
+        rule: "annual_income >= 120000 OR monthly_income >= 10000"
+        fail_to: LOW_INCOME_SOFT_END
+        optional: true
+    transitions:
+      - on: qualified
+        to: PRODUCT_PITCH
+      - on: not_eligible
+        to: NOT_ELIGIBLE
+      - on: low_income
+        to: LOW_INCOME_SOFT_END
+      - on: human_request
+        to: ESCALATE_HUMAN
+      - on: question_asked
+        to: KNOWLEDGE_RETRIEVAL
+
+  PRODUCT_PITCH:
+    description: "Present relevant product; answer questions from KB"
+    required_slots: []
+    allowed_intents:
+      - product_inquiry
+      - faq_question
+      - objection
+      - out_of_scope
+      - human_request
+      - schedule_callback
+    actions:
+      - speak: product_overview
+    transitions:
+      - on: interested
+        to: CRM_CAPTURE
+      - on: objection_raised
+        to: OBJECTION_HANDLING
+      - on: question_asked
+        to: KNOWLEDGE_RETRIEVAL
+      - on: out_of_scope
+        to: OUT_OF_SCOPE_RESPONSE
+      - on: human_request
+        to: ESCALATE_HUMAN
+      - on: callback_requested
+        to: SCHEDULE_CALLBACK
+      - on: not_interested
+        to: SOFT_END
+
+  KNOWLEDGE_RETRIEVAL:
+    description: "Retrieve answer from KB; cite source; apply sentence gate"
+    required_slots: []
+    actions:
+      - tool: retrieve_kb
+      - apply: sentence_gate
+    transitions:
+      - on: answer_found
+        to: _PREVIOUS
+      - on: no_match
+        to: NO_MATCH_RESPONSE
+      - on: gate_blocked
+        to: GATE_BLOCKED_RESPONSE
+      - on: human_request
+        to: ESCALATE_HUMAN
+
+  OBJECTION_HANDLING:
+    description: "Address objection using KB playbook; retry pitch"
+    required_slots: []
+    actions:
+      - tool: retrieve_kb
+        context: "objection_playbook"
+      - apply: sentence_gate
+    transitions:
+      - on: objection_resolved
+        to: PRODUCT_PITCH
+      - on: firm_no
+        to: SOFT_END
+      - on: human_request
+        to: ESCALATE_HUMAN
+      - on: no_match
+        to: NO_MATCH_RESPONSE
+
+  CRM_CAPTURE:
+    description: "Collect consent and create CRM lead"
+    required_slots: [phone_number]
+    actions:
+      - collect: phone_number
+      - tool: create_lead_or_update_crm
+    transitions:
+      - on: lead_created
+        to: CLOSING
+      - on: consent_denied
+        to: SOFT_END
+      - on: human_request
+        to: ESCALATE_HUMAN
+
+  SCHEDULE_CALLBACK:
+    description: "Schedule callback at customer's preferred time"
+    required_slots: [phone_number]
+    actions:
+      - collect: preferred_callback_time
+      - tool: schedule_callback
+    transitions:
+      - on: callback_scheduled
+        to: CLOSING
+      - on: human_request
+        to: ESCALATE_HUMAN
+
+  NO_MATCH_RESPONSE:
+    description: "Information not in KB; offer fallback and callback"
+    required_slots: []
+    actions:
+      - speak: unavailable_info_fallback
+      - offer: schedule_callback
+      - offer: escalate_human
+    transitions:
+      - on: callback_accepted
+        to: SCHEDULE_CALLBACK
+      - on: human_requested
+        to: ESCALATE_HUMAN
+      - on: end_call
+        to: SOFT_END
+
+  OUT_OF_SCOPE_RESPONSE:
+    description: "Query outside product scope"
+    required_slots: []
+    actions:
+      - speak: out_of_scope_fallback
+    transitions:
+      - on: continue
+        to: PRODUCT_PITCH
+      - on: end_call
+        to: SOFT_END
+      - on: human_request
+        to: ESCALATE_HUMAN
+
+  GATE_BLOCKED_RESPONSE:
+    description: "Sentence gate blocked a hallucinated or ungrounded response"
+    required_slots: []
+    actions:
+      - speak: gate_blocked_fallback
+      - log: gate_block_event
+    transitions:
+      - on: continue
+        to: _PREVIOUS
+      - on: human_request
+        to: ESCALATE_HUMAN
+
+  ESCALATE_HUMAN:
+    description: "Transfer to human agent"
+    required_slots: []
+    actions:
+      - tool: escalate_human
+      - speak: escalation_message
+    transitions:
+      - on: transferred
+        to: CALL_END_ESCALATED
+
+  NOT_ELIGIBLE:
+    description: "Customer does not meet eligibility criteria"
+    required_slots: []
+    actions:
+      - speak: not_eligible_message
+    transitions:
+      - on: done
+        to: SOFT_END
+
+  LOW_INCOME_SOFT_END:
+    description: "Customer income below threshold; soft exit"
+    required_slots: []
+    actions:
+      - speak: low_income_message
+    transitions:
+      - on: done
+        to: SOFT_END
+
+  WRONG_NUMBER:
+    description: "Wrong number reached"
+    required_slots: []
+    actions:
+      - speak: wrong_number_apology
+    transitions:
+      - on: done
+        to: CALL_END_WRONG_NUMBER
+
+  OPT_OUT_END:
+    description: "Customer opted out of recording / marketing"
+    required_slots: []
+    actions:
+      - speak: opt_out_acknowledgment
+      - tool: log_opt_out
+    transitions:
+      - on: done
+        to: CALL_END_OPT_OUT
+
+  CLOSING:
+    description: "Wrap up the call with a positive close"
+    required_slots: []
+    actions:
+      - speak: closer
+      - speak: mandatory_closer_disclosure
+    transitions:
+      - on: done
+        to: CALL_END_SUCCESS
+
+  SOFT_END:
+    description: "Graceful end when customer is not interested"
+    required_slots: []
+    actions:
+      - speak: soft_end_message
+      - speak: mandatory_closer_disclosure
+    transitions:
+      - on: done
+        to: CALL_END_NOT_INTERESTED
+
+  CALL_END_SUCCESS:
+    terminal: true
+    disposition: success
+
+  CALL_END_NOT_INTERESTED:
+    terminal: true
+    disposition: not_interested
+
+  CALL_END_ESCALATED:
+    terminal: true
+    disposition: escalated
+
+  CALL_END_OPT_OUT:
+    terminal: true
+    disposition: opt_out
+
+  CALL_END_WRONG_NUMBER:
+    terminal: true
+    disposition: wrong_number
+
+qualification_rules:
+  in_en:
+    age_min: 18
+    age_max: 70
+    annual_income_min: 120000
+    currency: INR
+  ph_tl:
+    age_min: 18
+    age_max: 65
+    monthly_income_min: 10000
+    currency: PHP
+  id_id:
+    age_min: 17
+    age_max: 65
+    monthly_income_min: 1500000
+    currency: IDR
+
+escalation_triggers:
+  - pattern: "speak to (a|an)? (human|agent|person|manager|supervisor)"
+    intent: human_request
+  - pattern: "transfer (me|this call)"
+    intent: human_request
+  - pattern: "paki-transfer|makausap ng tao|bicara dengan manusia|minta bantuan manusia"
+    intent: human_request
+  - pattern: "(angry|upset|frustrated|this is ridiculous|stop calling)"
+    intent: human_request
+    confidence_threshold: 0.7
