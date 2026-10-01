@@ -1,0 +1,6 @@
+fee_code,description,amount_inr,grace_window_days,effective_date,form_field_name,remarks
+FEE_REV_01,Policy Revival Processing Charge,500,180,15/10/2024,revival_request_fee,Standard renewal charge within 6 months
+FEE_DUP_02,Duplicate Policy Certificate Issuance,250,0,10-24-2024,duplicate_doc_charge,Physical certificate reprint and courier
+FEE_ENDORSE_03,Name or Address Endorsement Fee,150,0,2024.11.01,nominee_change_fee,Waived if requested via digital customer portal
+FEE_CHEQUE_BOUNCE,Dishonored Mandate / Cheque Return,350,0,05/12/2024,cheque_bounce_fine,Applicable per NACH return event
+FEE_CANCELLATION,Post Free-Look Cancellation Charge,1000,15,2024-12-15,cancellation_processing_fee,Deducted before balance refund

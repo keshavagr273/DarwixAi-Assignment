@@ -1,0 +1,50 @@
+# PARLEY Cross-Market Financial & Insurance Glossary
+version: "1.0"
+markets:
+  in_en:
+    terms:
+      installment:
+        canonical: "instalment"
+        synonyms: ["installment", "EMI", "monthly instalment", "quarterly premium"]
+      grace_period:
+        canonical: "grace period"
+        synonyms: ["grace days", "tolerance period", "overdue window"]
+      lapse:
+        canonical: "lapsed policy"
+        synonyms: ["terminated cover", "inactive policy", "expired policy"]
+      revival:
+        canonical: "policy revival"
+        synonyms: ["policy reinstatement", "reactivation"]
+      cashless:
+        canonical: "cashless hospitalisation"
+        synonyms: ["cashless admission", "cashless claim", "direct hospital billing"]
+
+  ph_tl:
+    terms:
+      installment:
+        canonical: "hulog"
+        synonyms: ["installment", "bayarin", "monthly premium", "premium payment"]
+      grace_period:
+        canonical: "grace period"
+        synonyms: ["palugit", "allowable days", "extension period"]
+      lapse:
+        canonical: "nawalang-bisa"
+        synonyms: ["lapsed policy", "tapos na ang coverage", "hindi aktibo"]
+      rider:
+        canonical: "karagdagang benepisyo"
+        synonyms: ["rider", "additional coverage", "protection add-on"]
+
+  id_id:
+    terms:
+      installment:
+        canonical: "angsuran"
+        synonyms: ["cicilan", "pembayaran bulanan", "tagihan angsuran"]
+      grace_period:
+        canonical: "masa tenggang"
+        synonyms: ["grace period", "tenggang waktu pembayaran", "toleransi keterlambatan"]
+      lapse:
+        canonical: "polis tidak aktif"
+        synonyms: ["lapsed", "hangus", "berakhir"]
+      late_fee:
+        canonical: "denda keterlambatan"
+        synonyms: ["denda", "biaya pinalti", "late payment charge"]

@@ -1,0 +1,29 @@
+{
+  "base_version": "v1.0",
+  "target_version": "v1.1",
+  "records_count_base": 11,
+  "records_count_target": 11,
+  "modifications": [
+    {
+      "field": "grace_period",
+      "record_id": "kb_faq_renewal_grace",
+      "old_val": "15 days",
+      "new_val": "30 days (Statutory IRDAI \u00a74.2)",
+      "reason": "Resolved discrepancy against official policy wording"
+    },
+    {
+      "field": "rate_table",
+      "record_id": "kb_prod_meridian_shield",
+      "old_val": "INR 120,000 / INR 12,000",
+      "new_val": "INR 10,800 / INR 950",
+      "reason": "Corrected order-of-magnitude rate table typo"
+    },
+    {
+      "field": "pii_sanitization",
+      "masked_count": 8,
+      "reason": "Zero raw PII leaks across telephone, email, PAN, and NIK numbers"
+    }
+  ],
+  "deduplicated_clusters": 1,
+  "quarantined_sources": 1
+}

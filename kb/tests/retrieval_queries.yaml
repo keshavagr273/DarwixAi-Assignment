@@ -1,0 +1,163 @@
+# PARLEY Retrieval Evaluation Test Suite
+# Contains 18 queries across Product, Policy, Qualification, FAQ, Objection, 4 No-Answer refusals, and 2 Cross-Lingual.
+
+queries:
+  # 1. Product Queries
+  - id: "q_prod_01"
+    query: "What is the maximum sum insured and free-look period for Meridian Shield?"
+    category: "product"
+    market: "in_en"
+    expected_record_id: "kb_prod_meridian_shield"
+    should_refuse: false
+    notes: "Should retrieve Meridian Shield brochure with 15-day free-look and up to 50 Lakhs sum insured."
+
+  - id: "q_prod_02"
+    query: "What is the daily ICU hospital cash allowance under the Comprehensive Hospital Cash plan?"
+    category: "product"
+    market: "in_en"
+    expected_record_id: "kb_policy_hospital_cash"
+    should_refuse: false
+    notes: "Should retrieve Hospital Cash Section 2 allowance of Rs. 6,000 per day for ICU."
+
+  # 2. Policy & Statutory Rules
+  - id: "q_pol_01"
+    query: "How many days of grace period are allowed for annual policy renewals before the policy lapses?"
+    category: "policy_rules"
+    market: "in_en"
+    expected_record_id: "kb_policy_hospital_cash"
+    should_refuse: false
+    notes: "Must return 30 calendar days per statutory IRDAI rule."
+
+  - id: "q_pol_02"
+    query: "What is the pre-existing disease (PED) waiting period before coverage begins?"
+    category: "policy_rules"
+    market: "in_en"
+    expected_record_id: "kb_policy_hospital_cash"
+    should_refuse: false
+    notes: "Must retrieve Section 3 requiring 36 months of continuous coverage."
+
+  - id: "q_pol_03"
+    query: "How can I revive a lapsed policy within 6 months of the due date?"
+    category: "policy_rules"
+    market: "in_en"
+    expected_record_id: "kb_policy_hospital_cash"
+    should_refuse: false
+    notes: "Must retrieve Section 5 Good Health Declaration and revival fee."
+
+  # 3. Branch Partnership Anchor (kb_product_001)
+  - id: "q_partner_01"
+    query: "What is the upfront referral commission rate for bank partner branches?"
+    category: "partnership_benefits"
+    market: "in_en"
+    expected_record_id: "kb_product_001"
+    should_refuse: false
+    notes: "Must retrieve kb_product_001 Branch Partnership Benefits with 12.5% referral fee."
+
+  # 4. FAQ & Operations
+  - id: "q_faq_01"
+    query: "How much in advance must I notify the hospital TPA desk for planned cashless admission?"
+    category: "faq"
+    market: "in_en"
+    expected_record_id: "kb_doc_website_faq"
+    should_refuse: false
+    notes: "Must retrieve 48 hours for planned or 24 hours for emergency admission."
+
+  - id: "q_faq_02"
+    query: "Can I add senior citizen parents up to age 75 to my existing health policy?"
+    category: "faq"
+    market: "in_en"
+    expected_record_id: "kb_doc_website_faq"
+    should_refuse: false
+    notes: "Must retrieve Family Floater Rider allowance with medical screening for age 60+."
+
+  - id: "q_faq_03"
+    query: "Who is the Principal Grievance Officer and how can policyholders file a complaint?"
+    category: "faq"
+    market: "in_en"
+    expected_record_id: "kb_doc_website_faq"
+    should_refuse: false
+    notes: "Must retrieve grievance desk details with 7 business days resolution SLA."
+
+  - id: "q_faq_04"
+    query: "How do I pay my renewal premium online using UPI or QuickPay?"
+    category: "faq"
+    market: "in_en"
+    expected_record_id: "kb_faq_pay_online_v1"
+    should_refuse: false
+    notes: "Must retrieve the canonical online payment portal instructions."
+
+  # 5. Objection Handling Playbook
+  - id: "q_obj_01"
+    query: "How should an advisor respond if the customer complains the renewal premium is too high?"
+    category: "objection_handling"
+    market: "in_en"
+    expected_record_id: "kb_playbook_objections"
+    should_refuse: false
+    notes: "Must retrieve Objection 1 value anchor: 20% cumulative no-claim bonus and quarterly billing."
+
+  - id: "q_obj_02"
+    query: "What is the talking point if a customer says they never made any claims last year?"
+    category: "objection_handling"
+    market: "in_en"
+    expected_record_id: "kb_playbook_objections"
+    should_refuse: false
+    notes: "Must retrieve Objection 2 free health checkup voucher worth Rs. 2,500 and waiting period progress."
+
+  # 6. Live Nudges & Compliance Disclosures
+  - id: "q_nudge_01"
+    query: "What is the mandatory call recording consent disclosure wording within 25 seconds?"
+    category: "compliance_disclosures"
+    market: "in_en"
+    expected_record_id: "kb_playbook_nudges"
+    should_refuse: false
+    notes: "Must retrieve approved 12-word disclosure nudge."
+
+  # 7. Cross-Lingual Queries (Taglish & Indonesian Colloquial)
+  - id: "q_cross_01"
+    query: "Magkano po ba ang grace period kung late ang bayad sa renewal bago mag-lapse ang insurance?"
+    category: "policy_rules"
+    market: "ph_tl"
+    expected_record_id: "kb_policy_hospital_cash"
+    should_refuse: false
+    notes: "Cross-lingual Taglish query for grace period renewal rules."
+
+  - id: "q_cross_02"
+    query: "Berapa hari masa tenggang pembayaran premi sebelum polis asuransi tidak aktif atau hangus?"
+    category: "policy_rules"
+    market: "id_id"
+    expected_record_id: "kb_policy_hospital_cash"
+    should_refuse: false
+    notes: "Cross-lingual Indonesian query for grace period (masa tenggang) rules."
+
+  # 8. NO-ANSWER REFUSAL QUERIES (4 Required - Hallucination Defenses)
+  - id: "q_refusal_01"
+    query: "Does Meridian Assure cover cosmetic laser dental surgery for exotic pet dogs?"
+    category: "unsupported"
+    market: "in_en"
+    expected_record_id: null
+    should_refuse: true
+    notes: "Out-of-scope pet insurance. System must refuse with NO_MATCH."
+
+  - id: "q_refusal_02"
+    query: "Can I pay my renewal insurance premium using Bitcoin, Ethereum or USDT cryptocurrency?"
+    category: "unsupported"
+    market: "in_en"
+    expected_record_id: null
+    should_refuse: true
+    notes: "Unsupported cryptocurrency payment mode. System must return NO_MATCH."
+
+  - id: "q_refusal_03"
+    query: "What is the secret coupon code for 50% discount on international commercial airline pilot life cover?"
+    category: "unsupported"
+    market: "in_en"
+    expected_record_id: null
+    should_refuse: true
+    notes: "Invented coupon code. System must refuse rather than hallucinating discount codes."
+
+  - id: "q_refusal_04"
+    query: "Can I transfer my accumulated insurance sum insured to purchase physical gold bars in Dubai?"
+    category: "unsupported"
+    market: "in_en"
+    expected_record_id: null
+    should_refuse: true
+    notes: "Impossible financial transfer. System must fail closed and refuse."

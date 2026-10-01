@@ -1,0 +1,51 @@
+# PARLEY KB Taxonomy
+version: "1.0"
+root: "insurance_and_finance"
+categories:
+  product:
+    path: "product"
+    description: "Product brochures, coverage limits, eligibility age brackets, and rider options."
+    subcategories:
+      - health_protection
+      - hospital_cash
+      - motor_insurance
+      - term_life
+  policy_rules:
+    path: "policy_rules"
+    description: "Binding legal terms, grace period rules, waiting periods, revival schedules, and claim conditions."
+    subcategories:
+      - grace_period
+      - pre_existing_diseases
+      - claim_adjudication
+      - policy_revival
+  qualification_rules:
+    path: "qualification_rules"
+    description: "Rules governing renewal intent qualification, payment capability, and policy status."
+    subcategories:
+      - renewal_intent
+      - payment_modes
+      - lapse_risk
+  faq:
+    path: "faq"
+    description: "Frequently asked policyholder questions and answers."
+    subcategories:
+      - payment_methods
+      - cashless_admission
+      - policy_endorsements
+  objection_handling:
+    path: "objection_handling"
+    description: "Approved value-anchoring responses to pricing, non-claim, or competitor objections."
+    subcategories:
+      - price_objection
+      - no_claim_objection
+      - competitor_switching
+      - cash_flow_deferral
+  forms_and_fees:
+    path: "forms_and_fees"
+    description: "Fee schedules, revival charges, endorsement fees, and banking mandate penalty structures."
+  compliance_disclosures:
+    path: "compliance_disclosures"
+    description: "Mandatory statutory notices (IRDAI, Insurance Commission PH, OJK Indonesia)."
+  partnership_benefits:
+    path: "partnership_benefits"
+    description: "Bancassurance partner privileges, referral fee schedules, and co-located concierge operations."

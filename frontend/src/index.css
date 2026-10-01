@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0B0F14;
+  --panel: #121821;
+  --panel-2: #18212D;
+  --panel-3: #1E293B;
+  --line: #243041;
+  --line-light: #334155;
+  --text-main: #E6EDF5;
+  --text-muted: #8A97A8;
+  --text-dim: #57677D;
+  --signal-green: #3DDC97;
+  --signal-amber: #FFB547;
+  --signal-red: #FF5C6C;
+  --signal-cyan: #4CC9F0;
+  --signal-violet: #A78BFA;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom crisp dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #243041;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Crisp borders and card utilities without any gradients */
+.panel-border {
+  border: 1px solid #243041;
+}
+
+.panel-border-hover:hover {
+  border-color: #334155;
+}
+
+/* Monospace font utility */
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Heading font utility */
+.font-heading {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+}

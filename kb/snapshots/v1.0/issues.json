@@ -1,0 +1,36 @@
+[
+  {
+    "issue_id": "issue_conflict_grace_period",
+    "severity": "critical",
+    "type": "conflict",
+    "source_ids": [
+      "src_policy_wording_hospital_cash",
+      "src_website_renewal_faq"
+    ],
+    "resolution_policy": "Policy wording (statutory IRDAI \u00a74.2) supersedes marketing website FAQ. Correct website record to 30 days.",
+    "resolved": true,
+    "description": "Grace period discrepancy detected: Policy wording specifies 30 days, while Website FAQ states 15 days."
+  },
+  {
+    "issue_id": "issue_typo_rate_table",
+    "severity": "high",
+    "type": "typo",
+    "source_ids": [
+      "src_product_brochure_meridian_shield"
+    ],
+    "resolution_policy": "Out-of-range rate detected (INR 120,000 vs bracket average INR 10,800). Correct to standard tier-1 rate INR 10,800 / INR 950.",
+    "resolved": true,
+    "description": "Order-of-magnitude rate table typo detected in Meridian Shield Age 41-45 band (INR 120,000 vs neighboring bracket INR 8,400)."
+  },
+  {
+    "issue_id": "issue_date_format_drift",
+    "severity": "medium",
+    "type": "impossible_date",
+    "source_ids": [
+      "src_forms_fee_schedule"
+    ],
+    "resolution_policy": "Normalize mixed DD/MM and MM-DD date strings into standard ISO-8601 (YYYY-MM-DD).",
+    "resolved": true,
+    "description": "Inconsistent date representations detected in forms_fee_schedule.csv (DD/MM/YYYY, MM-DD-YYYY)."
+  }
+]

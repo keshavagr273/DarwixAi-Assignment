@@ -1,0 +1,14 @@
+--- OCR SCAN METADATA ---
+Source: endorsement_scan_batch_402.pdf (Page 7)
+Scanner: Flatbed TWAIN 150dpi GrayScale
+OCR Engine: Tesseract-3.02 Fast Mode
+--------------------------
+%^&*@!~  MERIDIAN ??????  #$#$@!
+001239840  ENDORSMNT  ... /// \\\\
+===>> %%  p0l!cy   n0:  ???[[[   ]]]***
+Gr@c3 p3r!0d:   _ _ _ _  d@ys??  [ILLEGIBLE INK SMEAR]
+@@@  T3rm$   c0nd1t!0ns:  ^^^^^^^^^  $$$$$$$$$
+%%%%%   w@1v3r  0f  pr3m!um  =  %%%%%%%  [BLURRED MATRIX]
+SIGNED:  _______________ (SMUDGED SIGNATURE BLOTCH)
+DATE:  ??/??/20??
+### END OF UNREADABLE OCR BUFFER ###

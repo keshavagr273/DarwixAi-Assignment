@@ -1,0 +1,6 @@
+customer_id,full_name,phone_number,email,policy_number,tax_id,market,status
+CUST_SYN_101,Aarav Patel,+91 9876543210,aarav.patel@synthmail.com,POL-982144,ABCDE1234F,in_en,active
+CUST_SYN_102,Priya Nair,+91 9123456780,priya.nair@samplemail.in,POL-883921,BKRPN5512K,in_en,grace_period
+CUST_SYN_103,Juan Dela Cruz,+63 917 555 0192,juan.delacruz@fakemail.ph,POL-PH-44019,123-456-789-000,ph_tl,renewal_due
+CUST_SYN_104,Budi Santoso,+62 812 3456 7890,budi.santoso@contohmail.id,POL-ID-99201,3171012304850001,id_id,overdue
+CUST_SYN_105,Siti Rahayu,+62 856 7890 1234,siti.rahayu@dummymail.id,POL-ID-88302,3273021408900003,id_id,active
