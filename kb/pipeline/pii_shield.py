@@ -4,18 +4,20 @@ import re
 from typing import Dict, List, Tuple
 
 PII_PATTERNS = [
+    # Identify fixed-length national IDs before phones so a valid ID cannot be
+    # consumed as a phone-number substring.
+    ("NATIONAL_ID_PAN", re.compile(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b")),
+    ("NATIONAL_ID_NIK", re.compile(r"\b\d{16}\b")),
+    ("NATIONAL_ID_TIN", re.compile(r"\b\d{3}-\d{3}-\d{3}-\d{3}\b")),
     # Indian, Philippine, Indonesian Phone Numbers
-    ("PHONE", re.compile(r"(?:\+91[\s-]?|\+63[\s-]?|\+62[\s-]?)?[6-9]\d{3}[\s-]?\d{3}[\s-]?\d{3,4}")),
+    ("PHONE", re.compile(
+        r"(?<!\d)(?:\+91[\s-]?|\+63[\s-]?|\+62[\s-]?)?"
+        r"(?:[6-9]\d{3}[\s-]?\d{3}[\s-]?\d{3,4}|[6-9]\d{2}[\s-]?\d{3}[\s-]?\d{4})(?!\d)"
+    )),
     # Email addresses
     ("EMAIL", re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b")),
     # Policy numbers (e.g. POL-982144, POL-PH-44019)
     ("POLICY_NUM", re.compile(r"\bPOL(?:-[A-Z]{2})?-\d{5,6}\b")),
-    # Indian PAN card (5 letters, 4 digits, 1 letter)
-    ("NATIONAL_ID_PAN", re.compile(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b")),
-    # Indonesian NIK (16 digits)
-    ("NATIONAL_ID_NIK", re.compile(r"\b\d{16}\b")),
-    # Philippine TIN (e.g. 123-456-789-000)
-    ("NATIONAL_ID_TIN", re.compile(r"\b\d{3}-\d{3}-\d{3}-\d{3}\b")),
 ]
 
 class PiiVault:

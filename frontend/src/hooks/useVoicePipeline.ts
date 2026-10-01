@@ -14,6 +14,14 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+type BrowserSpeechRecognition = {
+  lang: string; interimResults: boolean; maxAlternatives: number; continuous: boolean;
+  start(): void; stop(): void;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+};
+
 const API_BASE = 'http://127.0.0.1:8000/api/v1';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -84,7 +92,7 @@ const MARKET_LANG: Record<string, string> = {
 
 export function useVoicePipeline(market: string = 'in_en') {
   const [state, setState] = useState<CallState>({ ...initialState, market });
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
   const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const asrStartTimeRef = useRef<number>(0);
@@ -153,7 +161,7 @@ export function useVoicePipeline(market: string = 'in_en') {
     stopASR();
     cancelTTS(); // barge-in: cancel TTS if it was playing
 
-    const recognition = new SpeechRecognitionImpl() as SpeechRecognition;
+    const recognition = new SpeechRecognitionImpl() as BrowserSpeechRecognition;
     recognition.lang = MARKET_LANG[market] || 'en-IN';
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
@@ -176,7 +184,7 @@ export function useVoicePipeline(market: string = 'in_en') {
       }
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: { error: string }) => {
       if (event.error === 'not-allowed' || event.error === 'permission-denied') {
         setState(s => ({ ...s, micPermission: 'denied', error: 'Microphone access denied. Please allow mic access and try again.' }));
       }

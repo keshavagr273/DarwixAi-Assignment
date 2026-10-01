@@ -144,16 +144,21 @@ export interface LiveTranscriptTurn {
 
 export interface LiveNudge {
   id: string;
-  priority: 'P0' | 'P1' | 'P2' | 'P3';
-  imperative_text: string;
-  rationale: string;
+  priority: 'P0' | 'P1' | 'P2' | 'P3' | number;
+  imperative_text?: string;
+  rationale?: string;
+  /** Fields returned by the live nudge WebSocket contract. */
+  type?: string;
+  title?: string;
+  text?: string;
+  timestamp?: string;
   confidence: number;
-  topic: string;
-  expires_in_sec: number;
-  fired_at: string;
+  topic?: string;
+  expires_in_sec?: number;
+  fired_at?: string;
   pinned?: boolean;
   status: 'active' | 'accepted' | 'dismissed' | 'snoozed';
-  waterfall_latency_ms: {
+  waterfall_latency_ms?: {
     chunk: number;
     asr: number;
     signal: number;

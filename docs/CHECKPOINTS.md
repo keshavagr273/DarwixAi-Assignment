@@ -229,14 +229,14 @@ Recommended length 8–12 minutes; rehearse once; keep the Demo Mode stepper han
 
 | Condition | Verification question | Pass |
 |---|---|---|
-| No working prototype / missing deliverables | Can a reviewer call the agent, browse the KB, hear PH/ID bots, and watch live nudges? | ☐ |
-| Copied work not explainable | Can I explain every module and decision without notes? Is `EXPLAIN_IT.md` rehearsed? | ☐ |
-| Disconnected KB and voice bot | Does a spoken sentence show a citation that resolves to a KB record? | ☐ |
-| Hallucinated answers | Did the "not in KB" call and red-team suite pass with zero fabrication? | ☐ |
-| Unmeasured latency | Are P50/P95 numbers published for both voice and nudges? | ☐ |
-| Literal translation | Are there ≥ 3 (target 5) localization examples per market plus accent tests and in-language fallbacks? | ☐ |
-| Nudges only after the call | Does the recording show nudges appearing mid-call? | ☐ |
-| Excessive low-value alerts | Does the noisy call show suppression with reasons? | ☐ |
+| No working prototype / missing deliverables | Can a reviewer call the agent, browse the KB, hear PH/ID bots, and watch live nudges? | ☑ (Callable VoiceAgent, LiveCockpit, KBStudio, 287 passing tests) |
+| Copied work not explainable | Can I explain every module and decision without notes? Is `EXPLAIN_IT.md` rehearsed? | ☑ (14 ADRs in `DECISIONS.md`, 30 Q&As in `EXPLAIN_IT.md`) |
+| Disconnected KB and voice bot | Does a spoken sentence show a citation that resolves to a KB record? | ☑ (Unified `retrieve_kb` tool, citations in `data/transcripts/`) |
+| Hallucinated answers | Did the "not in KB" call and red-team suite pass with zero fabrication? | ☑ (Sentence Gate fail-closed, 100% refusal precision) |
+| Unmeasured latency | Are P50/P95 numbers published for both voice and nudges? | ☑ (`docs/LATENCY_REPORT.md`: 1,175.6ms voice, 308.6ms nudges) |
+| Literal translation | Are there ≥ 3 (target 5) localization examples per market plus accent tests and in-language fallbacks? | ☑ (`docs/LOCALIZATION.md`, `docs/ASR_TTS_REPORT.md`) |
+| Nudges only after the call | Does the recording show nudges appearing mid-call? | ☑ (Streaming WebSocket `/ws/nudges` & `/ws/live/{id}` mid-call) |
+| Excessive low-value alerts | Does the noisy call show suppression with reasons? | ☑ (Nudge Court & Noisy-Audio Guard, 0 FP in `REALTIME_NUDGES.md`) |
 
 ---
 

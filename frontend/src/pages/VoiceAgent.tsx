@@ -417,10 +417,10 @@ export const VoiceAgent: React.FC = () => {
                       <SentenceGateStrip
                         gate={{
                           turn_id: entry.id,
-                          status: entry.gateVerdict === 'REFUSAL' ? 'REFUSAL'
-                            : entry.gateVerdict === 'BLOCKED' ? 'BLOCKED'
+                          status: entry.gateVerdict === 'REFUSAL' ? 'UNSUPPORTED'
+                            : entry.gateVerdict === 'BLOCKED' ? 'BLOCKED_FALLBACK'
                             : entry.citations?.length ? 'VERIFIED'
-                            : 'SOCIAL',
+                            : 'UNSUPPORTED',
                           draft_text: entry.text,
                           final_spoken_text: entry.text,
                           receipt: entry.citations?.length ? {
@@ -432,7 +432,7 @@ export const VoiceAgent: React.FC = () => {
                             source_file: 'knowledge_base.json',
                             chunk_text: entry.text.slice(0, 100),
                             score_breakdown: { dense: 0.9, bm25: 0.88, rerank: 0.92 },
-                          } : null,
+                          } : undefined,
                         }}
                       />
                     )}
