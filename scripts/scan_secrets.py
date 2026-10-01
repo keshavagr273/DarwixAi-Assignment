@@ -34,7 +34,7 @@ def should_skip(path: Path) -> bool:
     if "test_secret_scan.py" in path_str:
         return True
     for part in path.parts:
-        if part in ("node_modules", ".git", ".venv", "dist", "__pycache__"):
+        if part in ("node_modules", ".git", ".venv", "dist", "__pycache__", ".testdeps", ".agents"):
             return True
     return False
 
