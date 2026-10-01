@@ -187,27 +187,27 @@
 ## PHASE 6 — Integration, Documentation, Submission (Hours 44–48)
 
 ### 6A. UI wiring
-- ☐ Frontend connected to live API/WebSocket (`VITE_API_MODE=live`); mock banner shown otherwise
-- ☐ Required pages working: Mission Control, KB Studio, Retrieval Lab, Voice Agent, Live Nudge Cockpit, Call Library, Evaluation
-- ☐ Receipt drawer opens from any citation chip
-- ☐ Playwright smoke tests pass for: test call, retrieval test, live nudge replay
-- ☐ Nice-to-have pages: Market Packs, ASR Bench, Black Box, Architecture, Gaps, Demo Mode ✂
+- ☑ Frontend connected to live API/WebSocket (`VITE_API_MODE=live`); mock banner shown otherwise
+- ☑ Required pages working: Mission Control, KB Studio, Retrieval Lab, Voice Agent, Live Nudge Cockpit, Call Library, Evaluation
+- ☑ Receipt drawer opens from any citation chip
+- ☑ Playwright smoke tests pass for: test call, retrieval test, live nudge replay
+- ☑ Nice-to-have pages: Market Packs, ASR Bench, Black Box, Architecture, Gaps, Demo Mode ✂
 
 ### 6B. Documentation
-- ☐ `README.md` with setup, run commands, sample inputs, results summary
-- ☐ `docs/ARCHITECTURE.md` with exported diagrams
-- ☐ `docs/DECISIONS.md` complete (what / why / rejected)
-- ☐ `docs/EVAL_REPORT.md` and `data/evaluation/*.json`
-- ☐ `docs/LIMITATIONS_AND_PRODUCTION_PLAN.md`
-- ☐ `docs/EXPLAIN_IT.md` (30 hardest reviewer questions with answers)
-- ☐ `docs/VIDEO_SCRIPT.md`
+- ☑ `README.md` with setup, run commands, sample inputs, results summary
+- ☑ `docs/ARCHITECTURE.md` with exported diagrams
+- ☑ `docs/DECISIONS.md` complete (what / why / rejected)
+- ☑ `docs/EVAL_REPORT.md` and `data/evaluation/*.json`
+- ☑ `docs/LIMITATIONS_AND_PRODUCTION_PLAN.md`
+- ☑ `docs/EXPLAIN_IT.md` (30 hardest reviewer questions with answers)
+- ☑ `docs/VIDEO_SCRIPT.md`
 
 ### 6C. Submission audit
-- ☐ Clean-machine test: clone, copy `.env.example`, run documented commands successfully
-- ☐ Secret scan on full git history: clean
-- ☐ No real customer data anywhere; synthetic data labeled
-- ☐ Mocked components and unverified provider claims listed in README
-- ☐ Video recorded (order below) and linked
+- ☑ Clean-machine test: clone, copy `.env.example`, run documented commands successfully
+- ☑ Secret scan on full git history: clean
+- ☑ No real customer data anywhere; synthetic data labeled
+- ☑ Mocked components and unverified provider claims listed in README
+- ☑ Video recorded (order below) and linked
 
 🔒 **GATE 6 (submission):** all items above ticked; rejection-condition audit below passes.
 

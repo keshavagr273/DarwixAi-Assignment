@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { mockScenarios } from '../data/mockLiveData';
+
 import type { ScenarioDefinition } from '../data/mockLiveData';
 import type { LiveNudge, SuppressedNudge } from '../types';
 import { LiveWaveform } from '../components/common/LiveWaveform';
@@ -48,6 +49,32 @@ export const LiveCockpit: React.FC = () => {
     }
   }, [activeScenarioId]);
 
+  // Live WebSocket wiring
+  const isLiveMode = import.meta.env.VITE_API_MODE === 'live';
+  useEffect(() => {
+    if (!isLiveMode) return;
+    const ws = new WebSocket('ws://127.0.0.1:8000/ws/nudges');
+    ws.onmessage = (event) => {
+      try {
+        const nudgeData = JSON.parse(event.data);
+        const newNudge: LiveNudge = {
+          id: nudgeData.id,
+          type: nudgeData.type,
+          title: nudgeData.title,
+          text: nudgeData.text,
+          status: 'active',
+          priority: nudgeData.priority,
+          timestamp: new Date().toISOString().substring(11,19),
+          confidence: 0.95
+        };
+        setActiveNudges(prev => [newNudge, ...prev]);
+      } catch (err) {
+        console.error('WS Error', err);
+      }
+    };
+    return () => ws.close();
+  }, [isLiveMode]);
+
   const handleNudgeAction = (nudgeId: string, action: 'accepted' | 'dismissed' | 'snoozed') => {
     setActiveNudges((prev) =>
       prev.map((n) => (n.id === nudgeId ? { ...n, status: action } : n))
@@ -62,6 +89,13 @@ export const LiveCockpit: React.FC = () => {
 
   return (
     <div className="p-4 lg:p-6 space-y-4 max-w-[1600px] mx-auto select-none">
+      {!isLiveMode && (
+        <div className="bg-[#1A1A0A] border border-[#F4A535]/40 text-[#F4A535] px-4 py-2 rounded text-xs font-mono flex items-center gap-2">
+          <Info className="w-4 h-4" />
+          Running in MOCK mode (VITE_API_MODE is not 'live'). Displaying simulated scripted scenarios.
+        </div>
+      )}
+      
       {/* Top Cockpit Control Bar */}
       <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
