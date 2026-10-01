@@ -16,7 +16,13 @@ import {
   Clock,
   Activity,
   Info,
-  Check
+  Check,
+  Volume2,
+  Mic,
+  Sliders,
+  XCircle,
+  AlertTriangle,
+  ArrowRight
 } from 'lucide-react';
 
 export const LiveCockpit: React.FC = () => {
@@ -83,100 +89,91 @@ export const LiveCockpit: React.FC = () => {
 
   const visibleTurns = scenario.turns.slice(0, currentTurnIdx);
   const activeNudgesFiltered = activeNudges.filter((n) => n.status === 'active');
-  const acceptedNudgesCount = activeNudges.filter((n) => n.status === 'accepted').length;
-
   const currentScenarioNudgesAvoided = suppressedNudges.length;
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 max-w-[1600px] mx-auto select-none">
-      {!isLiveMode && (
-        <div className="bg-[#1A1A0A] border border-[#F4A535]/40 text-[#F4A535] px-4 py-2 rounded text-xs font-mono flex items-center gap-2">
-          <Info className="w-4 h-4" />
-          Running in MOCK mode (VITE_API_MODE is not 'live'). Displaying simulated scripted scenarios.
-        </div>
-      )}
-      
-      {/* Top Cockpit Control Bar */}
-      <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#122329] border border-[#4CC9F0]/40 rounded text-[#4CC9F0]">
-            <Zap className="w-5 h-5 animate-pulse" />
+    <div className="p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto select-none">
+      {/* Top Header & Scenario Bar */}
+      <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+            <Zap className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-heading text-lg font-bold text-[#E6EDF5]">
-                Live Nudge Cockpit
+            <div className="flex items-center gap-2.5">
+              <h1 className="font-heading text-lg font-bold text-white tracking-tight">
+                Live Agent Copilot & Nudge Court
               </h1>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#121E2A] text-[#4CC9F0] border border-[#4CC9F0]/40 rounded font-semibold">
-                STREAMING REPLAY · 60 FPS
+              <span className="text-[11px] font-medium px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
+                Streaming Stream · 60 FPS
               </span>
             </div>
-            <p className="text-xs text-[#8A97A8]">
-              Active Session: <span className="font-mono text-[#E6EDF5]">{scenario.policyNo}</span> ({scenario.caller})
+            <p className="text-xs text-slate-400 mt-0.5">
+              Active Call Session: <span className="font-mono text-slate-200">{scenario.policyNo}</span> · {scenario.caller}
             </p>
           </div>
         </div>
 
-        {/* 4 One-Click Scenario Buttons */}
+        {/* 4 Interactive Scenario Selectors */}
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveScenarioId('cross_sell')}
-            className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeScenarioId === 'cross_sell'
-                ? 'bg-[#18212D] text-[#3DDC97] border border-[#3DDC97]/60'
-                : 'bg-[#0B0F14] text-[#8A97A8] border border-[#243041] hover:text-[#E6EDF5]'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
             }`}
           >
-            1. Cross-Sell
+            1. Cross-Sell Opportunity
           </button>
           <button
             onClick={() => setActiveScenarioId('skipped_disclosure')}
-            className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeScenarioId === 'skipped_disclosure'
-                ? 'bg-[#18212D] text-[#FF5C6C] border border-[#FF5C6C]/60'
-                : 'bg-[#0B0F14] text-[#8A97A8] border border-[#243041] hover:text-[#E6EDF5]'
+                ? 'bg-rose-600 text-white shadow-sm'
+                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
             }`}
           >
             2. Skipped Disclosure
           </button>
           <button
             onClick={() => setActiveScenarioId('rising_frustration')}
-            className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeScenarioId === 'rising_frustration'
-                ? 'bg-[#18212D] text-[#FFB547] border border-[#FFB547]/60'
-                : 'bg-[#0B0F14] text-[#8A97A8] border border-[#243041] hover:text-[#E6EDF5]'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
             }`}
           >
             3. Rising Frustration
           </button>
           <button
             onClick={() => setActiveScenarioId('noisy_call')}
-            className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeScenarioId === 'noisy_call'
-                ? 'bg-[#18212D] text-[#4CC9F0] border border-[#4CC9F0]/60'
-                : 'bg-[#0B0F14] text-[#8A97A8] border border-[#243041] hover:text-[#E6EDF5]'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
             }`}
           >
-            4. Noisy Ambiguous Call
+            4. Ambient Street Noise
           </button>
         </div>
       </div>
 
       {/* Main 3-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* ================= COLUMN 1: Audio & Streaming Transcript (5 cols) ================= */}
-        <div className="lg:col-span-5 space-y-4">
+        <div className="lg:col-span-5 space-y-5">
           {/* Audio Ingest & Waveform */}
-          <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
+          <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#8A97A8] font-semibold">
-                Audio Stream & Ingest Control
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Audio Stream & Ingest
               </span>
               <div className="flex items-center gap-2">
                 <select
                   value={streamSource}
                   onChange={(e) => setStreamSource(e.target.value as any)}
-                  className="bg-[#0B0F14] border border-[#243041] text-[#E6EDF5] text-xs font-mono rounded px-2 py-1 focus:outline-none"
+                  className="bg-[#141C30] border border-[#1F293D] text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
                 >
                   <option value="replay_1x">Replay Scripted Stream (1.0x)</option>
                   <option value="replay_chaos">Replay with Chaos Noise</option>
@@ -184,15 +181,15 @@ export const LiveCockpit: React.FC = () => {
                 </select>
                 <button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="p-1.5 bg-[#18212D] hover:bg-[#243041] text-[#E6EDF5] rounded border border-[#243041]"
+                  className="p-1.5 bg-[#141C30] hover:bg-[#1A2540] text-slate-200 rounded-lg border border-[#1F293D] transition-colors"
                   title={isPlaying ? 'Pause simulation' : 'Resume simulation'}
                 >
-                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-[#3DDC97]" />}
+                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
                 </button>
                 <button
                   onClick={() => setCurrentTurnIdx(scenario.turns.length)}
-                  className="p-1.5 bg-[#18212D] hover:bg-[#243041] text-[#8A97A8] hover:text-[#E6EDF5] rounded border border-[#243041]"
-                  title="Reset to full conversation"
+                  className="p-1.5 bg-[#141C30] hover:bg-[#1A2540] text-slate-400 hover:text-slate-200 rounded-lg border border-[#1F293D] transition-colors"
+                  title="Reset conversation"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
@@ -207,10 +204,10 @@ export const LiveCockpit: React.FC = () => {
             />
 
             {streamSource === 'replay_chaos' && (
-              <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded space-y-1.5 text-xs font-mono">
-                <div className="flex justify-between text-[#8A97A8]">
-                  <span>Injected Acoustic Noise (SNR):</span>
-                  <span className="text-[#FFB547] font-semibold">{chaosSnr} dB</span>
+              <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl space-y-2 text-xs">
+                <div className="flex justify-between text-slate-400">
+                  <span>Injected Street Noise (SNR):</span>
+                  <span className="text-amber-400 font-mono font-semibold">{chaosSnr} dB</span>
                 </div>
                 <input
                   type="range"
@@ -218,25 +215,22 @@ export const LiveCockpit: React.FC = () => {
                   max="35"
                   value={chaosSnr}
                   onChange={(e) => setChaosSnr(Number(e.target.value))}
-                  className="w-full h-1 bg-[#243041] rounded-lg appearance-none cursor-pointer accent-[#FFB547]"
+                  className="w-full h-1.5 bg-[#1F293D] rounded-lg appearance-none cursor-pointer accent-indigo-500"
                 />
               </div>
             )}
           </div>
 
           {/* Streaming Transcript Lanes */}
-          <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
+          <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#8A97A8] font-semibold">
-                  Live Streaming Transcript
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 bg-[#0B0F14] text-[#3DDC97] border border-[#243041] rounded">
-                  Dual-Lane
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Dual-Lane Streaming Transcript
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-[#57677D]">
-                ASR: Deepgram Nova-2 Telephony
+              <span className="text-[11px] text-slate-400 font-mono">
+                ASR: Deepgram Nova-2
               </span>
             </div>
 
@@ -247,183 +241,184 @@ export const LiveCockpit: React.FC = () => {
                 return (
                   <div
                     key={turn.id}
-                    className={`p-3 rounded-md border text-xs ${
+                    className={`p-4 rounded-xl border text-xs transition-all ${
                       isAgent
-                        ? 'bg-[#151D28] border-[#243041] ml-2'
-                        : 'bg-[#18212D] border-[#243041] mr-2'
+                        ? 'bg-[#131A2B] border-indigo-500/20 ml-3'
+                        : 'bg-[#141C30] border-[#1F293D] mr-3'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1.5 text-[11px] font-mono">
+                    <div className="flex items-center justify-between mb-2 text-[11px]">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`font-semibold px-1.5 py-0.2 rounded ${
+                          className={`font-semibold px-2 py-0.5 rounded-md ${
                             isAgent
-                              ? 'bg-[#122329] text-[#4CC9F0] border border-[#4CC9F0]/40'
-                              : 'bg-[#0B0F14] text-[#E6EDF5] border border-[#243041]'
+                              ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                              : 'bg-slate-800 text-slate-300 border border-slate-700'
                           }`}
                         >
-                          {isAgent ? 'BOT AGENT' : 'CALLER'}
+                          {isAgent ? 'Voice Agent' : 'Customer'}
                         </span>
-                        <span className="text-[#57677D]">{turn.timestamp}</span>
+                        <span className="text-slate-400 font-mono">{turn.timestamp}</span>
                         {turn.language && (
-                          <span className="text-[#8A97A8] bg-[#0B0F14] px-1 rounded">
+                          <span className="text-slate-400 bg-[#0E1424] px-1.5 py-0.5 rounded border border-[#1F293D]">
                             {turn.language}
                           </span>
                         )}
                       </div>
 
-                      <div className="text-[10px] text-[#57677D] flex items-center gap-1.5">
+                      <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5">
                         <span>ASR {turn.asr_latency_ms}ms</span>
                         <span>·</span>
                         <span>Conf {((turn.confidence || 0.98) * 100).toFixed(0)}%</span>
                       </div>
                     </div>
 
-                    <p className="text-[#E6EDF5] leading-relaxed select-text font-sans">
+                    <p className="text-slate-200 leading-relaxed font-sans text-xs">
                       {turn.text}
                     </p>
 
-                    {/* Sentence Gate Visualizer if turn is from agent */}
+                    {/* Sentence Gate Visualizer */}
                     {isAgent && turn.gate && (
-                      <SentenceGateStrip gate={turn.gate} />
+                      <div className="mt-2.5 pt-2 border-t border-[#1F293D]/60">
+                        <SentenceGateStrip gate={turn.gate} />
+                      </div>
                     )}
                   </div>
                 );
               })}
 
-              {/* Streaming typing indicator */}
               {isPlaying && (
-                <div className="flex items-center gap-2 text-xs font-mono text-[#4CC9F0] p-2 bg-[#0B0F14] rounded border border-[#243041]">
-                  <span className="w-1.5 h-1.5 bg-[#4CC9F0] rounded-full animate-ping" />
-                  <span>Listening & transcribing streaming audio chunk...</span>
+                <div className="flex items-center gap-2 text-xs text-indigo-400 p-3 bg-[#141C30]/50 rounded-xl border border-indigo-500/20">
+                  <span className="w-2 h-2 bg-indigo-400 rounded-full animate-ping" />
+                  <span>Listening and transcribing live telephony audio stream...</span>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* ================= COLUMN 2: Signal Timeline & Sentiment Swimlanes (3 cols) ================= */}
-        <div className="lg:col-span-3 space-y-4">
-          <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-4 h-full flex flex-col">
-            <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
-              <span className="text-xs font-mono uppercase tracking-wider text-[#8A97A8] font-semibold flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-[#3DDC97]" />
-                Signal Timeline
+        {/* ================= COLUMN 2: Signals & Sentiment Swimlanes (3 cols) ================= */}
+        <div className="lg:col-span-3 space-y-5">
+          <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm flex flex-col h-full">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <Activity className="w-3.5 h-3.5 text-indigo-400" />
+                Real-Time Signals
               </span>
-              <span className="text-[11px] font-mono text-[#3DDC97]">
-                Live Swimlanes
+              <span className="text-[11px] text-emerald-400 font-medium">
+                Live
               </span>
             </div>
 
             {/* Sentiment Meter */}
-            <div className="p-3 bg-[#18212D] border border-[#243041] rounded space-y-2">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-[#8A97A8]">Caller Sentiment Index:</span>
+            <div className="p-4 bg-[#141C30] border border-[#1F293D] rounded-xl space-y-2.5">
+              <div className="flex justify-between text-xs font-medium">
+                <span className="text-slate-400">Caller Sentiment Index:</span>
                 <span
-                  className={`font-semibold ${
+                  className={
                     activeScenarioId === 'rising_frustration'
-                      ? 'text-[#FF5C6C]'
-                      : 'text-[#3DDC97]'
-                  }`}
+                      ? 'text-rose-400'
+                      : 'text-emerald-400'
+                  }
                 >
                   {activeScenarioId === 'rising_frustration' ? '-0.82 (Agitated)' : '+0.64 (Receptive)'}
                 </span>
               </div>
-              <div className="w-full h-2 bg-[#0B0F14] rounded-full overflow-hidden flex">
+              <div className="w-full h-2.5 bg-[#090D16] rounded-full overflow-hidden flex">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    activeScenarioId === 'rising_frustration' ? 'bg-[#FF5C6C]' : 'bg-[#3DDC97]'
+                  className={`h-full transition-all duration-300 rounded-full ${
+                    activeScenarioId === 'rising_frustration' ? 'bg-rose-500' : 'bg-emerald-500'
                   }`}
                   style={{
                     width: activeScenarioId === 'rising_frustration' ? '82%' : '64%'
                   }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-[#57677D]">
-                <span>Frustrated</span>
+              <div className="flex justify-between text-[11px] text-slate-400">
+                <span>Agitated</span>
                 <span>Neutral</span>
                 <span>Cooperative</span>
               </div>
             </div>
 
-            {/* Live Detected Signals list */}
-            <div className="space-y-2.5 flex-1 overflow-y-auto">
-              <div className="text-[11px] font-mono text-[#8A97A8] uppercase tracking-wider">
-                Extracted Real-Time Signals
+            {/* Extracted Signals list */}
+            <div className="space-y-3 flex-1 overflow-y-auto">
+              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">
+                Triggered Pipeline Signals
               </div>
 
               {activeScenarioId === 'cross_sell' && (
                 <>
-                  <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#3DDC97] font-semibold">BUYING SIGNAL: 2-WHEELER</span>
-                      <span className="text-[#57677D]">00:12</span>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-semibold">Intent: 2-Wheeler Inbound</span>
+                      <span className="text-slate-400 font-mono">00:12</span>
                     </div>
-                    <p className="text-[#8A97A8]">Customer mentioned new EV scooter acquisition. Affinity 0.88.</p>
+                    <p className="text-slate-300">Customer mentioned new EV scooter purchase. Affinity score 0.88.</p>
                   </div>
-                  <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#4CC9F0] font-semibold">POLICY INQUIRY: ADD-ON</span>
-                      <span className="text-[#57677D]">00:27</span>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-indigo-400 font-semibold">Add-on Cover Request</span>
+                      <span className="text-slate-400 font-mono">00:27</span>
                     </div>
-                    <p className="text-[#8A97A8]">Question regarding commercial delivery rider coverage.</p>
+                    <p className="text-slate-300">Commercial delivery rider coverage inquiry detected.</p>
                   </div>
                 </>
               )}
 
               {activeScenarioId === 'skipped_disclosure' && (
                 <>
-                  <div className="p-2.5 bg-[#1F1416] border border-[#FF5C6C]/40 rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#FF5C6C] font-semibold">COMPLIANCE RISK: IRDAI 4.2</span>
-                      <span className="text-[#FF5C6C]">00:03</span>
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-rose-400 font-semibold">Statutory Risk: IRDAI 4.2</span>
+                      <span className="text-rose-400 font-mono">00:03</span>
                     </div>
-                    <p className="text-[#8A97A8]">Agent skipped 30-day grace period notice; triggered safety gate correction.</p>
+                    <p className="text-slate-300">Grace period notice omitted; safety gate intercepted turn.</p>
                   </div>
-                  <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#3DDC97] font-semibold">DISCLOSURE RESTORED</span>
-                      <span className="text-[#57677D]">00:22</span>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-semibold">Mandatory Notice Restored</span>
+                      <span className="text-slate-400 font-mono">00:22</span>
                     </div>
-                    <p className="text-[#8A97A8]">Statutory grace period and active medical cover confirmed to caller.</p>
+                    <p className="text-slate-300">Statutory 30-day grace period clearly stated to customer.</p>
                   </div>
                 </>
               )}
 
               {activeScenarioId === 'rising_frustration' && (
                 <>
-                  <div className="p-2.5 bg-[#1F1416] border border-[#FF5C6C]/40 rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#FF5C6C] font-semibold">NEGATIVE SENTIMENT SPIKE</span>
-                      <span className="text-[#FF5C6C]">00:06</span>
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-rose-400 font-semibold">Sentiment Anomaly</span>
+                      <span className="text-rose-400 font-mono">00:06</span>
                     </div>
-                    <p className="text-[#8A97A8]">Unacknowledged UPI debit (Rs 14,500). De-escalation protocol engaged.</p>
+                    <p className="text-slate-300">Pending payment reconciliation issue. De-escalation protocol engaged.</p>
                   </div>
-                  <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#FFB547] font-semibold">RECONCILIATION INITIATED</span>
-                      <span className="text-[#57677D]">00:15</span>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-amber-400 font-semibold">UTR Lookup Initiated</span>
+                      <span className="text-slate-400 font-mono">00:15</span>
                     </div>
-                    <p className="text-[#8A97A8]">Requesting 12-digit bank UTR reference for immediate ledger release.</p>
+                    <p className="text-slate-300">Requesting 12-digit transaction reference for instant hold release.</p>
                   </div>
                 </>
               )}
 
               {activeScenarioId === 'noisy_call' && (
                 <>
-                  <div className="p-2.5 bg-[#18212D] border border-[#FFB547]/40 rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#FFB547] font-semibold">LOW SNR ACOUSTIC GUARD</span>
-                      <span className="text-[#FFB547]">00:05</span>
+                  <div className="p-3 bg-[#141C30] border border-amber-500/30 rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-amber-400 font-semibold">Low SNR Acoustic Guard</span>
+                      <span className="text-amber-400 font-mono">00:05</span>
                     </div>
-                    <p className="text-[#8A97A8]">Street noise detected (SNR 10.4 dB). Commercial upsell nudges throttled.</p>
+                    <p className="text-slate-300">Heavy street noise (SNR 10.4 dB). Commercial up-sell nudges suppressed.</p>
                   </div>
-                  <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#3DDC97] font-semibold">POLITE TAGLISH REGISTER</span>
-                      <span className="text-[#57677D]">00:14</span>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-indigo-400 font-semibold">Polite Taglish Register</span>
+                      <span className="text-slate-400 font-mono">00:14</span>
                     </div>
-                    <p className="text-[#8A97A8]">Warm respectful po/opo tone maintained. Zero English drift.</p>
+                    <p className="text-slate-300">Po/Opo honorific particles maintained. Zero English drift.</p>
                   </div>
                 </>
               )}
@@ -432,19 +427,19 @@ export const LiveCockpit: React.FC = () => {
         </div>
 
         {/* ================= COLUMN 3: Nudge Stack & Nudge Court (4 cols) ================= */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="lg:col-span-4 space-y-5">
           {/* Active Nudge Stack */}
-          <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
+          <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#E6EDF5] font-semibold">
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">
                   Active Live Nudges
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 bg-[#18212D] text-[#3DDC97] border border-[#243041] rounded font-semibold">
-                  {activeNudgesFiltered.length} Pending
+                <span className="text-[11px] font-medium px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
+                  {activeNudgesFiltered.length} Actionable
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-[#57677D]">
+              <span className="text-[11px] text-slate-400 font-mono">
                 ≤ 18 Words Standard
               </span>
             </div>
@@ -452,10 +447,10 @@ export const LiveCockpit: React.FC = () => {
             {/* Nudge Cards */}
             <div className="space-y-3">
               {activeNudgesFiltered.length === 0 ? (
-                <div className="p-6 bg-[#0B0F14] border border-[#243041] rounded text-center space-y-1">
-                  <CheckCircle2 className="w-6 h-6 text-[#3DDC97] mx-auto" />
-                  <div className="text-xs font-mono text-[#E6EDF5]">No Pending Live Nudges</div>
-                  <div className="text-[11px] text-[#8A97A8]">All actionable nudges handled or suppressed.</div>
+                <div className="p-8 bg-[#141C30]/50 border border-[#1F293D] rounded-xl text-center space-y-2">
+                  <CheckCircle2 className="w-7 h-7 text-emerald-400 mx-auto" />
+                  <div className="text-xs font-semibold text-white">No Pending Live Nudges</div>
+                  <div className="text-[11px] text-slate-400">All suggestions handled or suppressed to protect focus.</div>
                 </div>
               ) : (
                 activeNudgesFiltered.map((nudge) => {
@@ -465,76 +460,76 @@ export const LiveCockpit: React.FC = () => {
                   return (
                     <div
                       key={nudge.id}
-                      className={`p-3.5 rounded-md border text-xs space-y-2.5 transition-all ${
+                      className={`p-4 rounded-xl border text-xs space-y-3 transition-all ${
                         isP0
-                          ? 'bg-[#1F1416] border-[#FF5C6C] shadow-sm'
+                          ? 'bg-rose-500/10 border-rose-500/30 shadow-md shadow-rose-950/20'
                           : isP1
-                          ? 'bg-[#18212D] border-[#3DDC97]/60'
-                          : 'bg-[#151D28] border-[#243041]'
+                          ? 'bg-indigo-500/10 border-indigo-500/30'
+                          : 'bg-[#141C30] border-[#1F293D]'
                       }`}
                     >
                       {/* Card Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               isP0
-                                ? 'bg-[#251417] text-[#FF5C6C] border border-[#FF5C6C]/40'
+                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                                 : isP1
-                                ? 'bg-[#13221C] text-[#3DDC97] border border-[#3DDC97]/40'
-                                : 'bg-[#121E2A] text-[#4CC9F0] border border-[#4CC9F0]/40'
+                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
+                                : 'bg-slate-800 text-slate-300 border border-slate-700'
                             }`}
                           >
                             {nudge.priority} {nudge.pinned && '· PINNED'}
                           </span>
-                          <span className="font-mono text-[10px] text-[#8A97A8]">
-                            Conf: {(nudge.confidence * 100).toFixed(0)}%
+                          <span className="font-mono text-[10px] text-slate-400">
+                            Confidence: {(nudge.confidence * 100).toFixed(0)}%
                           </span>
                         </div>
 
-                        {/* Expiry Countdown ring / badge */}
-                        <div className="flex items-center gap-1 font-mono text-[10px] text-[#FFB547]">
+                        {/* Expiry Countdown */}
+                        <div className="flex items-center gap-1 font-mono text-[11px] text-amber-400">
                           <Clock className="w-3 h-3" />
                           <span>{nudge.expires_in_sec}s</span>
                         </div>
                       </div>
 
                       {/* Imperative Text */}
-                      <div className="font-heading font-semibold text-sm text-[#E6EDF5] leading-snug">
+                      <div className="font-heading font-semibold text-sm text-white leading-snug">
                         "{nudge.imperative_text}"
                       </div>
 
                       {/* Rationale */}
-                      <div className="text-[11px] text-[#8A97A8] leading-tight">
+                      <div className="text-[11px] text-slate-400 leading-relaxed">
                         {nudge.rationale}
                       </div>
 
                       {/* Action buttons */}
-                      <div className="pt-2 border-t border-[#243041] flex items-center justify-between gap-2">
+                      <div className="pt-2.5 border-t border-[#1F293D] flex items-center justify-between gap-2">
                         <button
                           onClick={() => setSelectedNudgeToExplain(nudge)}
-                          className="text-[11px] font-mono text-[#4CC9F0] hover:underline flex items-center gap-1"
+                          className="text-[11px] text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 font-medium"
                         >
                           <Info className="w-3 h-3" />
                           Explain
                         </button>
 
-                        <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                        <div className="flex items-center gap-1.5 text-xs">
                           <button
                             onClick={() => handleNudgeAction(nudge.id, 'dismissed')}
-                            className="px-2 py-1 bg-[#18212D] hover:bg-[#243041] text-[#8A97A8] hover:text-[#E6EDF5] border border-[#243041] rounded"
+                            className="px-2.5 py-1 bg-[#141C30] hover:bg-[#1A2540] text-slate-300 hover:text-white border border-[#1F293D] rounded-lg transition-colors"
                           >
                             Dismiss
                           </button>
                           <button
                             onClick={() => handleNudgeAction(nudge.id, 'snoozed')}
-                            className="px-2 py-1 bg-[#18212D] hover:bg-[#243041] text-[#FFB547] border border-[#243041] rounded"
+                            className="px-2.5 py-1 bg-[#141C30] hover:bg-[#1A2540] text-amber-300 border border-[#1F293D] rounded-lg transition-colors"
                           >
                             Snooze
                           </button>
                           <button
                             onClick={() => handleNudgeAction(nudge.id, 'accepted')}
-                            className="px-2.5 py-1 bg-[#13221C] hover:bg-[#1A3328] text-[#3DDC97] border border-[#3DDC97]/60 rounded font-semibold flex items-center gap-1"
+                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium flex items-center gap-1 shadow-sm transition-all"
                           >
                             <Check className="w-3 h-3" />
                             Accept
@@ -548,39 +543,39 @@ export const LiveCockpit: React.FC = () => {
             </div>
           </div>
 
-          {/* Nudge Court: Loud & Beautiful False-Positive Suppression Proof */}
-          <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
+          {/* Nudge Court: Suppressed Low-Value Alerts */}
+          <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-[#FFB547]" />
-                <h2 className="text-xs font-mono uppercase tracking-wider text-[#FFB547] font-semibold">
-                  Nudge Court (Suppressed Alerts)
+                <ShieldAlert className="w-4 h-4 text-amber-400" />
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+                  Suppression Court
                 </h2>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#261E14] text-[#FFB547] border border-[#FFB547]/40 rounded font-semibold">
-                {currentScenarioNudgesAvoided} Avoided
+              <span className="text-[11px] font-medium px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-mono">
+                {currentScenarioNudgesAvoided} Filtered
               </span>
             </div>
 
-            <p className="text-[11px] text-[#8A97A8]">
-              Suppression is the core proof of false-positive control. Low-value alerts are rejected before reaching the agent.
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Filtered alerts rejected before reaching the agent, preventing distraction and cognitive fatigue.
             </p>
 
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
               {suppressedNudges.map((sup) => (
                 <div
                   key={sup.id}
-                  className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-xs space-y-1 font-mono"
+                  className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1.5"
                 >
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="line-through text-[#8A97A8] font-sans truncate max-w-[200px]">
+                    <span className="line-through text-slate-400 truncate max-w-[200px]">
                       "{sup.candidate_text}"
                     </span>
-                    <span className="px-1.5 py-0.2 bg-[#251417] text-[#FFB547] border border-[#FFB547]/30 rounded text-[10px]">
+                    <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-mono text-[10px]">
                       {sup.suppression_reason}
                     </span>
                   </div>
-                  <div className="text-[11px] text-[#57677D] leading-tight">
+                  <div className="text-[11px] text-slate-400 leading-tight">
                     {sup.verdict_detail}
                   </div>
                 </div>
@@ -590,137 +585,124 @@ export const LiveCockpit: React.FC = () => {
         </div>
       </div>
 
-      {/* ================= BOTTOM DOCK: Latency Waterfall (ms breakdown against budget) ================= */}
-      <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-2 select-none">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3DDC97]" />
-            <span className="text-[#E6EDF5] font-semibold">
-              Live Nudge Latency Waterfall (Latest Turn Turn-around)
-            </span>
+      {/* Latency Waterfall Footer */}
+      <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-3 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 font-semibold text-white">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>Live Turn Execution Waterfall</span>
           </div>
-          <div className="text-[#8A97A8] flex items-center gap-3 text-[11px]">
+          <div className="text-slate-400 flex items-center gap-3 text-xs">
             <span>
-              Total: <span className="text-[#3DDC97] font-semibold">655 ms</span>
+              Total: <span className="text-emerald-400 font-mono font-semibold">655 ms</span>
             </span>
             <span>·</span>
             <span>
-              Budget Line: <span className="text-[#E6EDF5]">2,500 ms</span>
+              Budget: <span className="text-white font-mono">2,500 ms</span>
             </span>
             <span>·</span>
-            <span className="text-[#3DDC97] bg-[#13221C] px-1.5 py-0.5 rounded border border-[#3DDC97]/40">
-              WITHIN BUDGET (73.8% Headroom)
+            <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
+              73.8% Headroom
             </span>
           </div>
         </div>
 
-        {/* Stacked Waterfall Bar without gradients */}
-        <div className="space-y-1.5">
-          <div className="w-full h-5 bg-[#0B0F14] rounded border border-[#243041] flex overflow-hidden font-mono text-[10px] text-[#0B0F14] font-semibold">
-            {/* Audio Chunk: 60ms (9%) */}
-            <div
-              className="bg-[#4CC9F0] flex items-center justify-center truncate px-1"
-              style={{ width: '9%' }}
-              title="Audio Chunk Slicing: 60ms"
-            >
-              Chunk 60ms
-            </div>
-            {/* ASR: 175ms (27%) */}
-            <div
-              className="bg-[#3DDC97] flex items-center justify-center truncate px-1"
-              style={{ width: '27%' }}
-              title="Streaming ASR: 175ms (Deepgram Nova-2)"
-            >
-              ASR 175ms
-            </div>
-            {/* Signal Extraction: 95ms (15%) */}
-            <div
-              className="bg-[#FFB547] flex items-center justify-center truncate px-1"
-              style={{ width: '15%' }}
-              title="Signal Classification: 95ms"
-            >
-              Signal 95ms
-            </div>
-            {/* LLM Inference: 290ms (44%) */}
-            <div
-              className="bg-[#A78BFA] flex items-center justify-center truncate px-1"
-              style={{ width: '44%' }}
-              title="LLM Synthesis & Gate: 290ms (Claude 3.5 Haiku)"
-            >
-              LLM + Gate 290ms
-            </div>
-            {/* WebRTC Delivery: 35ms (5%) */}
-            <div
-              className="bg-[#E6EDF5] flex items-center justify-center truncate px-1"
-              style={{ width: '5%' }}
-              title="WebSocket Client Delivery: 35ms"
-            >
-              35ms
-            </div>
+        {/* Stacked Waterfall Bar */}
+        <div className="w-full h-4 bg-[#141C30] rounded-lg border border-[#1F293D] flex overflow-hidden font-mono text-[10px] text-white">
+          <div
+            className="bg-sky-500 flex items-center justify-center truncate px-1"
+            style={{ width: '9%' }}
+            title="Audio Slicing: 60ms"
+          >
+            60ms
           </div>
-
-          <div className="flex justify-between text-[10px] font-mono text-[#57677D]">
-            <span>0 ms</span>
-            <span>500 ms</span>
-            <span>1,000 ms</span>
-            <span>1,500 ms</span>
-            <span>2,000 ms</span>
-            <span className="text-[#FF5C6C]">2,500 ms (Strict Budget)</span>
+          <div
+            className="bg-emerald-500 flex items-center justify-center truncate px-1"
+            style={{ width: '27%' }}
+            title="ASR: 175ms"
+          >
+            ASR 175ms
+          </div>
+          <div
+            className="bg-amber-500 flex items-center justify-center truncate px-1"
+            style={{ width: '15%' }}
+            title="Signals: 95ms"
+          >
+            95ms
+          </div>
+          <div
+            className="bg-indigo-500 flex items-center justify-center truncate px-1"
+            style={{ width: '44%' }}
+            title="LLM + Gate: 290ms"
+          >
+            LLM + Gate 290ms
+          </div>
+          <div
+            className="bg-violet-500 flex items-center justify-center truncate px-1"
+            style={{ width: '5%' }}
+            title="Dispatch: 35ms"
+          >
+            35ms
           </div>
         </div>
       </div>
 
-      {/* Explain Nudge Modal */}
+      {/* Explanation Modal */}
       {selectedNudgeToExplain && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/70"
-            onClick={() => setSelectedNudgeToExplain(null)}
-          />
-          <div className="relative w-full max-w-lg bg-[#121821] border border-[#243041] rounded-lg p-5 z-10 space-y-4 font-mono text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
-              <span className="text-[#3DDC97] font-semibold text-sm">
-                Nudge Execution Diagnostics
-              </span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-indigo-400" />
+                <h3 className="font-heading font-semibold text-white">
+                  Nudge Reasoning Audit
+                </h3>
+              </div>
               <button
                 onClick={() => setSelectedNudgeToExplain(null)}
-                className="text-[#8A97A8] hover:text-[#E6EDF5]"
+                className="text-slate-400 hover:text-white"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3 text-xs text-slate-300">
               <div>
-                <span className="text-[#8A97A8]">NUDGE ID:</span>
-                <span className="text-[#E6EDF5] ml-2">{selectedNudgeToExplain.id}</span>
-              </div>
-              <div>
-                <span className="text-[#8A97A8]">TRIGGER TEXT:</span>
-                <p className="text-[#E6EDF5] font-sans text-sm mt-0.5">
+                <span className="text-slate-400 block mb-1">Imperative Prompt:</span>
+                <p className="font-semibold text-white bg-[#141C30] p-3 rounded-xl border border-[#1F293D]">
                   "{selectedNudgeToExplain.imperative_text}"
                 </p>
               </div>
+
               <div>
-                <span className="text-[#8A97A8]">RATIONALE:</span>
-                <p className="text-[#8A97A8] font-sans mt-0.5">
+                <span className="text-slate-400 block mb-1">Trigger Rationale:</span>
+                <p className="text-slate-300 leading-relaxed">
                   {selectedNudgeToExplain.rationale}
                 </p>
               </div>
-              <div className="p-3 bg-[#0B0F14] border border-[#243041] rounded space-y-1">
-                <div className="text-[#3DDC97] font-semibold">Confidence Formulation:</div>
-                <div className="text-[11px] text-[#8A97A8]">
-                  Signal Affinity (0.92) × Acoustic Quality (0.96) × Topic Weight (1.0) = {(selectedNudgeToExplain.confidence * 100).toFixed(1)}%
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="p-3 bg-[#141C30] rounded-xl border border-[#1F293D]">
+                  <span className="text-slate-400 text-[11px] block">Confidence:</span>
+                  <span className="font-mono text-emerald-400 font-bold text-sm">
+                    {(selectedNudgeToExplain.confidence * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="p-3 bg-[#141C30] rounded-xl border border-[#1F293D]">
+                  <span className="text-slate-400 text-[11px] block">Priority Tier:</span>
+                  <span className="font-mono text-indigo-400 font-bold text-sm">
+                    {selectedNudgeToExplain.priority}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#243041] flex justify-end">
+            <div className="pt-3 border-t border-[#1F293D] flex justify-end">
               <button
                 onClick={() => setSelectedNudgeToExplain(null)}
-                className="px-3 py-1.5 bg-[#18212D] text-[#E6EDF5] rounded border border-[#243041]"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all"
               >
-                Close Diagnostics
+                Close Audit
               </button>
             </div>
           </div>

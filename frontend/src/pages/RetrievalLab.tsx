@@ -5,7 +5,14 @@ import type { RetrievalEvidenceItem } from '../types';
 import {
   Search,
   Download,
-  CheckCircle2
+  CheckCircle2,
+  Sliders,
+  Database,
+  ArrowRight,
+  Layers,
+  Sparkles,
+  Check,
+  FileText
 } from 'lucide-react';
 
 export const RetrievalLab: React.FC = () => {
@@ -45,127 +52,129 @@ export const RetrievalLab: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto select-none">
+    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
       {/* Header */}
-      <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono px-2 py-0.5 bg-[#18212D] text-[#3DDC97] border border-[#243041] rounded font-semibold">
-              QUESTION 2 EVIDENCE
+            <span className="text-xs font-semibold px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
+              RAG Evaluation Bench
             </span>
-            <span className="text-xs font-mono text-[#8A97A8]">
+            <span className="text-xs text-slate-400">
               {evidenceList.length} Verified Evidence Records · Fail-Closed Refusal Suite
             </span>
           </div>
-          <h1 className="font-heading text-xl font-bold text-[#E6EDF5] mt-1">
-            Retrieval Lab & Evidence Table
+          <h1 className="font-heading text-xl lg:text-2xl font-bold text-white tracking-tight">
+            Retrieval Quality Lab
           </h1>
-          <p className="text-xs text-[#8A97A8]">
-            Compare Dense vs BM25 vs Hybrid + Reranker logic, test no-answer refusal queries, and review human-verified retrieval verdicts.
+          <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+            Compare Dense vector, BM25 keyword, and Cross-Encoder rerank fusion logic. Test adversarial refusal queries and review human-verified retrieval verdicts.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#18212D] hover:bg-[#243041] text-[#E6EDF5] border border-[#243041] rounded text-xs font-mono transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#141C30] hover:bg-[#1A2540] text-slate-200 border border-[#1F293D] hover:border-slate-500 rounded-xl text-xs font-semibold transition-all shadow-sm"
           >
-            <Download className="w-3.5 h-3.5 text-[#3DDC97]" />
+            <Download className="w-3.5 h-3.5 text-indigo-400" />
             Export Evidence CSV
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-[#243041] pb-1 text-xs font-mono">
+      <div className="flex items-center gap-2 border-b border-[#1F293D] pb-3 text-xs">
         <button
           onClick={() => setActiveTab('evidence_table')}
-          className={`px-4 py-2 rounded-t font-semibold transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
             activeTab === 'evidence_table'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
           }`}
         >
-          1. Evidence Table ({evidenceList.length} Cases)
+          <Database className="w-3.5 h-3.5" />
+          <span>Evidence Table ({evidenceList.length} Cases)</span>
         </button>
         <button
           onClick={() => setActiveTab('live_query')}
-          className={`px-4 py-2 rounded-t font-semibold transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
             activeTab === 'live_query'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
           }`}
         >
-          2. Live Interactive Query Workbench
+          <Search className="w-3.5 h-3.5" />
+          <span>Interactive Query Sandbox</span>
         </button>
       </div>
 
       {/* ================= VIEW 1: EVIDENCE TABLE ================= */}
       {activeTab === 'evidence_table' && (
-        <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#1F293D]">
             <div>
-              <h2 className="text-xs font-mono uppercase tracking-wider text-[#E6EDF5] font-semibold">
-                Comprehensive Retrieval Evidence Table (Deliverable Q2)
+              <h2 className="text-sm font-semibold text-white">
+                Comprehensive Retrieval Evidence Table
               </h2>
-              <p className="text-xs text-[#8A97A8]">
-                Covers Product, Policy, Qualification, FAQ, Objection, 2 deliberate failure cases diagnosed & fixed, and No-Answer refusal tests.
+              <p className="text-xs text-slate-400 mt-0.5">
+                Covers Product, Policy, Qualification, FAQ, Objection, deliberate failure cases, and fail-closed refusal tests.
               </p>
             </div>
-            <span className="text-xs font-mono text-[#3DDC97] bg-[#13221C] px-2 py-1 rounded border border-[#3DDC97]/40">
-              Human Reviewer Edits Enabled
+            <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Interactive Verdict Edits Enabled
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-mono">
+          <div className="overflow-x-auto rounded-xl border border-[#1F293D]">
+            <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#243041] text-[#8A97A8] bg-[#0B0F14]">
-                  <th className="py-2.5 px-3">CAT</th>
-                  <th className="py-2.5 px-3">MARKET</th>
-                  <th className="py-2.5 px-3">USER QUESTION</th>
-                  <th className="py-2.5 px-3">RETRIEVED RECORD / CHUNK</th>
-                  <th className="py-2.5 px-3">SOURCE REFERENCE</th>
-                  <th className="py-2.5 px-3">RELEVANCE EXPLANATION</th>
-                  <th className="py-2.5 px-3">REVIEWER VERDICT</th>
+                <tr className="border-b border-[#1F293D] text-slate-400 bg-[#141C30] font-medium">
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4">Market</th>
+                  <th className="py-3 px-4">Customer Query</th>
+                  <th className="py-3 px-4">Retrieved Citation</th>
+                  <th className="py-3 px-4">Source Document</th>
+                  <th className="py-3 px-4">Relevance Explanation</th>
+                  <th className="py-3 px-4 text-right">Verdict</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#243041]">
+              <tbody className="divide-y divide-[#1F293D] bg-[#0E1424]">
                 {evidenceList.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#18212D]/60 transition-colors">
-                    <td className="py-3 px-3 uppercase text-[#8A97A8] font-semibold">
+                  <tr key={item.id} className="hover:bg-[#141C30]/50 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-slate-300 capitalize">
                       {item.category}
                     </td>
-                    <td className="py-3 px-3 uppercase text-[#4CC9F0]">
+                    <td className="py-3.5 px-4 uppercase text-indigo-400 font-mono text-[11px]">
                       {item.market}
                     </td>
-                    <td className="py-3 px-3 font-sans font-medium text-[#E6EDF5] max-w-xs">
+                    <td className="py-3.5 px-4 text-white font-medium max-w-xs">
                       {item.question}
                     </td>
-                    <td className="py-3 px-3 text-[#8A97A8] max-w-sm">
-                      <div className="font-mono text-[#3DDC97] font-semibold mb-0.5">
+                    <td className="py-3.5 px-4 max-w-sm">
+                      <div className="font-mono text-indigo-300 font-semibold mb-0.5">
                         {item.retrieved_record_id}
                       </div>
-                      <div className="line-clamp-2 text-[11px] leading-tight">
+                      <div className="line-clamp-2 text-[11px] text-slate-400 leading-tight">
                         {item.retrieved_chunk}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-[#57677D] text-[11px] max-w-xs truncate">
+                    <td className="py-3.5 px-4 text-slate-400 text-[11px] max-w-xs truncate">
                       {item.source_reference}
                     </td>
-                    <td className="py-3 px-3 text-[#8A97A8] text-[11px] max-w-xs font-sans">
+                    <td className="py-3.5 px-4 text-slate-300 text-xs max-w-xs">
                       {item.relevance_explanation}
                       {item.reviewer_notes && (
-                        <div className="text-[#FFB547] text-[10px] mt-1 font-mono">
+                        <div className="text-amber-400 text-[11px] mt-1 font-mono">
                           Note: {item.reviewer_notes}
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-3.5 px-4 text-right">
                       {item.is_refusal_test ? (
-                        <span className="px-2 py-0.5 bg-[#13221C] text-[#3DDC97] border border-[#3DDC97]/40 rounded font-semibold text-[10px] inline-flex items-center gap-1">
+                        <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-semibold text-[11px] inline-flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
-                          CORRECTLY REFUSED
+                          Correct Refusal
                         </span>
                       ) : (
                         <select
@@ -173,17 +182,17 @@ export const RetrievalLab: React.FC = () => {
                           onChange={(e) =>
                             handleVerdictChange(item.id, e.target.value as any)
                           }
-                          className={`px-2 py-0.5 rounded font-mono text-[11px] font-semibold border focus:outline-none cursor-pointer ${
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border focus:outline-none cursor-pointer ${
                             item.verdict === 'correct'
-                              ? 'bg-[#13221C] text-[#3DDC97] border-[#3DDC97]/40'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                               : item.verdict === 'partially_correct'
-                              ? 'bg-[#261E14] text-[#FFB547] border-[#FFB547]/40'
-                              : 'bg-[#251417] text-[#FF5C6C] border-[#FF5C6C]/40'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                              : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
                           }`}
                         >
-                          <option value="correct" className="bg-[#121821] text-[#3DDC97]">Correct</option>
-                          <option value="partially_correct" className="bg-[#121821] text-[#FFB547]">Partially Correct</option>
-                          <option value="incorrect" className="bg-[#121821] text-[#FF5C6C]">Incorrect</option>
+                          <option value="correct" className="bg-[#0E1424] text-emerald-400">Correct</option>
+                          <option value="partially_correct" className="bg-[#0E1424] text-amber-400">Partially Correct</option>
+                          <option value="incorrect" className="bg-[#0E1424] text-rose-400">Incorrect</option>
                         </select>
                       )}
                     </td>
@@ -197,51 +206,51 @@ export const RetrievalLab: React.FC = () => {
 
       {/* ================= VIEW 2: LIVE QUERY WORKBENCH ================= */}
       {activeTab === 'live_query' && (
-        <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 space-y-6">
+        <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 space-y-6 shadow-sm">
           {/* Query input and mode toggle */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <label className="text-xs font-mono text-[#8A97A8] uppercase tracking-wider">
-                Interactive Retrieval Query
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                Retrieval Engine Sandbox
               </label>
               {/* Mode Switcher */}
-              <div className="flex items-center rounded border border-[#243041] bg-[#0B0F14] p-0.5 text-xs font-mono">
+              <div className="flex items-center rounded-xl border border-[#1F293D] bg-[#090D16] p-0.5 text-xs">
                 <button
                   onClick={() => setRetrievalMode('dense')}
-                  className={`px-2.5 py-1 rounded transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
                     retrievalMode === 'dense'
-                      ? 'bg-[#18212D] text-[#3DDC97] border border-[#3DDC97]/40 font-semibold'
-                      : 'text-[#8A97A8] hover:text-[#E6EDF5]'
+                      ? 'bg-[#182238] text-indigo-300 font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Dense Vector
                 </button>
                 <button
                   onClick={() => setRetrievalMode('sparse')}
-                  className={`px-2.5 py-1 rounded transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
                     retrievalMode === 'sparse'
-                      ? 'bg-[#18212D] text-[#4CC9F0] border border-[#4CC9F0]/40 font-semibold'
-                      : 'text-[#8A97A8] hover:text-[#E6EDF5]'
+                      ? 'bg-[#182238] text-sky-300 font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Sparse (BM25)
                 </button>
                 <button
                   onClick={() => setRetrievalMode('hybrid')}
-                  className={`px-2.5 py-1 rounded transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
                     retrievalMode === 'hybrid'
-                      ? 'bg-[#18212D] text-[#FFB547] border border-[#FFB547]/40 font-semibold'
-                      : 'text-[#8A97A8] hover:text-[#E6EDF5]'
+                      ? 'bg-[#182238] text-amber-300 font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  Hybrid
+                  Hybrid RRF
                 </button>
                 <button
                   onClick={() => setRetrievalMode('hybrid_rerank')}
-                  className={`px-2.5 py-1 rounded transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
                     retrievalMode === 'hybrid_rerank'
-                      ? 'bg-[#13221C] text-[#3DDC97] border border-[#3DDC97]/60 font-semibold'
-                      : 'text-[#8A97A8] hover:text-[#E6EDF5]'
+                      ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 font-semibold shadow-sm'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Hybrid + Rerank (Prod)
@@ -254,88 +263,88 @@ export const RetrievalLab: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-3 pl-4 pr-10 bg-[#0B0F14] border border-[#243041] rounded-md text-sm text-[#E6EDF5] font-sans focus:outline-none focus:border-[#3DDC97]"
+                className="w-full py-3.5 pl-4 pr-12 bg-[#141C30] border border-[#1F293D] rounded-xl text-sm text-white font-sans focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
               />
-              <Search className="w-4 h-4 text-[#8A97A8] absolute right-3.5 top-3.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute right-4 top-4" />
             </div>
 
-            {/* Preloaded quick queries */}
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-              <span className="text-[#57677D]">Quick Test Inquiries:</span>
+            {/* Quick Test Inquiries */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-slate-400">Pre-loaded Inquiries:</span>
               <button
                 onClick={() => setSearchQuery('Are there discounts available if I work for an agency branch partner?')}
-                className="px-2 py-0.5 bg-[#18212D] text-[#8A97A8] hover:text-[#E6EDF5] border border-[#243041] rounded"
+                className="px-2.5 py-1 bg-[#141C30] text-slate-300 hover:text-white border border-[#1F293D] rounded-lg transition-colors"
               >
                 Branch Partner Discount
               </button>
               <button
                 onClick={() => setSearchQuery('How many days do I have before my policy lapses if I miss the due date?')}
-                className="px-2 py-0.5 bg-[#18212D] text-[#8A97A8] hover:text-[#E6EDF5] border border-[#243041] rounded"
+                className="px-2.5 py-1 bg-[#141C30] text-slate-300 hover:text-white border border-[#1F293D] rounded-lg transition-colors"
               >
-                Statutory Grace Period
+                Statutory Grace Window
               </button>
               <button
                 onClick={() => setSearchQuery('What is the current stock price of Meridian Assure on the Bombay Stock Exchange?')}
-                className="px-2 py-0.5 bg-[#18212D] text-[#FF5C6C] hover:text-[#FFA6B0] border border-[#FF5C6C]/40 rounded"
+                className="px-2.5 py-1 bg-rose-500/10 text-rose-300 hover:text-rose-200 border border-rose-500/20 rounded-lg transition-colors"
               >
-                No-Answer Bait
+                Adversarial Hallucination Bait
               </button>
             </div>
           </div>
 
           {/* Results list */}
           <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-between text-xs font-mono text-[#8A97A8]">
-              <span>RETRIEVAL RESULTS (k=2 CHUNKS)</span>
-              <span>Search Latency: 48 ms · Top Score: 0.94</span>
+            <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-[#1F293D]">
+              <span className="font-semibold uppercase tracking-wider text-slate-300">Retrieved Candidate Chunks (k=2)</span>
+              <span className="font-mono">Latency: 48 ms · Top Score: 0.94</span>
             </div>
 
             {mockSearchResults['branch discount']?.map((res, i) => (
               <div
                 key={res.chunk_id}
-                className="p-4 bg-[#18212D] border border-[#243041] rounded-lg space-y-3 font-mono text-xs"
+                className="p-5 bg-[#141C30] border border-[#1F293D] rounded-2xl space-y-4 text-xs"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#243041] pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded bg-[#0B0F14] border border-[#243041] flex items-center justify-center text-[#3DDC97] font-semibold text-[11px]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1F293D] pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-md bg-[#090D16] border border-[#1F293D] flex items-center justify-center text-indigo-400 font-bold text-xs">
                       #{i + 1}
                     </span>
-                    <span className="font-heading font-semibold text-sm text-[#E6EDF5]">
+                    <span className="font-heading font-semibold text-sm text-white">
                       {res.title}
                     </span>
-                    <span className="text-[#3DDC97]">{res.record_id}</span>
+                    <span className="text-slate-400 font-mono text-[11px]">{res.record_id}</span>
                   </div>
-                  <span className="text-[#4CC9F0] bg-[#121E2A] px-2 py-0.5 rounded border border-[#4CC9F0]/40 font-semibold">
-                    Citation: [{res.citation}]
+                  <span className="text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20 font-mono text-[11px]">
+                    [{res.citation}]
                   </span>
                 </div>
 
-                <div className="p-3 bg-[#0B0F14] border border-[#243041] rounded text-[#E6EDF5] font-mono leading-relaxed select-text">
+                <div className="p-4 bg-[#090D16] border border-[#1F293D] rounded-xl text-slate-200 font-sans leading-relaxed select-text">
                   {res.text}
                 </div>
 
-                {/* Score breakdown bars */}
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 bg-[#0B0F14] border border-[#243041] rounded text-[11px]">
+                {/* Score breakdown pills */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-[#090D16] border border-[#1F293D] rounded-xl text-xs font-mono">
                   <div>
-                    <div className="text-[#8A97A8] mb-0.5">Dense Vector:</div>
-                    <div className="text-[#3DDC97] font-semibold">{(res.scores.dense * 100).toFixed(1)}%</div>
+                    <div className="text-slate-400 text-[11px] mb-0.5">Dense Vector:</div>
+                    <div className="text-indigo-400 font-semibold">{(res.scores.dense * 100).toFixed(1)}%</div>
                   </div>
                   <div>
-                    <div className="text-[#8A97A8] mb-0.5">Sparse BM25:</div>
-                    <div className="text-[#4CC9F0] font-semibold">{(res.scores.sparse * 100).toFixed(1)}%</div>
+                    <div className="text-slate-400 text-[11px] mb-0.5">Sparse BM25:</div>
+                    <div className="text-sky-400 font-semibold">{(res.scores.sparse * 100).toFixed(1)}%</div>
                   </div>
                   <div>
-                    <div className="text-[#8A97A8] mb-0.5">Cross-Reranker:</div>
-                    <div className="text-[#A78BFA] font-semibold">{(res.scores.rerank * 100).toFixed(1)}%</div>
+                    <div className="text-slate-400 text-[11px] mb-0.5">Cross-Reranker:</div>
+                    <div className="text-violet-400 font-semibold">{(res.scores.rerank * 100).toFixed(1)}%</div>
                   </div>
                   <div>
-                    <div className="text-[#8A97A8] mb-0.5">Total Composite:</div>
-                    <div className="text-[#E6EDF5] font-bold">{(res.scores.total * 100).toFixed(1)}%</div>
+                    <div className="text-slate-400 text-[11px] mb-0.5">Composite Score:</div>
+                    <div className="text-emerald-400 font-bold">{(res.scores.total * 100).toFixed(1)}%</div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-[#57677D]">{res.source_ref}</span>
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="text-slate-400 truncate max-w-sm">{res.source_ref}</span>
                   <button
                     onClick={() =>
                       openReceipt({
@@ -353,9 +362,10 @@ export const RetrievalLab: React.FC = () => {
                         }
                       })
                     }
-                    className="text-[#3DDC97] hover:underline"
+                    className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-medium hover:underline"
                   >
-                    Open in Receipt Inspector →
+                    <span>Inspect Grounding Receipt</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

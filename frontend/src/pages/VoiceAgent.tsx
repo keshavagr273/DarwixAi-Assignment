@@ -12,10 +12,17 @@ import {
   Radio,
   AlertCircle,
   Activity,
+  Bot,
+  Settings,
+  GitBranch,
+  Send,
+  FileCheck,
+  ChevronRight,
+  ShieldCheck
 } from 'lucide-react';
 
 export const VoiceAgent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'config' | 'flow' | 'test_call' | 'crm_action' | 'test_matrix'>('test_call');
+  const [activeTab, setActiveTab] = useState<'test_call' | 'flow' | 'config' | 'crm_action' | 'test_matrix'>('test_call');
   const [selectedMarket, setSelectedMarket] = useState<string>('in_en');
 
   const { state: voiceState, startCall, endCall, resetCall, toggleMute, activateMic } = useVoicePipeline(selectedMarket);
@@ -125,137 +132,112 @@ export const VoiceAgent: React.FC = () => {
     }
   ];
 
+  const tabs = [
+    { id: 'test_call', label: 'Telephony Simulator', icon: PhoneCall },
+    { id: 'flow', label: 'Dialogue FSM Canvas', icon: GitBranch },
+    { id: 'config', label: 'Stack Configuration', icon: Settings },
+    { id: 'crm_action', label: 'CRM Payloads', icon: Send },
+    { id: 'test_matrix', label: 'Test Matrix', icon: FileCheck },
+  ];
+
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto select-none">
+    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
       {/* Header */}
-      <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono px-2 py-0.5 bg-[#18212D] text-[#3DDC97] border border-[#243041] rounded font-semibold">
-              QUESTION 1 DELIVERABLE
+            <span className="text-xs font-semibold px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
+              Voice Orchestration
             </span>
-            <span className="text-xs font-mono text-[#8A97A8]">
-              Insurance Renewal Voice Agent · Fail-Closed Failover
+            <span className="text-xs text-slate-400">
+              Insurance Renewal · Fail-Closed Circuit Breaker
             </span>
           </div>
-          <h1 className="font-heading text-xl font-bold text-[#E6EDF5] mt-1">
+          <h1 className="font-heading text-xl lg:text-2xl font-bold text-white tracking-tight">
             Voice Agent Studio
           </h1>
-          <p className="text-xs text-[#8A97A8]">
-            Configure orchestration models, inspect dialog state machine, test browser telephony in real time, and verify test matrices.
+          <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+            Configure pipeline models, inspect dialogue state machine transitions, test browser telephony in real-time, and run regression test matrices.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 font-mono text-xs">
-          <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3DDC97]" />
-            <span className="text-[#8A97A8]">KB Gate:</span>
-            <span className="text-[#3DDC97] font-semibold">Fail-Closed Active</span>
+        <div className="flex items-center gap-3 text-xs">
+          <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-slate-400">Grounding Gate:</span>
+            <span className="text-emerald-400 font-medium">Fail-Closed Active</span>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-1 border-b border-[#243041] pb-1 text-xs font-mono">
-        <button
-          onClick={() => setActiveTab('test_call')}
-          className={`px-3.5 py-2 rounded-t font-semibold transition-colors ${
-            activeTab === 'test_call'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
-          }`}
-        >
-          1. Test Call Simulator (Live Browser Mic)
-        </button>
-        <button
-          onClick={() => setActiveTab('flow')}
-          className={`px-3.5 py-2 rounded-t font-semibold transition-colors ${
-            activeTab === 'flow'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
-          }`}
-        >
-          2. Flow Designer (Dialogue FSM)
-        </button>
-        <button
-          onClick={() => setActiveTab('config')}
-          className={`px-3.5 py-2 rounded-t font-semibold transition-colors ${
-            activeTab === 'config'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
-          }`}
-        >
-          3. Model & Engine Configuration
-        </button>
-        <button
-          onClick={() => setActiveTab('crm_action')}
-          className={`px-3.5 py-2 rounded-t font-semibold transition-colors ${
-            activeTab === 'crm_action'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
-          }`}
-        >
-          4. Business Action Payloads
-        </button>
-        <button
-          onClick={() => setActiveTab('test_matrix')}
-          className={`px-3.5 py-2 rounded-t font-semibold transition-colors ${
-            activeTab === 'test_matrix'
-              ? 'bg-[#18212D] text-[#3DDC97] border-t border-x border-[#243041]'
-              : 'text-[#8A97A8] hover:text-[#E6EDF5]'
-          }`}
-        >
-          5. Mandatory Test Matrix
-        </button>
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-[#1F293D] pb-3 text-xs">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-all ${
+                isActive
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ================= TAB 1: TEST CALL SIMULATOR ================= */}
       {activeTab === 'test_call' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left: Call Controls & Live Transcript (7 cols) */}
-          <div className="lg:col-span-7 space-y-4">
+          <div className="lg:col-span-7 space-y-5">
             {/* Call Control Widget */}
-            <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
+            <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <span
                     className={`w-2.5 h-2.5 rounded-full ${
-                      voiceState.status === 'listening' ? 'bg-[#3DDC97] animate-pulse' :
-                      callActive ? 'bg-[#3DDC97]' : 'bg-[#57677D]'
+                      voiceState.status === 'listening' ? 'bg-emerald-400 animate-pulse' :
+                      callActive ? 'bg-emerald-400' : 'bg-slate-500'
                     }`}
                   />
-                  <span className="font-heading font-semibold text-sm text-[#E6EDF5]">
-                    {voiceState.status === 'idle' && 'BROWSER CALL SIMULATOR (STANDBY)'}
-                    {voiceState.status === 'starting' && 'CONNECTING...'}
-                    {voiceState.status === 'connected' && 'CALL CONNECTED'}
-                    {voiceState.status === 'listening' && 'LISTENING (ASR ACTIVE)'}
-                    {voiceState.status === 'processing' && 'PROCESSING TURN...'}
-                    {voiceState.status === 'speaking' && 'AGENT SPEAKING (TTS)'}
-                    {voiceState.status === 'ending' && 'ENDING CALL...'}
-                    {voiceState.status === 'ended' && 'CALL ENDED'}
+                  <span className="font-heading font-semibold text-sm text-white">
+                    {voiceState.status === 'idle' && 'Telephony Simulator (Standby)'}
+                    {voiceState.status === 'starting' && 'Connecting to Media Stream...'}
+                    {voiceState.status === 'connected' && 'Call Connected · Media Active'}
+                    {voiceState.status === 'listening' && 'Listening (ASR Active)'}
+                    {voiceState.status === 'processing' && 'Evaluating RAG & Sentence Gate...'}
+                    {voiceState.status === 'speaking' && 'Agent Speaking (TTS Stream)'}
+                    {voiceState.status === 'ending' && 'Terminating Session...'}
+                    {voiceState.status === 'ended' && 'Call Ended (Session Closed)'}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs font-mono text-[#8A97A8]">
-                  {callActive && <span>Duration: {formatElapsed(callElapsedSec)}</span>}
-                  {callActive && <span>Turn: {voiceState.turnCount}</span>}
+                <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
+                  {callActive && <span>Duration: <strong className="text-white">{formatElapsed(callElapsedSec)}</strong></span>}
+                  {callActive && <span>Turn: <strong className="text-white">{voiceState.turnCount}</strong></span>}
                   {!callActive && <span>Ready to Dial</span>}
                 </div>
               </div>
 
               {/* Call Control Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                {/* Market selector */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-2">
                 {!callActive && (
                   <select
                     id="market-select"
                     value={selectedMarket}
                     onChange={(e) => setSelectedMarket(e.target.value)}
-                    className="px-3 py-2 bg-[#0B0F14] border border-[#243041] rounded text-xs font-mono text-[#8A97A8] cursor-pointer"
+                    className="px-3 py-2 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs text-slate-200 cursor-pointer focus:outline-none"
                     aria-label="Select market"
                   >
-                    <option value="in_en">India (en-IN)</option>
-                    <option value="ph_tl">Philippines (fil-PH)</option>
-                    <option value="id_id">Indonesia (id-ID)</option>
+                    <option value="in_en">🇮🇳 India (English/Hindi)</option>
+                    <option value="ph_tl">🇵🇭 Philippines (Taglish)</option>
+                    <option value="id_id">🇮🇩 Indonesia (Bahasa)</option>
                   </select>
                 )}
 
@@ -264,13 +246,13 @@ export const VoiceAgent: React.FC = () => {
                     id="start-call-btn"
                     onClick={voiceState.status === 'ended' ? resetCall : startCall}
                     aria-label="Start simulated inbound call"
-                    className="flex items-center gap-2 px-4 py-2 bg-[#13221C] hover:bg-[#1A3328] text-[#3DDC97] border border-[#3DDC97]/60 rounded text-xs font-mono font-semibold"
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
                   >
                     <PhoneCall className="w-4 h-4" />
-                    {voiceState.status === 'ended' ? 'Start New Call' : 'Start Simulated Inbound Call'}
+                    {voiceState.status === 'ended' ? 'Restart Simulation' : 'Start Inbound Call'}
                   </button>
                 ) : voiceState.status === 'starting' ? (
-                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-[#18212D] text-[#57677D] border border-[#243041] rounded text-xs font-mono">
+                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-[#141C30] text-slate-400 border border-[#1F293D] rounded-xl text-xs">
                     <Activity className="w-4 h-4 animate-spin" />
                     Connecting...
                   </button>
@@ -279,7 +261,7 @@ export const VoiceAgent: React.FC = () => {
                     id="end-call-btn"
                     onClick={endCall}
                     aria-label="End call session"
-                    className="flex items-center gap-2 px-4 py-2 bg-[#251417] hover:bg-[#33181C] text-[#FF5C6C] border border-[#FF5C6C]/60 rounded text-xs font-mono font-semibold"
+                    className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all"
                   >
                     <PhoneOff className="w-4 h-4" />
                     End Call Session
@@ -291,78 +273,45 @@ export const VoiceAgent: React.FC = () => {
                   onClick={toggleMute}
                   disabled={!callActive}
                   aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-colors ${
                     isMuted
-                      ? 'bg-[#251417] text-[#FF5C6C] border-[#FF5C6C]/40'
-                      : 'bg-[#18212D] text-[#8A97A8] border-[#243041] hover:text-[#E6EDF5]'
+                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                      : 'bg-[#141C30] text-slate-300 border-[#1F293D] hover:text-white'
                   }`}
                 >
                   {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                  {isMuted ? 'Mic Muted' : 'Mute Mic'}
+                  {isMuted ? 'Muted' : 'Mute Mic'}
                 </button>
 
-                {/* Activate Mic / Listen button */}
                 {callActive && voiceState.asrSupported && (
                   <button
                     id="activate-mic-btn"
                     onClick={activateMic}
                     disabled={isMuted || voiceState.status === 'listening' || voiceState.status === 'processing'}
                     aria-label="Activate microphone to speak"
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium border transition-all ${
                       voiceState.status === 'listening'
-                        ? 'bg-[#13221C] text-[#3DDC97] border-[#3DDC97]/60 animate-pulse'
-                        : 'bg-[#18212D] text-[#4CC9F0] border-[#4CC9F0]/40 hover:border-[#4CC9F0]/80'
+                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40 animate-pulse'
+                        : 'bg-indigo-600 hover:bg-indigo-500 text-white border-transparent'
                     }`}
                   >
                     <Radio className="w-3.5 h-3.5" />
-                    {voiceState.status === 'listening' ? 'Listening...' : 'Speak (Press to Talk)'}
+                    {voiceState.status === 'listening' ? 'Listening...' : 'Speak Now'}
                   </button>
                 )}
-
-                <button
-                  id="push-to-talk-btn"
-                  onClick={() => setPushToTalk(!pushToTalk)}
-                  disabled={!callActive}
-                  aria-label="Toggle push to talk mode"
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors ${
-                    pushToTalk
-                      ? 'bg-[#18212D] text-[#4CC9F0] border-[#4CC9F0]/60'
-                      : 'bg-[#18212D] text-[#8A97A8] border-[#243041]'
-                  }`}
-                >
-                  Push-to-Talk Fallback: {pushToTalk ? 'ON' : 'OFF'}
-                </button>
               </div>
 
-              {/* Error message */}
               {voiceState.error && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-[#251417] border border-[#FF5C6C]/40 rounded text-xs font-mono text-[#FF5C6C]">
-                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-400">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {voiceState.error}
-                </div>
-              )}
-
-              {/* Browser support notice */}
-              {!voiceState.asrSupported && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-[#1A1A0A] border border-[#F4A535]/40 rounded text-xs font-mono text-[#F4A535]">
-                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                  Web Speech API not available in this browser. Use Chrome or Edge for live mic.
                 </div>
               )}
 
               {/* Interim ASR */}
               {voiceState.currentInterim && (
-                <div className="px-3 py-2 bg-[#18212D] border border-[#243041] rounded text-xs font-mono text-[#8A97A8] italic">
+                <div className="px-3.5 py-2 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs text-slate-300 italic">
                   Listening: {voiceState.currentInterim}...
-                </div>
-              )}
-
-              {/* Latency display */}
-              {voiceState.lastLatency && callActive && (
-                <div className="flex flex-wrap gap-2 font-mono text-[10px] text-[#57677D]">
-                  {voiceState.lastLatency.asr_ms && <span>ASR: <span className="text-[#4CC9F0]">{voiceState.lastLatency.asr_ms}ms</span></span>}
-                  {voiceState.lastLatency.retrieval_ms && <span>Retrieval: <span className="text-[#4CC9F0]">{voiceState.lastLatency.retrieval_ms}ms</span></span>}
-                  {voiceState.lastLatency.user_stops_to_bot_audio_ms && <span className="text-[#3DDC97]">User→Bot: {voiceState.lastLatency.user_stops_to_bot_audio_ms}ms</span>}
                 </div>
               )}
 
@@ -377,64 +326,65 @@ export const VoiceAgent: React.FC = () => {
             </div>
 
             {/* Live Transcript Pane */}
-            <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#E6EDF5] font-semibold">
+            <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">
                   Live Grounded Transcript
                 </span>
-                <span className="text-[11px] font-mono text-[#3DDC97]">
-                  Every Bot Sentence Has A Receipt
+                <span className="text-[11px] text-emerald-400 font-medium">
+                  Verified Sentence Gate Backed
                 </span>
               </div>
 
-              {/* Live Transcript — real turns from voice pipeline */}
-              <div className="space-y-3 font-mono text-xs">
+              <div className="space-y-3 text-xs">
                 {voiceState.transcript.length === 0 && (
-                  <div className="p-4 text-center text-[#57677D] text-xs">
-                    {callActive ? 'Waiting for first turn...' : 'Start a call to see live grounded transcript here.'}
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    {callActive ? 'Waiting for first audio turn...' : 'Start a call to observe real-time speech turns with grounding citations.'}
                   </div>
                 )}
                 {voiceState.transcript.map((entry) => (
                   <div
                     key={entry.id}
-                    className={`p-3 rounded space-y-1.5 ${
+                    className={`p-4 rounded-xl space-y-2 border transition-all ${
                       entry.speaker === 'agent'
-                        ? 'bg-[#151D28] border border-[#243041]'
-                        : 'bg-[#18212D] border border-[#243041]'
+                        ? 'bg-[#131A2B] border-indigo-500/20 ml-2'
+                        : 'bg-[#141C30] border-[#1F293D] mr-2'
                     }`}
                   >
-                    <div className="flex justify-between text-[11px] text-[#57677D]">
-                      <span className={entry.speaker === 'agent' ? 'text-[#4CC9F0] font-semibold' : 'text-[#E6EDF5] font-semibold'}>
-                        {entry.speaker === 'agent' ? 'BOT AGENT' : 'CALLER'}
+                    <div className="flex justify-between text-[11px] text-slate-400">
+                      <span className={entry.speaker === 'agent' ? 'text-indigo-400 font-semibold' : 'text-slate-200 font-semibold'}>
+                        {entry.speaker === 'agent' ? 'Voice Agent' : 'Customer'}
                       </span>
-                      <span>
-                        {entry.latency?.asr_ms && `ASR ${entry.latency.asr_ms}ms`}
-                        {entry.latency?.user_stops_to_bot_audio_ms && ` · U→B ${entry.latency.user_stops_to_bot_audio_ms}ms`}
+                      <span className="font-mono text-[10px]">
+                        {entry.latency?.asr_ms && `ASR: ${entry.latency.asr_ms}ms`}
+                        {entry.latency?.user_stops_to_bot_audio_ms && ` · E2E: ${entry.latency.user_stops_to_bot_audio_ms}ms`}
                       </span>
                     </div>
-                    <p className="font-sans text-[#E6EDF5]">{entry.text}</p>
+                    <p className="text-slate-200 leading-relaxed font-sans">{entry.text}</p>
                     {entry.speaker === 'agent' && (
-                      <SentenceGateStrip
-                        gate={{
-                          turn_id: entry.id,
-                          status: entry.gateVerdict === 'REFUSAL' ? 'UNSUPPORTED'
-                            : entry.gateVerdict === 'BLOCKED' ? 'BLOCKED_FALLBACK'
-                            : entry.citations?.length ? 'VERIFIED'
-                            : 'UNSUPPORTED',
-                          draft_text: entry.text,
-                          final_spoken_text: entry.text,
-                          receipt: entry.citations?.length ? {
-                            citation: entry.citations[0],
-                            record_id: entry.citations[0],
-                            version: 'v1.1',
-                            score: 0.92,
-                            source_title: 'KB Record',
-                            source_file: 'knowledge_base.json',
-                            chunk_text: entry.text.slice(0, 100),
-                            score_breakdown: { dense: 0.9, bm25: 0.88, rerank: 0.92 },
-                          } : undefined,
-                        }}
-                      />
+                      <div className="pt-2 border-t border-[#1F293D]/60">
+                        <SentenceGateStrip
+                          gate={{
+                            turn_id: entry.id,
+                            status: entry.gateVerdict === 'REFUSAL' ? 'UNSUPPORTED'
+                              : entry.gateVerdict === 'BLOCKED' ? 'BLOCKED_FALLBACK'
+                              : entry.citations?.length ? 'VERIFIED'
+                              : 'UNSUPPORTED',
+                            draft_text: entry.text,
+                            final_spoken_text: entry.text,
+                            receipt: entry.citations?.length ? {
+                              citation: entry.citations[0],
+                              record_id: entry.citations[0],
+                              version: 'v1.1',
+                              score: 0.92,
+                              source_title: 'KB Record',
+                              source_file: 'knowledge_base.json',
+                              chunk_text: entry.text.slice(0, 100),
+                              score_breakdown: { dense: 0.9, bm25: 0.88, rerank: 0.92 },
+                            } : undefined,
+                          }}
+                        />
+                      </div>
                     )}
                   </div>
                 ))}
@@ -443,77 +393,53 @@ export const VoiceAgent: React.FC = () => {
           </div>
 
           {/* Right: Real-Time Qualification Checklist & Extracted JSON (5 cols) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-5">
             {/* Qualification Checklist */}
-            <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#243041]">
+            <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#3DDC97]" />
-                  <span className="text-xs font-mono uppercase tracking-wider text-[#E6EDF5] font-semibold">
-                    Qualification Checklist (Live)
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-white">
+                    Live Qualification Checklist
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-[#3DDC97] bg-[#13221C] px-2 py-0.5 rounded border border-[#3DDC97]/40">
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   5 of 5 Verified
                 </span>
               </div>
 
-              <div className="space-y-2 text-xs font-mono">
-                <div className="p-2.5 bg-[#18212D] border border-[#243041] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded bg-[#13221C] border border-[#3DDC97] text-[#3DDC97] flex items-center justify-center text-[10px]">✓</span>
-                    <span className="text-[#E6EDF5]">1. Caller Identity Verified</span>
+              <div className="space-y-2 text-xs">
+                {[
+                  { title: '1. Caller Identity Verified', note: 'DOB + Phone Match' },
+                  { title: '2. Policy Status Checked', note: 'Active (Grace Window)' },
+                  { title: '3. Due Date Acknowledged', note: 'Oct 15, 2026' },
+                  { title: '4. Renewal Intent Confirmed', note: 'Affirmative (1.0)' },
+                  { title: '5. Payment Channel Chosen', note: 'UPI (Google Pay)' },
+                ].map((item, idx) => (
+                  <div key={idx} className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-[10px] font-bold">✓</span>
+                      <span className="text-slate-200 font-medium">{item.title}</span>
+                    </div>
+                    <span className="text-emerald-400 text-[11px] font-mono">{item.note}</span>
                   </div>
-                  <span className="text-[#3DDC97] text-[11px]">DOB + Phone Match</span>
-                </div>
-
-                <div className="p-2.5 bg-[#18212D] border border-[#243041] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded bg-[#13221C] border border-[#3DDC97] text-[#3DDC97] flex items-center justify-center text-[10px]">✓</span>
-                    <span className="text-[#E6EDF5]">2. Policy Status Checked</span>
-                  </div>
-                  <span className="text-[#3DDC97] text-[11px]">Active (Grace Window)</span>
-                </div>
-
-                <div className="p-2.5 bg-[#18212D] border border-[#243041] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded bg-[#13221C] border border-[#3DDC97] text-[#3DDC97] flex items-center justify-center text-[10px]">✓</span>
-                    <span className="text-[#E6EDF5]">3. Due Date Acknowledged</span>
-                  </div>
-                  <span className="text-[#3DDC97] text-[11px]">Oct 15, 2026</span>
-                </div>
-
-                <div className="p-2.5 bg-[#18212D] border border-[#243041] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded bg-[#13221C] border border-[#3DDC97] text-[#3DDC97] flex items-center justify-center text-[10px]">✓</span>
-                    <span className="text-[#E6EDF5]">4. Renewal Intent Confirmed</span>
-                  </div>
-                  <span className="text-[#3DDC97] text-[11px]">Intent: Positive (1.0)</span>
-                </div>
-
-                <div className="p-2.5 bg-[#18212D] border border-[#243041] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded bg-[#13221C] border border-[#3DDC97] text-[#3DDC97] flex items-center justify-center text-[10px]">✓</span>
-                    <span className="text-[#E6EDF5]">5. Payment Channel Chosen</span>
-                  </div>
-                  <span className="text-[#3DDC97] text-[11px]">UPI (Google Pay)</span>
-                </div>
+                ))}
               </div>
             </div>
 
             {/* Real-time Extracted Fields JSON */}
-            <div className="bg-[#121821] border border-[#243041] rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#8A97A8] font-semibold flex items-center gap-1.5">
-                  <Code className="w-3.5 h-3.5 text-[#4CC9F0]" />
-                  Live Extracted Fields (Structured JSON)
+            <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-3 shadow-sm">
+              <div className="flex items-center justify-between pb-2 border-b border-[#1F293D]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <Code className="w-3.5 h-3.5 text-indigo-400" />
+                  Live Extracted Metadata (Structured JSON)
                 </span>
-                <span className="text-[10px] font-mono text-[#57677D]">
-                  Schema: v1.3
+                <span className="text-[10px] font-mono text-slate-400">
+                  Schema v1.3
                 </span>
               </div>
 
-              <pre className="p-3 bg-[#0B0F14] border border-[#243041] rounded font-mono text-[11px] text-[#3DDC97] overflow-x-auto leading-relaxed">
+              <pre className="p-4 bg-[#090D16] border border-[#1F293D] rounded-xl font-mono text-[11px] text-emerald-400 overflow-x-auto leading-relaxed">
 {JSON.stringify(
   {
     session_id: 'sess_live_9921c',
@@ -551,40 +477,40 @@ export const VoiceAgent: React.FC = () => {
 
       {/* ================= TAB 2: FLOW DESIGNER ================= */}
       {activeTab === 'flow' && (
-        <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 space-y-6">
+        <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 space-y-6 shadow-sm">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-wider text-[#E6EDF5] font-semibold">
+            <h2 className="text-sm font-semibold text-white">
               Dialogue State Machine & Guardrail Flow Canvas
             </h2>
-            <p className="text-xs text-[#8A97A8] mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               Every stage has explicit guardrails, required tools, and fail-closed fallback phrasing.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-mono text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
             {flowNodes.map((node) => (
               <div
                 key={node.id}
-                className="p-4 bg-[#18212D] border border-[#243041] rounded-lg space-y-3 hover:border-[#3DDC97] transition-colors"
+                className="p-5 bg-[#141C30] border border-[#1F293D] rounded-2xl space-y-3.5 hover:border-indigo-500/40 transition-colors"
               >
-                <div className="font-heading font-semibold text-sm text-[#E6EDF5]">
+                <div className="font-heading font-semibold text-sm text-white">
                   {node.title}
                 </div>
 
-                <div className="space-y-1 text-[11px]">
-                  <div className="text-[#8A97A8]">
-                    Tools: <span className="text-[#4CC9F0]">{node.tools.join(', ')}</span>
+                <div className="space-y-1.5 text-xs">
+                  <div className="text-slate-400">
+                    Tools: <span className="text-indigo-400 font-mono text-[11px]">{node.tools.join(', ')}</span>
                   </div>
-                  <div className="text-[#8A97A8]">
-                    Prompt Directive: <span className="text-[#E6EDF5] font-sans">{node.promptFragment}</span>
+                  <div className="text-slate-400">
+                    Prompt Directive: <span className="text-slate-300 font-sans">{node.promptFragment}</span>
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-[#0B0F14] border border-[#243041] rounded text-[11px] space-y-1">
-                  <div className="text-[#FFB547] font-semibold">Guardrail:</div>
-                  <div className="text-[#8A97A8] font-sans">{node.guardrail}</div>
-                  <div className="text-[#3DDC97] font-semibold mt-1">Fallback Phrase:</div>
-                  <div className="text-[#E6EDF5] font-sans">"{node.fallback}"</div>
+                <div className="p-3 bg-[#090D16] border border-[#1F293D] rounded-xl text-xs space-y-1.5">
+                  <div className="text-amber-400 font-semibold">Guardrail Rule:</div>
+                  <div className="text-slate-400 leading-relaxed">{node.guardrail}</div>
+                  <div className="text-emerald-400 font-semibold mt-2">Fallback Phrase:</div>
+                  <div className="text-slate-200">"{node.fallback}"</div>
                 </div>
               </div>
             ))}
@@ -594,53 +520,57 @@ export const VoiceAgent: React.FC = () => {
 
       {/* ================= TAB 3: CONFIGURATION ================= */}
       {activeTab === 'config' && (
-        <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 space-y-6 font-mono text-xs">
+        <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 space-y-6 shadow-sm text-xs">
           <div>
-            <h2 className="text-xs uppercase tracking-wider text-[#E6EDF5] font-semibold">
+            <h2 className="text-sm font-semibold text-white">
               Voice Orchestration Stack Configuration
             </h2>
-            <p className="text-xs text-[#8A97A8] font-sans mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Declarative architecture adapters for Telephony, ASR, LLM, VAD, and TTS.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-[#18212D] border border-[#243041] rounded space-y-2">
-              <span className="text-[#3DDC97] font-semibold">Streaming Speech Ingest:</span>
-              <div className="text-[#8A97A8]">Provider: <strong className="text-[#E6EDF5]">Deepgram Nova-2 Telephony</strong></div>
-              <div className="text-[#8A97A8]">Sampling: <strong className="text-[#E6EDF5]">16,000 Hz · 16-bit Linear PCM</strong></div>
-              <div className="text-[#8A97A8]">VAD Engine: <strong className="text-[#E6EDF5]">Silero VAD ONNX (Local 5ms)</strong></div>
+            <div className="p-5 bg-[#141C30] border border-[#1F293D] rounded-2xl space-y-3">
+              <span className="text-emerald-400 font-semibold text-sm">Streaming Speech Ingest:</span>
+              <div className="space-y-1 text-slate-300">
+                <div>Provider: <strong className="text-white">Deepgram Nova-2 Telephony</strong></div>
+                <div>Sampling: <strong className="text-white font-mono">16,000 Hz · 16-bit PCM</strong></div>
+                <div>VAD Engine: <strong className="text-white">Silero VAD ONNX (Local 5ms)</strong></div>
+              </div>
             </div>
 
-            <div className="p-4 bg-[#18212D] border border-[#243041] rounded space-y-2">
-              <span className="text-[#4CC9F0] font-semibold">Language Intelligence & Gate:</span>
-              <div className="text-[#8A97A8]">Dialogue Model: <strong className="text-[#E6EDF5]">Claude 3.5 Haiku (temp 0.2)</strong></div>
-              <div className="text-[#8A97A8]">Safety Gate: <strong className="text-[#E6EDF5]">Fail-Closed Grounding Verifier</strong></div>
-              <div className="text-[#8A97A8]">Index Provider: <strong className="text-[#E6EDF5]">pgvector + BM25 Hybrid</strong></div>
+            <div className="p-5 bg-[#141C30] border border-[#1F293D] rounded-2xl space-y-3">
+              <span className="text-indigo-400 font-semibold text-sm">Language Intelligence & Safety:</span>
+              <div className="space-y-1 text-slate-300">
+                <div>Dialogue Model: <strong className="text-white">Claude 3.5 Haiku / Groq Llama-3</strong></div>
+                <div>Safety Gate: <strong className="text-white">Fail-Closed Grounding Verifier</strong></div>
+                <div>Vector Retrieval: <strong className="text-white">Cohere Embed-v4.0 + BM25</strong></div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ================= TAB 4: BUSINESS ACTION PAYLOADS ================= */}
+      {/* ================= TAB 4: CRM PAYLOADS ================= */}
       {activeTab === 'crm_action' && (
-        <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 space-y-4 font-mono text-xs">
+        <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 space-y-4 shadow-sm text-xs">
           <div>
-            <h2 className="text-xs uppercase tracking-wider text-[#E6EDF5] font-semibold">
+            <h2 className="text-sm font-semibold text-white">
               Automated CRM Lead & Callback Webhook Payloads
             </h2>
-            <p className="text-xs text-[#8A97A8] font-sans mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Verified action payloads dispatched upon call closure.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-[#18212D] border border-[#243041] rounded space-y-2">
-              <div className="flex justify-between items-center text-[#3DDC97] font-semibold">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
+            <div className="p-5 bg-[#141C30] border border-[#1F293D] rounded-2xl space-y-3">
+              <div className="flex justify-between items-center text-emerald-400 font-semibold">
                 <span>POST /api/crm/lead (Created)</span>
-                <span className="text-[10px] bg-[#13221C] px-1.5 py-0.2 rounded border border-[#3DDC97]/40">Status: 201</span>
+                <span className="text-[11px] bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Status: 201</span>
               </div>
-              <pre className="p-3 bg-[#0B0F14] rounded text-[11px] text-[#E6EDF5] overflow-x-auto">
+              <pre className="p-4 bg-[#090D16] border border-[#1F293D] rounded-xl text-[11px] text-slate-200 overflow-x-auto leading-relaxed">
 {JSON.stringify(
   {
     lead_id: 'lead_renewal_9921',
@@ -656,12 +586,12 @@ export const VoiceAgent: React.FC = () => {
               </pre>
             </div>
 
-            <div className="p-4 bg-[#18212D] border border-[#243041] rounded space-y-2">
-              <div className="flex justify-between items-center text-[#4CC9F0] font-semibold">
+            <div className="p-5 bg-[#141C30] border border-[#1F293D] rounded-2xl space-y-3">
+              <div className="flex justify-between items-center text-indigo-400 font-semibold">
                 <span>POST /api/crm/escalation (Standby)</span>
-                <span className="text-[10px] bg-[#121E2A] px-1.5 py-0.2 rounded border border-[#4CC9F0]/40">Status: 200</span>
+                <span className="text-[11px] bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">Status: 200</span>
               </div>
-              <pre className="p-3 bg-[#0B0F14] rounded text-[11px] text-[#E6EDF5] overflow-x-auto">
+              <pre className="p-4 bg-[#090D16] border border-[#1F293D] rounded-xl text-[11px] text-slate-200 overflow-x-auto leading-relaxed">
 {JSON.stringify(
   {
     escalation_id: 'esc_auto_441',
@@ -682,39 +612,39 @@ export const VoiceAgent: React.FC = () => {
 
       {/* ================= TAB 5: TEST MATRIX ================= */}
       {activeTab === 'test_matrix' && (
-        <div className="bg-[#121821] border border-[#243041] rounded-lg p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-[#E6EDF5] font-semibold">
-              Mandatory Assessment Test Coverage Matrix
+        <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between pb-2 border-b border-[#1F293D]">
+            <h2 className="text-sm font-semibold text-white">
+              End-to-End Verification Test Matrix
             </h2>
-            <span className="text-xs font-mono text-[#3DDC97] bg-[#13221C] px-2 py-0.5 rounded border border-[#3DDC97]/40">
+            <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">
               5 of 5 Passed
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-mono">
+          <div className="overflow-x-auto rounded-xl border border-[#1F293D]">
+            <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#243041] text-[#8A97A8] bg-[#0B0F14]">
-                  <th className="py-2.5 px-3">SCENARIO NAME</th>
-                  <th className="py-2.5 px-3">MARKET</th>
-                  <th className="py-2.5 px-3">EXECUTION PATH</th>
-                  <th className="py-2.5 px-3">RESULT</th>
-                  <th className="py-2.5 px-3">NOTES</th>
+                <tr className="border-b border-[#1F293D] text-slate-400 bg-[#141C30] font-medium">
+                  <th className="py-3 px-4">Scenario Name</th>
+                  <th className="py-3 px-4">Market</th>
+                  <th className="py-3 px-4">Execution Path</th>
+                  <th className="py-3 px-4">Result</th>
+                  <th className="py-3 px-4 text-right">Verification Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#243041]">
+              <tbody className="divide-y divide-[#1F293D] bg-[#0E1424]">
                 {testMatrix.map((tm) => (
-                  <tr key={tm.id} className="hover:bg-[#18212D]/60 transition-colors">
-                    <td className="py-3 px-3 font-sans font-semibold text-[#E6EDF5]">{tm.scenario}</td>
-                    <td className="py-3 px-3 uppercase text-[#4CC9F0]">{tm.market}</td>
-                    <td className="py-3 px-3 text-[#8A97A8]">{tm.coverage}</td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 bg-[#13221C] text-[#3DDC97] border border-[#3DDC97]/40 rounded font-semibold text-[10px]">
+                  <tr key={tm.id} className="hover:bg-[#141C30]/50 transition-colors">
+                    <td className="py-3.5 px-4 font-semibold text-white">{tm.scenario}</td>
+                    <td className="py-3.5 px-4 uppercase text-indigo-400 font-mono text-[11px]">{tm.market}</td>
+                    <td className="py-3.5 px-4 text-slate-300">{tm.coverage}</td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-semibold text-[11px]">
                         {tm.status}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-[#57677D] text-[11px] font-sans">{tm.notes}</td>
+                    <td className="py-3.5 px-4 text-right text-slate-400 text-[11px]">{tm.notes}</td>
                   </tr>
                 ))}
               </tbody>

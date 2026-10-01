@@ -31,6 +31,8 @@ IGNORED_PATHS = [
 
 def should_skip(path: Path) -> bool:
     path_str = str(path).replace("\\", "/")
+    if path.name == ".env" or (path.name.startswith(".env.") and path.name != ".env.example"):
+        return True
     if "test_secret_scan.py" in path_str:
         return True
     for part in path.parts:

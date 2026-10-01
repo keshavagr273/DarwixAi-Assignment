@@ -3,27 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0B0F14;
-  --panel: #121821;
-  --panel-2: #18212D;
-  --panel-3: #1E293B;
-  --line: #243041;
-  --line-light: #334155;
-  --text-main: #E6EDF5;
-  --text-muted: #8A97A8;
-  --text-dim: #57677D;
-  --signal-green: #3DDC97;
-  --signal-amber: #FFB547;
-  --signal-red: #FF5C6C;
-  --signal-cyan: #4CC9F0;
-  --signal-violet: #A78BFA;
+  --bg: #090D16;
+  --panel: #0E1424;
+  --panel-2: #141C30;
+  --panel-3: #1B253F;
+  --line: #1F293D;
+  --line-light: #2E3D59;
+  --text-main: #F1F5F9;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  --signal-green: #10B981;
+  --signal-amber: #F59E0B;
+  --signal-red: #F43F5E;
+  --signal-cyan: #0EA5E9;
+  --signal-violet: #8B5CF6;
+  --brand: #6366F1;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text-main);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom crisp dark scrollbar */
@@ -33,33 +37,45 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0F14;
+  background: #090D16;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #243041;
-  border-radius: 3px;
+  background: #1F293D;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #2E3D59;
 }
 
-/* Crisp borders and card utilities without any gradients */
+/* Modern Card & Panel utilities */
 .panel-border {
-  border: 1px solid #243041;
+  border: 1px solid #1F293D;
 }
 
 .panel-border-hover:hover {
-  border-color: #334155;
+  border-color: #2E3D59;
 }
 
-/* Monospace font utility */
+.glass-panel {
+  background: rgba(14, 20, 36, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(31, 41, 61, 0.8);
+}
+
+.glass-card {
+  background: rgba(20, 28, 48, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(46, 61, 89, 0.5);
+}
+
+/* Monospace font utility for code and numbers */
 .font-mono {
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Heading font utility */
 .font-heading {
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
 }

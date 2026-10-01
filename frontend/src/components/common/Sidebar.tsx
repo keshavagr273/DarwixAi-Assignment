@@ -15,30 +15,52 @@ import {
   PlaySquare,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
 
-interface NavItem {
-  name: string;
-  path: string;
-  icon: React.ComponentType<{ className?: string }>;
-  tag?: string;
-  hero?: boolean;
+interface NavGroup {
+  label: string;
+  items: {
+    name: string;
+    path: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }[];
 }
 
-const navItems: NavItem[] = [
-  { name: 'Mission Control', path: '/', icon: LayoutDashboard },
-  { name: 'Live Nudge Cockpit', path: '/live', icon: Zap, tag: 'HERO', hero: true },
-  { name: 'KB Studio', path: '/kb', icon: Database, tag: 'Q2' },
-  { name: 'Retrieval Lab', path: '/retrieval', icon: Search, tag: 'Q2' },
-  { name: 'Voice Agent', path: '/agent', icon: Bot, tag: 'Q1' },
-  { name: 'Market Packs', path: '/markets', icon: Globe2, tag: 'Q3' },
-  { name: 'ASR Bench', path: '/asr', icon: Mic, tag: 'Q3' },
-  { name: 'Call Library', path: '/calls', icon: PhoneCall },
-  { name: 'Evaluation', path: '/evaluation', icon: BarChart3 },
-  { name: 'Architecture', path: '/architecture', icon: Layers },
-  { name: 'Gaps & Compliance', path: '/gaps', icon: AlertTriangle },
-  { name: 'Demo Mode', path: '/demo', icon: PlaySquare, tag: 'TOUR' },
+const navGroups: NavGroup[] = [
+  {
+    label: 'Operations',
+    items: [
+      { name: 'Mission Control', path: '/', icon: LayoutDashboard },
+      { name: 'Live Copilot', path: '/live', icon: Zap },
+      { name: 'Voice Studio', path: '/agent', icon: Bot },
+    ],
+  },
+  {
+    label: 'Knowledge & RAG',
+    items: [
+      { name: 'Knowledge Studio', path: '/kb', icon: Database },
+      { name: 'Retrieval Lab', path: '/retrieval', icon: Search },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { name: 'Language Packs', path: '/markets', icon: Globe2 },
+      { name: 'ASR Engineering', path: '/asr', icon: Mic },
+    ],
+  },
+  {
+    label: 'Observability',
+    items: [
+      { name: 'Call Library', path: '/calls', icon: PhoneCall },
+      { name: 'Evaluation', path: '/evaluation', icon: BarChart3 },
+      { name: 'Architecture', path: '/architecture', icon: Layers },
+      { name: 'Compliance & Gaps', path: '/gaps', icon: AlertTriangle },
+      { name: 'Product Tour', path: '/demo', icon: PlaySquare },
+    ],
+  },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -46,84 +68,81 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`bg-[#121821] border-r border-[#243041] flex flex-col transition-all duration-200 select-none z-30 ${
-        collapsed ? 'w-16' : 'w-60'
+      className={`bg-[#0E1424] border-r border-[#1F293D] flex flex-col transition-all duration-200 select-none z-30 ${
+        collapsed ? 'w-16' : 'w-64'
       }`}
     >
-      {/* Navigation items list */}
-      <div className="flex-1 py-3 px-2 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded text-xs font-medium transition-colors relative group ${
-                  isActive
-                    ? item.hero
-                      ? 'bg-[#122329] text-[#4CC9F0] border border-[#4CC9F0]/40 font-semibold'
-                      : 'bg-[#18212D] text-[#3DDC97] border border-[#243041] font-semibold'
-                    : 'text-[#8A97A8] hover:text-[#E6EDF5] hover:bg-[#18212D]'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    className={`w-4 h-4 shrink-0 ${
+      {/* Navigation items list grouped logically */}
+      <div className="flex-1 py-4 px-3 space-y-5 overflow-y-auto">
+        {navGroups.map((group) => (
+          <div key={group.label} className="space-y-1">
+            {!collapsed && (
+              <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                {group.label}
+              </div>
+            )}
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === '/'}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all relative group ${
                       isActive
-                        ? item.hero
-                          ? 'text-[#4CC9F0]'
-                          : 'text-[#3DDC97]'
-                        : 'text-[#8A97A8] group-hover:text-[#E6EDF5]'
-                    }`}
-                  />
-                  {!collapsed && (
-                    <span className="truncate flex-1">{item.name}</span>
+                        ? 'bg-indigo-600/15 text-indigo-300 font-semibold border border-indigo-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-[#141C30]'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon
+                        className={`w-4 h-4 shrink-0 transition-colors ${
+                          isActive
+                            ? 'text-indigo-400'
+                            : 'text-slate-400 group-hover:text-slate-200'
+                        }`}
+                      />
+                      {!collapsed && (
+                        <span className="truncate flex-1">{item.name}</span>
+                      )}
+                      {collapsed && (
+                        <div className="absolute left-full ml-2 px-2.5 py-1 bg-[#141C30] text-slate-200 text-xs rounded-lg border border-[#1F293D] shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                          {item.name}
+                        </div>
+                      )}
+                    </>
                   )}
-                  {!collapsed && item.tag && (
-                    <span
-                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${
-                        item.hero
-                          ? 'bg-[#121E2A] text-[#4CC9F0] border border-[#4CC9F0]/40'
-                          : 'bg-[#0B0F14] text-[#8A97A8] border border-[#243041]'
-                      }`}
-                    >
-                      {item.tag}
-                    </span>
-                  )}
-                  {collapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1 bg-[#18212D] text-[#E6EDF5] text-xs rounded border border-[#243041] shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                      {item.name} {item.tag && `(${item.tag})`}
-                    </div>
-                  )}
-                </>
-              )}
-            </NavLink>
-          );
-        })}
+                </NavLink>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
-      {/* Footer / Principle badge */}
+      {/* Clean Status Pill */}
       {!collapsed && (
-        <div className="p-3 mx-2 mb-2 bg-[#0B0F14] border border-[#243041] rounded text-[11px] font-mono space-y-1">
-          <div className="flex items-center gap-1.5 text-[#3DDC97] font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            FAIL-CLOSED RULE
+        <div className="p-3 mx-3 mb-3 bg-[#141C30]/80 border border-[#1F293D] rounded-xl flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-slate-300 font-medium">Fail-Closed Safety</span>
           </div>
-          <p className="text-[#8A97A8] leading-tight">
-            Every claim has a receipt. Every suppressed alert has a reason.
-          </p>
+          <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">
+            Active
+          </span>
         </div>
       )}
 
       {/* Collapse toggle */}
-      <div className="p-2 border-t border-[#243041] flex justify-end">
+      <div className="p-3 border-t border-[#1F293D] flex items-center justify-between">
+        {!collapsed && (
+          <span className="text-[11px] text-slate-400 font-medium pl-1">Collapse Menu</span>
+        )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 text-[#8A97A8] hover:text-[#E6EDF5] hover:bg-[#18212D] rounded transition-colors"
+          className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-[#141C30] rounded-lg transition-colors ml-auto"
           title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

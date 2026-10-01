@@ -44,8 +44,8 @@ export const LiveWaveform: React.FC<LiveWaveformProps> = ({
         const x = i * (barWidth + 2);
         const y = centerY - barHeight / 2;
 
-        // Solid color logic: cyan when active, red when muted, muted line when inactive
-        ctx.fillStyle = isMuted ? '#FF5C6C' : isActive ? '#4CC9F0' : '#243041';
+        // Modern indigo bars when active, rose when muted, muted slate when inactive
+        ctx.fillStyle = isMuted ? '#F43F5E' : isActive ? '#6366F1' : '#1E293B';
         ctx.fillRect(x, y, barWidth, Math.max(3, barHeight));
       }
 
@@ -61,29 +61,29 @@ export const LiveWaveform: React.FC<LiveWaveformProps> = ({
   }, [isActive, isMuted]);
 
   return (
-    <div className="p-3 bg-[#121821] border border-[#243041] rounded-md flex flex-col gap-2">
-      <div className="flex items-center justify-between text-xs font-mono">
+    <div className="p-3.5 bg-[#0E1424] border border-[#1F293D] rounded-xl flex flex-col gap-2.5">
+      <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${isActive && !isMuted ? 'bg-[#4CC9F0] animate-pulse' : 'bg-[#57677D]'}`} />
-          <span className="text-[#8A97A8] uppercase tracking-wider">
+          <span className={`w-2 h-2 rounded-full ${isActive && !isMuted ? 'bg-indigo-500 animate-pulse' : 'bg-slate-600'}`} />
+          <span className="text-slate-300 font-medium tracking-tight">
             Telephony WebRTC Ingest
           </span>
-          <span className="text-[#3DDC97] bg-[#13221C] px-1.5 py-0.2 rounded text-[10px]">
+          <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-mono text-[10px]">
             16kHz · Mono
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-[#8A97A8]">
-            SNR: <span className="text-[#E6EDF5]">{noiseLevelDb} dB</span>
+          <span className="text-slate-400 text-xs">
+            SNR: <span className="font-mono text-slate-200">{noiseLevelDb} dB</span>
           </span>
           {onToggleMute && (
             <button
               onClick={onToggleMute}
-              className={`p-1 rounded border transition-colors ${
+              className={`p-1.5 rounded-lg border transition-colors ${
                 isMuted
-                  ? 'bg-[#251417] text-[#FF5C6C] border-[#FF5C6C]/40'
-                  : 'bg-[#18212D] text-[#8A97A8] border-[#243041] hover:text-[#E6EDF5]'
+                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                  : 'bg-[#141C30] text-slate-400 border-[#1F293D] hover:text-slate-100 hover:border-slate-700'
               }`}
               title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
             >
@@ -93,7 +93,7 @@ export const LiveWaveform: React.FC<LiveWaveformProps> = ({
         </div>
       </div>
 
-      <div className="w-full bg-[#0B0F14] border border-[#243041] rounded overflow-hidden p-1.5 flex items-center justify-center">
+      <div className="w-full bg-[#090D16] border border-[#1F293D] rounded-lg overflow-hidden p-2 flex items-center justify-center">
         <canvas
           ref={canvasRef}
           width={460}
@@ -102,9 +102,9 @@ export const LiveWaveform: React.FC<LiveWaveformProps> = ({
         />
       </div>
 
-      <div className="flex items-center justify-between text-[11px] font-mono text-[#57677D]">
+      <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
         <span>Chunks: 250ms streaming slice</span>
-        <span>Silero VAD: Speech Detected (0.94)</span>
+        <span className="text-slate-300">Silero VAD: Speech Detected (0.94)</span>
       </div>
     </div>
   );

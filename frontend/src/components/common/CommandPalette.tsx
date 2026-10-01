@@ -13,16 +13,16 @@ export const CommandPalette: React.FC = () => {
 
   const quickPages = [
     { name: 'Mission Control', path: '/', icon: LayoutDashboard, category: 'Navigation' },
-    { name: 'Live Nudge Cockpit (Hero)', path: '/live', icon: Zap, category: 'Navigation' },
-    { name: 'KB Studio (Ingestion, Pipeline, Records)', path: '/kb', icon: Database, category: 'Navigation' },
-    { name: 'Retrieval Lab (Evidence & No-Answer Tests)', path: '/retrieval', icon: Search, category: 'Navigation' },
-    { name: 'Voice Agent Studio (Flow, Simulator, Rules)', path: '/agent', icon: Bot, category: 'Navigation' },
-    { name: 'Market Packs & Localization (IN/PH/ID)', path: '/markets', icon: Globe2, category: 'Navigation' },
-    { name: 'ASR Bench (Regional Accents & Noise)', path: '/asr', icon: Mic, category: 'Navigation' },
+    { name: 'Live Agent Copilot', path: '/live', icon: Zap, category: 'Navigation' },
+    { name: 'Knowledge Studio', path: '/kb', icon: Database, category: 'Navigation' },
+    { name: 'Retrieval Quality Lab', path: '/retrieval', icon: Search, category: 'Navigation' },
+    { name: 'Voice Agent Studio', path: '/agent', icon: Bot, category: 'Navigation' },
+    { name: 'Language Packs & Localization', path: '/markets', icon: Globe2, category: 'Navigation' },
+    { name: 'ASR Engineering Bench', path: '/asr', icon: Mic, category: 'Navigation' },
     { name: 'Call Library & Audio Traces', path: '/calls', icon: PhoneCall, category: 'Navigation' },
-    { name: 'Evaluation Suite (Grounding, Stress, Latency)', path: '/evaluation', icon: BarChart3, category: 'Navigation' },
-    { name: 'Architecture & Tradeoff Decisions', path: '/architecture', icon: Layers, category: 'Navigation' },
-    { name: 'Gaps & Compliance Checklist', path: '/gaps', icon: AlertTriangle, category: 'Navigation' },
+    { name: 'System Evaluation & Benchmarks', path: '/evaluation', icon: BarChart3, category: 'Navigation' },
+    { name: 'Architecture & Decisions', path: '/architecture', icon: Layers, category: 'Navigation' },
+    { name: 'Compliance & Gaps Matrix', path: '/gaps', icon: AlertTriangle, category: 'Navigation' },
   ];
 
   const filteredPages = quickPages.filter((p) =>
@@ -55,41 +55,41 @@ export const CommandPalette: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-start justify-center pt-20 px-4">
+    <div className="fixed inset-0 z-50 overflow-hidden flex items-start justify-center pt-24 px-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/75 transition-opacity"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
         onClick={() => setIsCmdOpen(false)}
       />
 
       {/* Palette Box */}
-      <div className="relative w-full max-w-2xl bg-[#121821] border border-[#243041] rounded-lg shadow-2xl overflow-hidden z-10 flex flex-col font-mono text-xs">
+      <div className="relative w-full max-w-2xl bg-[#0E1424] border border-[#1F293D] rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col text-xs animate-in zoom-in-95 duration-150">
         {/* Search input bar */}
-        <div className="flex items-center px-4 border-b border-[#243041] bg-[#18212D]">
-          <Search className="w-4 h-4 text-[#8A97A8] mr-2 shrink-0" />
+        <div className="flex items-center px-4 border-b border-[#1F293D] bg-[#141C30]">
+          <Search className="w-4 h-4 text-slate-400 mr-3 shrink-0" />
           <input
             type="text"
-            placeholder="Type a page name, KB record ID, or keyword..."
+            placeholder="Search pages, KB record IDs, or topics..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
-            className="w-full py-3 bg-transparent text-[#E6EDF5] placeholder-[#57677D] focus:outline-none text-sm font-sans"
+            className="w-full py-3.5 bg-transparent text-white placeholder-slate-500 focus:outline-none text-sm font-sans"
           />
           <button
             onClick={() => setIsCmdOpen(false)}
-            className="p-1 text-[#8A97A8] hover:text-[#E6EDF5] rounded"
+            className="p-1 text-slate-400 hover:text-white rounded-lg"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Results list */}
-        <div className="max-h-96 overflow-y-auto p-2 space-y-4">
+        <div className="max-h-96 overflow-y-auto p-3 space-y-4">
           {/* Navigation Pages */}
           {filteredPages.length > 0 && (
             <div>
-              <div className="px-3 py-1 text-[10px] text-[#57677D] uppercase tracking-wider font-semibold">
-                Control Room Pages
+              <div className="px-3 py-1 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
+                Application Pages
               </div>
               <div className="space-y-1 mt-1">
                 {filteredPages.map((page) => {
@@ -98,13 +98,13 @@ export const CommandPalette: React.FC = () => {
                     <button
                       key={page.path}
                       onClick={() => handleSelectPage(page.path)}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded text-left hover:bg-[#18212D] text-[#8A97A8] hover:text-[#E6EDF5] transition-colors group"
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#141C30] transition-colors text-left group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className="w-4 h-4 text-[#8A97A8] group-hover:text-[#3DDC97]" />
-                        <span className="font-sans font-medium">{page.name}</span>
+                        <Icon className="w-4 h-4 text-indigo-400 group-hover:scale-105 transition-transform" />
+                        <span className="font-medium">{page.name}</span>
                       </div>
-                      <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-[#3DDC97] transition-opacity" />
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
                     </button>
                   );
                 })}
@@ -112,36 +112,44 @@ export const CommandPalette: React.FC = () => {
             </div>
           )}
 
-          {/* KB Records */}
+          {/* Knowledge Base Records Match */}
           {filteredRecords.length > 0 && (
             <div>
-              <div className="px-3 py-1 text-[10px] text-[#57677D] uppercase tracking-wider font-semibold">
-                Knowledge Base Records
+              <div className="px-3 py-1 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
+                Knowledge Base Records & Citations
               </div>
               <div className="space-y-1 mt-1">
-                {filteredRecords.map((r) => (
+                {filteredRecords.slice(0, 5).map((record) => (
                   <button
-                    key={r.record_id}
-                    onClick={() => handleSelectRecord(r)}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded text-left hover:bg-[#18212D] text-[#8A97A8] hover:text-[#E6EDF5] transition-colors group"
+                    key={record.record_id}
+                    onClick={() => handleSelectRecord(record)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#141C30] transition-colors text-left group"
                   >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <FileText className="w-4 h-4 text-[#3DDC97] shrink-0" />
-                      <span className="font-mono text-[#3DDC97] font-semibold">{r.record_id}</span>
-                      <span className="truncate text-[#E6EDF5] font-sans">{r.title}</span>
+                    <div className="flex items-center gap-2.5">
+                      <FileText className="w-4 h-4 text-emerald-400 group-hover:scale-105 transition-transform" />
+                      <div>
+                        <div className="text-white font-medium">{record.title}</div>
+                        <div className="text-[11px] text-indigo-400 font-mono">{record.record_id} · {record.version}</div>
+                      </div>
                     </div>
-                    <span className="text-[10px] text-[#57677D] shrink-0 uppercase">{r.category}</span>
+                    <span className="text-[11px] text-slate-400 group-hover:text-emerald-400 transition-colors">Open Receipt →</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
+
+          {filteredPages.length === 0 && filteredRecords.length === 0 && (
+            <div className="p-8 text-center text-slate-400">
+              No matching pages or knowledge records found for "{query}".
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="p-2.5 bg-[#0B0F14] border-t border-[#243041] flex items-center justify-between text-[11px] text-[#57677D]">
-          <span>Navigation shortcut: <kbd className="px-1 py-0.5 bg-[#18212D] rounded border border-[#243041]">ESC</kbd> to close</span>
-          <span>Press Enter to select</span>
+        <div className="p-3 border-t border-[#1F293D] bg-[#141C30] flex items-center justify-between text-[11px] text-slate-400">
+          <span>Navigate with mouse or arrow keys</span>
+          <span>Press ESC to close</span>
         </div>
       </div>
     </div>
