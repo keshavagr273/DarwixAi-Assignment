@@ -374,3 +374,169 @@ def get_callbacks(limit: int = Query(default=50, le=500)):
     recent = lines[-limit:]
     return [json.loads(l) for l in recent]
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 3: Voice Call endpoints
+# ─────────────────────────────────────────────────────────────────────────────
+
+from services.voice.call_provider import MockProvider, get_provider
+from services.voice.asr_tts import MARKET_LANGUAGE_MAP, ASR_PROVIDER_NOTES, MARKET_TTS_VOICES, VAD_CONFIG
+
+TRANSCRIPTS_DIR = ROOT_DIR / "data" / "transcripts"
+AUDIO_DIR = ROOT_DIR / "data" / "audio"
+CALLS_DIR = ROOT_DIR / "data" / "calls"
+
+# In-memory call sessions (provider instances)
+_CALL_SESSIONS: Dict[str, Any] = {}
+
+
+class StartCallRequest(BaseModel):
+    session_id: Optional[str] = None
+    market: str = "in_en"
+    provider: str = "mock"      # "mock" | "livekit"
+
+
+class TurnInputRequest(BaseModel):
+    call_session_id: str
+    user_text: str              # ASR transcript of customer turn
+    turn_number: int = 0
+
+
+@app.post("/api/v1/voice/calls")
+def start_call(req: StartCallRequest):
+    """Start a voice call session."""
+    session_id = req.session_id or f"call_{uuid.uuid4().hex[:10]}"
+    provider = get_provider(req.provider)
+    call_info = provider.start_call(session_id, req.market)
+    _CALL_SESSIONS[session_id] = {
+        "provider": provider,
+        "call_info": call_info,
+        "market": req.market,
+        "turn_count": 0,
+        "latencies": [],
+    }
+    return {
+        "call_session_id": session_id,
+        "market": req.market,
+        "provider": req.provider,
+        "language": MARKET_LANGUAGE_MAP.get(req.market, "en-IN"),
+        "status": "connected",
+        **call_info,
+    }
+
+
+@app.post("/api/v1/voice/calls/{call_session_id}/turn")
+def process_voice_turn(call_session_id: str, req: TurnInputRequest):
+    """Process one voice turn: ASR text -> FSM -> retrieve -> gate -> TTS text."""
+    t_start = time.perf_counter()
+    sess = _CALL_SESSIONS.get(call_session_id)
+    if not sess:
+        raise HTTPException(status_code=404, detail=f"Call session {call_session_id!r} not found")
+
+    market = sess["market"]
+    sess["turn_count"] += 1
+    turn_number = sess["turn_count"]
+
+    # Simulate latency spans
+    provider = sess["provider"]
+    if hasattr(provider, "get_turn_latencies"):
+        latencies = provider.get_turn_latencies(call_session_id, turn_number)
+        latency_dict = latencies.to_dict()
+    else:
+        latency_dict = {}
+
+    # KB retrieval for the user text
+    from services.agent.tools import retrieve_kb as tool_retrieve_kb
+    retrieve_result = tool_retrieve_kb(query=req.user_text, market=market, session_id=call_session_id)
+
+    total_ms = round((time.perf_counter() - t_start) * 1000.0, 2)
+
+    return {
+        "call_session_id": call_session_id,
+        "turn_number": turn_number,
+        "user_text": req.user_text,
+        "market": market,
+        "is_refusal": retrieve_result["is_refusal"],
+        "citations": retrieve_result["citations"],
+        "num_results": len(retrieve_result["results"]),
+        "latencies": latency_dict,
+        "retrieval_latency_ms": retrieve_result["latency_ms"],
+        "total_api_latency_ms": total_ms,
+    }
+
+
+@app.delete("/api/v1/voice/calls/{call_session_id}")
+def end_call(call_session_id: str):
+    """End a voice call session."""
+    sess = _CALL_SESSIONS.pop(call_session_id, None)
+    if not sess:
+        raise HTTPException(status_code=404, detail=f"Call session {call_session_id!r} not found")
+    provider = sess["provider"]
+    call_summary = provider.end_call(call_session_id)
+    return {
+        "status": "ended",
+        "call_session_id": call_session_id,
+        "total_turns": sess["turn_count"],
+        **call_summary,
+    }
+
+
+@app.get("/api/v1/voice/providers")
+def get_provider_info():
+    """Return ASR/TTS provider information for all markets."""
+    return {
+        "asr_providers": ASR_PROVIDER_NOTES,
+        "tts_voices": MARKET_TTS_VOICES,
+        "vad_config": VAD_CONFIG,
+        "markets": list(MARKET_LANGUAGE_MAP.keys()),
+    }
+
+
+@app.get("/api/v1/voice/transcripts")
+def list_transcripts():
+    """List all recorded call transcripts."""
+    if not TRANSCRIPTS_DIR.exists():
+        return []
+    return [f.name for f in sorted(TRANSCRIPTS_DIR.glob("*.json"))]
+
+
+@app.get("/api/v1/voice/transcripts/{call_id}")
+def get_transcript(call_id: str):
+    """Get a specific call transcript."""
+    transcript_file = TRANSCRIPTS_DIR / f"{call_id}_transcript.json"
+    if not transcript_file.exists():
+        raise HTTPException(status_code=404, detail=f"Transcript for {call_id!r} not found")
+    return json.loads(transcript_file.read_text(encoding="utf-8"))
+
+
+@app.get("/api/v1/voice/latency_report")
+def get_latency_report():
+    """Get the Phase 3 latency report."""
+    report_file = CALLS_DIR / "latency_report.json"
+    if not report_file.exists():
+        return {"error": "Latency report not yet generated. Run scripts/record_calls.py"}
+    return json.loads(report_file.read_text(encoding="utf-8"))
+
+
+@app.get("/api/v1/voice/results")
+def get_call_results():
+    """Get the Phase 3 call results summary."""
+    results_file = CALLS_DIR / "results.md"
+    if not results_file.exists():
+        return {"error": "Results not yet generated. Run scripts/record_calls.py"}
+    return {"results_md": results_file.read_text(encoding="utf-8")}
+
+
+@app.get("/api/v1/voice/calls")
+def list_active_calls():
+    """List active call sessions."""
+    return {
+        "active_calls": [
+            {
+                "call_session_id": k,
+                "market": v["market"],
+                "turn_count": v["turn_count"],
+            }
+            for k, v in _CALL_SESSIONS.items()
+        ]
+    }

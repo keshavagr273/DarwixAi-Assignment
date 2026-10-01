@@ -1,0 +1,91 @@
+{
+  "call_id": "call_002",
+  "scenario": "objection",
+  "market": "in_en",
+  "duration_s": 104.5,
+  "language": "en-IN",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "en-IN-Wavenet-D",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Namaste! This is Priya from SecureLife Insurance. Am I speaking with Anita Sharma?",
+      "tts_duration_ms": 5200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Yes, speaking.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.846
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "This call may be recorded for quality and compliance purposes.",
+      "tts_duration_ms": 4000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Okay.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.857
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "May I ask your age?",
+      "tts_duration_ms": 2000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "I am 28.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.925
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "We have a great term insurance plan for you!",
+      "tts_duration_ms": 3600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 8,
+      "speaker": "customer",
+      "text": "This is too expensive, I cannot afford it right now.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.914
+    },
+    {
+      "turn": 9,
+      "speaker": "agent",
+      "text": "I completely understand your concern. Many customers find flexible payment options helpful.",
+      "tts_duration_ms": 4800.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 10,
+      "speaker": "customer",
+      "text": "No, I am still not interested, thank you.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.838
+    },
+    {
+      "turn": 11,
+      "speaker": "agent",
+      "text": "I completely understand. Thank you for your time, Anita. Have a wonderful day! This is a marketing communication from SecureLife Insurance.",
+      "tts_duration_ms": 8400.0,
+      "asr_confidence": null
+    }
+  ]
+}

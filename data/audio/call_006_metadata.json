@@ -1,0 +1,70 @@
+{
+  "call_id": "call_006",
+  "scenario": "info_not_in_kb",
+  "market": "in_en",
+  "duration_s": 100.7,
+  "language": "en-IN",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "en-IN-Wavenet-D",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Namaste! This is Priya from SecureLife Insurance. Am I speaking with Meera Patel?",
+      "tts_duration_ms": 5200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Yes, I'm Meera.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.968
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "This call may be recorded for quality and compliance purposes.",
+      "tts_duration_ms": 4000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Sure.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.968
+    },
+    {
+      "turn": 5,
+      "speaker": "customer",
+      "text": "Can you tell me the premium for the SecureLife Platinum Ultra Max Plan?",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.881
+    },
+    {
+      "turn": 6,
+      "speaker": "agent",
+      "text": "I'm sorry, I don't have that specific information readily available. I want to make sure I give you accurate details. I'd like to arrange for one of our senior specialists to get back to you. Shall I schedule a callback?",
+      "tts_duration_ms": 16000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 7,
+      "speaker": "customer",
+      "text": "No that's okay, I'll look it up myself.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.909
+    },
+    {
+      "turn": 8,
+      "speaker": "agent",
+      "text": "Of course! Thank you for your time, Meera. Have a wonderful day! This is a marketing communication from SecureLife Insurance.",
+      "tts_duration_ms": 8000.0,
+      "asr_confidence": null
+    }
+  ]
+}

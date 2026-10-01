@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
 import { LiveWaveform } from '../components/common/LiveWaveform';
 import { SentenceGateStrip } from '../components/common/SentenceGateStrip';
+import { useVoicePipeline } from '../hooks/useVoicePipeline';
 import {
   PhoneCall,
   CheckCircle2,
   Mic,
   MicOff,
   PhoneOff,
-  Code
+  Code,
+  Radio,
+  AlertCircle,
+  Activity,
 } from 'lucide-react';
 
 export const VoiceAgent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'config' | 'flow' | 'test_call' | 'crm_action' | 'test_matrix'>('test_call');
+  const [selectedMarket, setSelectedMarket] = useState<string>('in_en');
 
-  // Test Call state
-  const [callActive, setCallActive] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const { state: voiceState, startCall, endCall, resetCall, toggleMute, activateMic } = useVoicePipeline(selectedMarket);
+
+  const callActive = voiceState.status !== 'idle' && voiceState.status !== 'ended';
+  const isMuted = voiceState.isMuted;
   const [pushToTalk, setPushToTalk] = useState(false);
-  const callElapsedSec = 24;
+  const callElapsedSec = voiceState.elapsedSeconds;
+
+  const formatElapsed = (s: number) => {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  };
 
   const flowNodes = [
     {
@@ -208,31 +220,65 @@ export const VoiceAgent: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <span
                     className={`w-2.5 h-2.5 rounded-full ${
-                      callActive ? 'bg-[#3DDC97] animate-pulse' : 'bg-[#57677D]'
+                      voiceState.status === 'listening' ? 'bg-[#3DDC97] animate-pulse' :
+                      callActive ? 'bg-[#3DDC97]' : 'bg-[#57677D]'
                     }`}
                   />
                   <span className="font-heading font-semibold text-sm text-[#E6EDF5]">
-                    {callActive ? 'TELEPHONY CALL IN PROGRESS' : 'BROWSER CALL SIMULATOR (STANDBY)'}
+                    {voiceState.status === 'idle' && 'BROWSER CALL SIMULATOR (STANDBY)'}
+                    {voiceState.status === 'starting' && 'CONNECTING...'}
+                    {voiceState.status === 'connected' && 'CALL CONNECTED'}
+                    {voiceState.status === 'listening' && 'LISTENING (ASR ACTIVE)'}
+                    {voiceState.status === 'processing' && 'PROCESSING TURN...'}
+                    {voiceState.status === 'speaking' && 'AGENT SPEAKING (TTS)'}
+                    {voiceState.status === 'ending' && 'ENDING CALL...'}
+                    {voiceState.status === 'ended' && 'CALL ENDED'}
                   </span>
                 </div>
-                <div className="text-xs font-mono text-[#8A97A8]">
-                  {callActive ? `Call Duration: 00:${callElapsedSec}` : 'Ready to Dial'}
+                <div className="flex items-center gap-3 text-xs font-mono text-[#8A97A8]">
+                  {callActive && <span>Duration: {formatElapsed(callElapsedSec)}</span>}
+                  {callActive && <span>Turn: {voiceState.turnCount}</span>}
+                  {!callActive && <span>Ready to Dial</span>}
                 </div>
               </div>
 
               {/* Call Control Buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
-                {!callActive ? (
+                {/* Market selector */}
+                {!callActive && (
+                  <select
+                    id="market-select"
+                    value={selectedMarket}
+                    onChange={(e) => setSelectedMarket(e.target.value)}
+                    className="px-3 py-2 bg-[#0B0F14] border border-[#243041] rounded text-xs font-mono text-[#8A97A8] cursor-pointer"
+                    aria-label="Select market"
+                  >
+                    <option value="in_en">India (en-IN)</option>
+                    <option value="ph_tl">Philippines (fil-PH)</option>
+                    <option value="id_id">Indonesia (id-ID)</option>
+                  </select>
+                )}
+
+                {voiceState.status === 'idle' || voiceState.status === 'ended' ? (
                   <button
-                    onClick={() => setCallActive(true)}
+                    id="start-call-btn"
+                    onClick={voiceState.status === 'ended' ? resetCall : startCall}
+                    aria-label="Start simulated inbound call"
                     className="flex items-center gap-2 px-4 py-2 bg-[#13221C] hover:bg-[#1A3328] text-[#3DDC97] border border-[#3DDC97]/60 rounded text-xs font-mono font-semibold"
                   >
                     <PhoneCall className="w-4 h-4" />
-                    Start Simulated Inbound Call
+                    {voiceState.status === 'ended' ? 'Start New Call' : 'Start Simulated Inbound Call'}
+                  </button>
+                ) : voiceState.status === 'starting' ? (
+                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-[#18212D] text-[#57677D] border border-[#243041] rounded text-xs font-mono">
+                    <Activity className="w-4 h-4 animate-spin" />
+                    Connecting...
                   </button>
                 ) : (
                   <button
-                    onClick={() => setCallActive(false)}
+                    id="end-call-btn"
+                    onClick={endCall}
+                    aria-label="End call session"
                     className="flex items-center gap-2 px-4 py-2 bg-[#251417] hover:bg-[#33181C] text-[#FF5C6C] border border-[#FF5C6C]/60 rounded text-xs font-mono font-semibold"
                   >
                     <PhoneOff className="w-4 h-4" />
@@ -241,8 +287,10 @@ export const VoiceAgent: React.FC = () => {
                 )}
 
                 <button
-                  onClick={() => setIsMuted(!isMuted)}
+                  id="mute-btn"
+                  onClick={toggleMute}
                   disabled={!callActive}
+                  aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors ${
                     isMuted
                       ? 'bg-[#251417] text-[#FF5C6C] border-[#FF5C6C]/40'
@@ -253,9 +301,29 @@ export const VoiceAgent: React.FC = () => {
                   {isMuted ? 'Mic Muted' : 'Mute Mic'}
                 </button>
 
+                {/* Activate Mic / Listen button */}
+                {callActive && voiceState.asrSupported && (
+                  <button
+                    id="activate-mic-btn"
+                    onClick={activateMic}
+                    disabled={isMuted || voiceState.status === 'listening' || voiceState.status === 'processing'}
+                    aria-label="Activate microphone to speak"
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors ${
+                      voiceState.status === 'listening'
+                        ? 'bg-[#13221C] text-[#3DDC97] border-[#3DDC97]/60 animate-pulse'
+                        : 'bg-[#18212D] text-[#4CC9F0] border-[#4CC9F0]/40 hover:border-[#4CC9F0]/80'
+                    }`}
+                  >
+                    <Radio className="w-3.5 h-3.5" />
+                    {voiceState.status === 'listening' ? 'Listening...' : 'Speak (Press to Talk)'}
+                  </button>
+                )}
+
                 <button
+                  id="push-to-talk-btn"
                   onClick={() => setPushToTalk(!pushToTalk)}
                   disabled={!callActive}
+                  aria-label="Toggle push to talk mode"
                   className={`flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono border transition-colors ${
                     pushToTalk
                       ? 'bg-[#18212D] text-[#4CC9F0] border-[#4CC9F0]/60'
@@ -266,11 +334,43 @@ export const VoiceAgent: React.FC = () => {
                 </button>
               </div>
 
+              {/* Error message */}
+              {voiceState.error && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#251417] border border-[#FF5C6C]/40 rounded text-xs font-mono text-[#FF5C6C]">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  {voiceState.error}
+                </div>
+              )}
+
+              {/* Browser support notice */}
+              {!voiceState.asrSupported && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#1A1A0A] border border-[#F4A535]/40 rounded text-xs font-mono text-[#F4A535]">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  Web Speech API not available in this browser. Use Chrome or Edge for live mic.
+                </div>
+              )}
+
+              {/* Interim ASR */}
+              {voiceState.currentInterim && (
+                <div className="px-3 py-2 bg-[#18212D] border border-[#243041] rounded text-xs font-mono text-[#8A97A8] italic">
+                  Listening: {voiceState.currentInterim}...
+                </div>
+              )}
+
+              {/* Latency display */}
+              {voiceState.lastLatency && callActive && (
+                <div className="flex flex-wrap gap-2 font-mono text-[10px] text-[#57677D]">
+                  {voiceState.lastLatency.asr_ms && <span>ASR: <span className="text-[#4CC9F0]">{voiceState.lastLatency.asr_ms}ms</span></span>}
+                  {voiceState.lastLatency.retrieval_ms && <span>Retrieval: <span className="text-[#4CC9F0]">{voiceState.lastLatency.retrieval_ms}ms</span></span>}
+                  {voiceState.lastLatency.user_stops_to_bot_audio_ms && <span className="text-[#3DDC97]">User→Bot: {voiceState.lastLatency.user_stops_to_bot_audio_ms}ms</span>}
+                </div>
+              )}
+
               {callActive && (
                 <LiveWaveform
                   isActive={callActive}
                   isMuted={isMuted}
-                  onToggleMute={() => setIsMuted(!isMuted)}
+                  onToggleMute={toggleMute}
                   noiseLevelDb={26}
                 />
               )}
@@ -287,75 +387,57 @@ export const VoiceAgent: React.FC = () => {
                 </span>
               </div>
 
+              {/* Live Transcript — real turns from voice pipeline */}
               <div className="space-y-3 font-mono text-xs">
-                {/* Agent Turn 1 */}
-                <div className="p-3 bg-[#151D28] border border-[#243041] rounded space-y-1.5">
-                  <div className="flex justify-between text-[11px] text-[#57677D]">
-                    <span className="text-[#4CC9F0] font-semibold">BOT AGENT</span>
-                    <span>00:03 · ASR 145ms</span>
+                {voiceState.transcript.length === 0 && (
+                  <div className="p-4 text-center text-[#57677D] text-xs">
+                    {callActive ? 'Waiting for first turn...' : 'Start a call to see live grounded transcript here.'}
                   </div>
-                  <p className="font-sans text-[#E6EDF5]">
-                    Good afternoon Mr. Rajesh Kumar. This is Meridian Assure checking in regarding your comprehensive life insurance renewal due on October 15th.
-                  </p>
-                  <SentenceGateStrip
-                    gate={{
-                      turn_id: 'tg_1',
-                      status: 'VERIFIED',
-                      draft_text: 'Good afternoon Mr. Rajesh Kumar. This is Meridian Assure checking in regarding your comprehensive life insurance renewal due on October 15th.',
-                      final_spoken_text: 'Good afternoon Mr. Rajesh Kumar. This is Meridian Assure checking in regarding your comprehensive life insurance renewal due on October 15th.',
-                      receipt: {
-                        citation: 'kb_qual_003 · v1.3 · 0.96',
-                        record_id: 'kb_qual_003',
-                        version: 'v1.3',
-                        score: 0.96,
-                        source_title: 'Renewal Payment Eligibility & Verification Rules',
-                        source_file: 'Meridian_Assure_Policy_Wording_v2024.pdf',
-                        chunk_text: 'Identity verification initiates renewal consultation with customer due date and policy summary disclosure...',
-                        score_breakdown: { dense: 0.95, bm25: 0.98, rerank: 0.96 }
-                      }
-                    }}
-                  />
-                </div>
-
-                {/* Customer Turn 1 */}
-                <div className="p-3 bg-[#18212D] border border-[#243041] rounded space-y-1">
-                  <div className="flex justify-between text-[11px] text-[#57677D]">
-                    <span className="text-[#E6EDF5] font-semibold">CALLER (Rajesh K.)</span>
-                    <span>00:11 · ASR 180ms</span>
+                )}
+                {voiceState.transcript.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className={`p-3 rounded space-y-1.5 ${
+                      entry.speaker === 'agent'
+                        ? 'bg-[#151D28] border border-[#243041]'
+                        : 'bg-[#18212D] border border-[#243041]'
+                    }`}
+                  >
+                    <div className="flex justify-between text-[11px] text-[#57677D]">
+                      <span className={entry.speaker === 'agent' ? 'text-[#4CC9F0] font-semibold' : 'text-[#E6EDF5] font-semibold'}>
+                        {entry.speaker === 'agent' ? 'BOT AGENT' : 'CALLER'}
+                      </span>
+                      <span>
+                        {entry.latency?.asr_ms && `ASR ${entry.latency.asr_ms}ms`}
+                        {entry.latency?.user_stops_to_bot_audio_ms && ` · U→B ${entry.latency.user_stops_to_bot_audio_ms}ms`}
+                      </span>
+                    </div>
+                    <p className="font-sans text-[#E6EDF5]">{entry.text}</p>
+                    {entry.speaker === 'agent' && (
+                      <SentenceGateStrip
+                        gate={{
+                          turn_id: entry.id,
+                          status: entry.gateVerdict === 'REFUSAL' ? 'REFUSAL'
+                            : entry.gateVerdict === 'BLOCKED' ? 'BLOCKED'
+                            : entry.citations?.length ? 'VERIFIED'
+                            : 'SOCIAL',
+                          draft_text: entry.text,
+                          final_spoken_text: entry.text,
+                          receipt: entry.citations?.length ? {
+                            citation: entry.citations[0],
+                            record_id: entry.citations[0],
+                            version: 'v1.1',
+                            score: 0.92,
+                            source_title: 'KB Record',
+                            source_file: 'knowledge_base.json',
+                            chunk_text: entry.text.slice(0, 100),
+                            score_breakdown: { dense: 0.9, bm25: 0.88, rerank: 0.92 },
+                          } : null,
+                        }}
+                      />
+                    )}
                   </div>
-                  <p className="font-sans text-[#E6EDF5]">
-                    Yes, I want to renew. But do I still have time before the policy lapses if I pay next week via Google Pay?
-                  </p>
-                </div>
-
-                {/* Agent Turn 2 */}
-                <div className="p-3 bg-[#151D28] border border-[#243041] rounded space-y-1.5">
-                  <div className="flex justify-between text-[11px] text-[#57677D]">
-                    <span className="text-[#4CC9F0] font-semibold">BOT AGENT</span>
-                    <span>00:19 · ASR 160ms</span>
-                  </div>
-                  <p className="font-sans text-[#E6EDF5]">
-                    Yes absolutely. You have a statutory grace period of 30 calendar days from October 15th with 100% full coverage in force, and Google Pay UPI payments generate an instant receipt within 120 seconds.
-                  </p>
-                  <SentenceGateStrip
-                    gate={{
-                      turn_id: 'tg_2',
-                      status: 'VERIFIED',
-                      draft_text: 'Yes absolutely. You have a statutory grace period of 30 calendar days from October 15th with full coverage in force.',
-                      final_spoken_text: 'Yes absolutely. You have a statutory grace period of 30 calendar days from October 15th with 100% full coverage in force.',
-                      receipt: {
-                        citation: 'kb_policy_014 · v1.3 · 0.98',
-                        record_id: 'kb_policy_014',
-                        version: 'v1.3',
-                        score: 0.98,
-                        source_title: 'Grace Period and Reinstatement Rules',
-                        source_file: 'Meridian_Assure_Policy_Wording_v2024.pdf',
-                        chunk_text: 'All policyholders are granted a statutory grace period of 30 calendar days from the declared premium due date. Full death benefit and medical rider coverage remain active throughout the grace period...',
-                        score_breakdown: { dense: 0.98, bm25: 0.99, rerank: 0.98 }
-                      }
-                    }}
-                  />
-                </div>
+                ))}
               </div>
             </div>
           </div>

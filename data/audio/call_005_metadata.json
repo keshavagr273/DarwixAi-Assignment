@@ -1,0 +1,63 @@
+{
+  "call_id": "call_005",
+  "scenario": "human_request",
+  "market": "id_id",
+  "duration_s": 86.4,
+  "language": "id-ID",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "id-ID-Wavenet-A",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Selamat siang! Perkenalkan, saya Sari dari SecureLife Insurance. Apakah benar saya berbicara dengan Budi Santoso?",
+      "tts_duration_ms": 6000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Ya, benar.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.927
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "Pembicaraan ini mungkin direkam untuk keperluan kualitas dan kepatuhan.",
+      "tts_duration_ms": 3600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Baik.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.85
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "Bapak Budi, kami ingin memperkenalkan produk asuransi kami.",
+      "tts_duration_ms": 3200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "Maaf, saya ingin bicara dengan manusia saja, bukan bot.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.836
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "Tentu saja Pak! Izinkan saya mengalihkan Bapak ke agen senior kami sekarang. Mohon tunggu sebentar.",
+      "tts_duration_ms": 6000.0,
+      "asr_confidence": null
+    }
+  ]
+}

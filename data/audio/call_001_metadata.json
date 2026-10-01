@@ -1,0 +1,105 @@
+{
+  "call_id": "call_001",
+  "scenario": "cooperative",
+  "market": "in_en",
+  "duration_s": 136.8,
+  "language": "en-IN",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "en-IN-Wavenet-D",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Namaste! This is Priya from SecureLife Insurance. Am I speaking with Rajesh Kumar?",
+      "tts_duration_ms": 5200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Yes, this is Rajesh.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.888
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "This call may be recorded for quality and compliance purposes.",
+      "tts_duration_ms": 4000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "That's fine.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.855
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "May I know your age, Rajesh ji?",
+      "tts_duration_ms": 2800.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "I am 35 years old.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.973
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "And could you share your approximate annual income?",
+      "tts_duration_ms": 3200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 8,
+      "speaker": "customer",
+      "text": "Around 5 lakh per year.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.906
+    },
+    {
+      "turn": 9,
+      "speaker": "agent",
+      "text": "Wonderful! We have an excellent term plan for you. The grace period for premium payment is 30 days from the due date.",
+      "tts_duration_ms": 8800.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 10,
+      "speaker": "customer",
+      "text": "That sounds good! I am interested.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.933
+    },
+    {
+      "turn": 11,
+      "speaker": "agent",
+      "text": "Wonderful! May I take your phone number for our specialist to get in touch?",
+      "tts_duration_ms": 5600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 12,
+      "speaker": "customer",
+      "text": "Sure, it is 9876543210.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.922
+    },
+    {
+      "turn": 13,
+      "speaker": "agent",
+      "text": "Thank you so much, Rajesh ji! Have a wonderful day! This is a marketing communication from SecureLife Insurance.",
+      "tts_duration_ms": 7200.0,
+      "asr_confidence": null
+    }
+  ]
+}

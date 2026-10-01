@@ -1,0 +1,70 @@
+{
+  "call_id": "call_004",
+  "scenario": "out_of_scope",
+  "market": "in_en",
+  "duration_s": 62.3,
+  "language": "en-IN",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "en-IN-Wavenet-D",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Namaste! This is Priya from SecureLife Insurance. Am I speaking with the customer?",
+      "tts_duration_ms": 5200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Yes.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.834
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "This call may be recorded for quality and compliance purposes.",
+      "tts_duration_ms": 4000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Fine.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.862
+    },
+    {
+      "turn": 5,
+      "speaker": "customer",
+      "text": "Actually, do you offer Bitcoin insurance or crypto coverage?",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.87
+    },
+    {
+      "turn": 6,
+      "speaker": "agent",
+      "text": "I'm afraid that's outside the scope of what I can help with today. I'm here specifically to assist with SecureLife life and health insurance products. May I help you with any of those?",
+      "tts_duration_ms": 13200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 7,
+      "speaker": "customer",
+      "text": "No thank you, not interested.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.914
+    },
+    {
+      "turn": 8,
+      "speaker": "agent",
+      "text": "Thank you for your time. Have a wonderful day! This is a marketing communication from SecureLife Insurance.",
+      "tts_duration_ms": 6800.0,
+      "asr_confidence": null
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "call_id": "call_003",
+  "scenario": "conflicting_details",
+  "market": "ph_tl",
+  "duration_s": 155.0,
+  "language": "fil-PH",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "fil-PH-Wavenet-A",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Magandang araw po! Ako po si Maria mula sa SecureLife Insurance. Kausap ko po ba si Juan dela Cruz?",
+      "tts_duration_ms": 7600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Oo, ako po iyon.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.822
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "Ang tawag na ito ay maaaring i-record para sa kalidad at pagsunod sa regulasyon.",
+      "tts_duration_ms": 5600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Sige po.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.893
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "Maaari po ba ninyong sabihin ang inyong edad?",
+      "tts_duration_ms": 3200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "Ako ay 20 taong gulang po.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.868
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "Maraming salamat. Narinig ko po, 20 taong gulang kayo. Maaari po bang i-confirm?",
+      "tts_duration_ms": 5200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 8,
+      "speaker": "customer",
+      "text": "Ah hindi, mali. Ako ay 15 taon lang.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.82
+    },
+    {
+      "turn": 9,
+      "speaker": "agent",
+      "text": "Salamat po sa paglilinaw, Juan. Sa kasalukuyan, ang aming mga plano ay para sa mga may edad na 18 pataas. Salamat po sa inyong oras! Magandang araw po!",
+      "tts_duration_ms": 11200.0,
+      "asr_confidence": null
+    }
+  ]
+}
