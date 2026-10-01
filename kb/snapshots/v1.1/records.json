@@ -3,7 +3,7 @@
     "record_id": "kb_crm_samples",
     "kb_version": "v1.1",
     "title": "Customer Records Synthetic Pii",
-    "content": "Customer Records Synthetic Pii Row 1\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_101,Aarav Patel,[PHONE_4],[EMAIL_5],[POLICY_NUM_5],[ID_2],in_en,active\n\nCustomer Records Synthetic Pii Row 2\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_102,Priya Nair,[PHONE_3],[EMAIL_4],[POLICY_NUM_4],[ID_1],in_en,grace_period\n\nCustomer Records Synthetic Pii Row 3\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_103,Juan Dela Cruz,+63 917 555 0192,[EMAIL_3],[POLICY_NUM_3],[ID_3],ph_tl,renewal_due\n\nCustomer Records Synthetic Pii Row 4\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_104,Budi Santoso,+62 812 3456 7890,[EMAIL_2],[POLICY_NUM_2],31[PHONE_2]001,id_id,overdue\n\nCustomer Records Synthetic Pii Row 5\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_105,Siti Rahayu,+62 856 7890 1234,[EMAIL_1],[POLICY_NUM_1],32[PHONE_1]003,id_id,active",
+    "content": "Customer Records Synthetic Pii Row 1\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_101,Aarav Patel,[PHONE_3],[EMAIL_5],[POLICY_NUM_5],[ID_2],in_en,active\n\nCustomer Records Synthetic Pii Row 2\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_102,Priya Nair,[PHONE_2],[EMAIL_4],[POLICY_NUM_4],[ID_1],in_en,grace_period\n\nCustomer Records Synthetic Pii Row 3\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_103,Juan Dela Cruz,[PHONE_1],[EMAIL_3],[POLICY_NUM_3],[ID_5],ph_tl,renewal_due\n\nCustomer Records Synthetic Pii Row 4\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_104,Budi Santoso,+62 812 3456 7890,[EMAIL_2],[POLICY_NUM_2],[ID_4],id_id,overdue\n\nCustomer Records Synthetic Pii Row 5\nColumns: customer_id,full_name,phone_number,email,policy_number,tax_id,market,status | Data: CUST_SYN_105,Siti Rahayu,+62 856 7890 1234,[EMAIL_1],[POLICY_NUM_1],[ID_3],id_id,active",
     "category": "qualification_rules",
     "category_path": "customer/synthetic_records",
     "market": "in_en",
@@ -17,14 +17,15 @@
     "duplicate_of": null,
     "pii": false,
     "pii_types": [
+      "NATIONAL_ID_PAN",
+      "NATIONAL_ID_NIK",
+      "NATIONAL_ID_TIN",
       "PHONE",
       "EMAIL",
-      "POLICY_NUM",
-      "NATIONAL_ID_PAN",
-      "NATIONAL_ID_TIN"
+      "POLICY_NUM"
     ],
     "confidence": 1.0,
-    "content_hash": "abb22a2b88fcd3458fd852d3effeef3a29a92286594a9e47226082669b8d22d9",
+    "content_hash": "eb35345de6de432671c3a2f4509d00a3abf1c53e791786bf6951cddd2b035693",
     "citation_display": "CRM Synthetic Customer Sample"
   },
   {
@@ -185,7 +186,7 @@
     "record_id": "kb_doc_website_faq",
     "kb_version": "v1.1",
     "title": "Frequently Asked Questions | Meridian Assure",
-    "content": "Frequently Asked Questions\nWhat is the Meridian Shield cashless hospitalisation process? Policyholders can obtain cashless hospital admission at over 8,500 network hospitals nationwide. Show your digital Meridian Health Card at the hospital TPA desk at least 48 hours prior to planned hospitalisation or within 24 hours of emergency admission. The pre-authorisation request is processed within 60 minutes. Statutory Notice IRDAI: Insurance is the subject matter of solicitation. Policy terms and conditions apply. IRDAI Reg No. 994. Can I add my parents to my existing health policy? Yes, senior citizen parents up to age 75 may be enrolled under the Meridian Family Floater Rider during the annual policy renewal window. A nominal medical screening test is mandatory for parents aged 60 and above. Who do I contact for customer grievances? You can contact our Principal Grievance Officer, Mr. Rajesh Sharma, at [EMAIL_6] or call customer desk [PHONE_4]. Policyholder escalations are resolved within 7 business days.\n\nWhat is the Meridian Shield cashless claim process?\nPolicyholders can obtain cashless hospital admission at over 8,500 network hospitals nationwide. Show your digital Meridian Health Card at the hospital TPA desk at least 48 hours prior to planned hospitalisation or within 24 hours of emergency admission. The pre-authorisation request is processed within 60 minutes.\n\nCan I add my parents to my existing health policy?\nYes, senior citizen parents up to age 75 may be enrolled under the Meridian Family Floater Rider during the annual policy renewal window. A nominal medical screening test is mandatory for parents aged 60 and above.\n\nWho do I contact for customer grievances?\nYou can contact our Principal Grievance Officer, Mr. Rajesh Sharma, at [EMAIL_6] or call customer desk [PHONE_4]. Policyholder escalations are resolved within 7 business days.",
+    "content": "Frequently Asked Questions\nWhat is the Meridian Shield cashless hospitalisation process? Policyholders can obtain cashless hospital admission at over 8,500 network hospitals nationwide. Show your digital Meridian Health Card at the hospital TPA desk at least 48 hours prior to planned hospitalisation or within 24 hours of emergency admission. The pre-authorisation request is processed within 60 minutes. Statutory Notice IRDAI: Insurance is the subject matter of solicitation. Policy terms and conditions apply. IRDAI Reg No. 994. Can I add my parents to my existing health policy? Yes, senior citizen parents up to age 75 may be enrolled under the Meridian Family Floater Rider during the annual policy renewal window. A nominal medical screening test is mandatory for parents aged 60 and above. Who do I contact for customer grievances? You can contact our Principal Grievance Officer, Mr. Rajesh Sharma, at [EMAIL_6] or call customer desk [PHONE_3]. Policyholder escalations are resolved within 7 business days.\n\nWhat is the Meridian Shield cashless claim process?\nPolicyholders can obtain cashless hospital admission at over 8,500 network hospitals nationwide. Show your digital Meridian Health Card at the hospital TPA desk at least 48 hours prior to planned hospitalisation or within 24 hours of emergency admission. The pre-authorisation request is processed within 60 minutes.\n\nCan I add my parents to my existing health policy?\nYes, senior citizen parents up to age 75 may be enrolled under the Meridian Family Floater Rider during the annual policy renewal window. A nominal medical screening test is mandatory for parents aged 60 and above.\n\nWho do I contact for customer grievances?\nYou can contact our Principal Grievance Officer, Mr. Rajesh Sharma, at [EMAIL_6] or call customer desk [PHONE_3]. Policyholder escalations are resolved within 7 business days.",
     "category": "faq",
     "category_path": "general/website_faq",
     "market": "in_en",
@@ -203,7 +204,7 @@
       "EMAIL"
     ],
     "confidence": 1.0,
-    "content_hash": "678f0daae09d8ed2d62604968157a84f704a65a0993640daa1bbd2cde893850e",
+    "content_hash": "f89c78342c319f4a109312ae2e8f9040860372844d655083fec6dbb465d2f2d8",
     "citation_display": "Website \u203a Frequently Asked Questions | Meridian Assure"
   },
   {
