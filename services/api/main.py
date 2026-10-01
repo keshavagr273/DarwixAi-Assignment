@@ -5,7 +5,7 @@ import uuid
 import json
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -540,3 +540,30 @@ def list_active_calls():
             for k, v in _CALL_SESSIONS.items()
         ]
     }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 5: Live Insights WebSockets
+# ─────────────────────────────────────────────────────────────────────────────
+from services.insights.engine import InsightsEngine
+_ENGINE = InsightsEngine()
+
+@app.websocket("/ws/nudges")
+async def websocket_nudges(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            turn = json.loads(data)
+            decisions = _ENGINE.process_turn(turn, {})
+            for decision in decisions:
+                if decision.action == "fired":
+                    await websocket.send_json({
+                        "id": decision.nudge.id,
+                        "type": decision.nudge.type,
+                        "title": decision.nudge.title,
+                        "text": decision.nudge.text,
+                        "priority": decision.nudge.priority,
+                        "reason": decision.nudge.reason
+                    })
+    except WebSocketDisconnect:
+        pass
