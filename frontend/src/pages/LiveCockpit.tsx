@@ -59,7 +59,9 @@ export const LiveCockpit: React.FC = () => {
   const isLiveMode = import.meta.env.VITE_API_MODE === 'live';
   useEffect(() => {
     if (!isLiveMode) return;
-    const ws = new WebSocket('ws://127.0.0.1:8000/ws/nudges');
+    const rawApiBase = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+    const wsBase = rawApiBase.replace(/^http(s?):\/\//i, 'ws$1://');
+    const ws = new WebSocket(`${wsBase}/ws/nudges`);
     ws.onmessage = (event) => {
       try {
         const nudgeData = JSON.parse(event.data);

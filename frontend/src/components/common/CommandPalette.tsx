@@ -9,6 +9,16 @@ export const CommandPalette: React.FC = () => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsCmdOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setIsCmdOpen]);
+
   if (!isCmdOpen) return null;
 
   const quickPages = [

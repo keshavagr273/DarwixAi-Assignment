@@ -29,7 +29,12 @@ from services.agent.market_loader import (
 from services.agent.system_prompt import build_system_prompt
 from services.agent.sentence_gate import get_gate
 
+import os
 import yaml
+from dotenv import load_dotenv
+
+# Load .env variables on startup
+load_dotenv()
 
 app = FastAPI(
     title="PARLEY Voice & Knowledge Operations Platform API",
@@ -37,13 +42,31 @@ app = FastAPI(
     description="Grounded, Multilingual Voice-Operations & Knowledge Base Platform API"
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Robust Production CORS Configuration:
+# - If CORS_ORIGINS is provided in .env (e.g. "https://app.domain.com,https://staging.domain.com"), restricts strictly to them.
+# - Otherwise, dynamically permits all HTTP/HTTPS origins (localhost, Vercel, Netlify, Cloudflare, etc.)
+#   using allow_origin_regex so credentials (allow_credentials=True) conform to W3C CORS standards.
+cors_origins_env = os.environ.get("CORS_ORIGINS", "").strip()
+if cors_origins_env and cors_origins_env != "*":
+    allowed_origins = [orig.strip() for orig in cors_origins_env.split(",") if orig.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[],
+        allow_origin_regex=r"^https?:\/\/.*$",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+    )
 
 class SearchRequest(BaseModel):
     query: str
@@ -976,3 +999,11 @@ async def websocket_live_session(websocket: WebSocket, session_id: str):
             })
     except WebSocketDisconnect:
         pass
+
+
+if __name__ == "__main__":
+    import uvicorn
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 8000))
+    print(f"Starting PARLEY API on {host}:{port}")
+    uvicorn.run("services.api.main:app", host=host, port=port, reload=False)

@@ -22,7 +22,8 @@ type BrowserSpeechRecognition = {
   onend: (() => void) | null;
 };
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1';
+const rawApiBase = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const API_BASE = rawApiBase.endsWith('/api/v1') ? rawApiBase : `${rawApiBase}/api/v1`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

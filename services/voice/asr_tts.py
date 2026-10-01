@@ -17,6 +17,9 @@ import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, List, Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # ─────────────────────────────────────────────────────────────────────────────

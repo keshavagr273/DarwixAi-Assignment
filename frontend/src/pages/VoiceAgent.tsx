@@ -315,14 +315,12 @@ export const VoiceAgent: React.FC = () => {
                 </div>
               )}
 
-              {callActive && (
-                <LiveWaveform
-                  isActive={callActive}
-                  isMuted={isMuted}
-                  onToggleMute={toggleMute}
-                  noiseLevelDb={26}
-                />
-              )}
+              <LiveWaveform
+                isActive={callActive}
+                isMuted={isMuted}
+                onToggleMute={toggleMute}
+                noiseLevelDb={callActive ? 26 : 0}
+              />
             </div>
 
             {/* Live Transcript Pane */}

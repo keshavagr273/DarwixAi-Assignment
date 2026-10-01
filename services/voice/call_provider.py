@@ -11,6 +11,7 @@ All providers conform to the CallProvider protocol defined below.
 """
 from __future__ import annotations
 
+import os
 import time
 import uuid
 import json
@@ -19,6 +20,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Callable
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Latency span
