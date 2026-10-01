@@ -1,25 +1,76 @@
-# Key Design Decisions
+# PARLEY — ARCHITECTURAL & TECHNICAL DECISIONS LOG
 
-## 1. Web Speech API for Local Voice Prototyping
-**What:** Using the browser's native `SpeechRecognition` and `SpeechSynthesis` instead of wiring up a full LiveKit+Deepgram pipeline for local dev.
-**Why:** Achieves sub-2000ms latency immediately, costs $0 to prototype, and eliminates complex WebRTC tunneling for reviewers.
-**Rejected:** Forcing reviewers to set up Ngrok and Twilio SIP trunks. Too fragile for an assignment.
+> Format: Context, Alternatives Considered, Decision, Rationale, Consequences / Rejection Reason.
 
-## 2. Sentence Gate "Fail-Closed" Mechanism
-**What:** The LLM's output is broken into sentences. Each sentence is independently verified against the retrieved context chunk. If it contains numbers/facts not in the chunk, the *entire* turn is blocked and replaced with a safe fallback.
-**Why:** In finance, a hallucinated interest rate is a legal liability. A slightly awkward fallback is always better than a convincing lie.
-**Rejected:** Prompt-only constraints (they eventually fail under jailbreaks or edge cases).
+---
 
-## 3. Hybrid RAG (Dense + BM25)
-**What:** Combining semantic embeddings with exact keyword matching (BM25) with a 0.70 / 0.30 weight ratio.
-**Why:** Users often search for exact policy names (e.g., "Term Plan X2") where dense embeddings might incorrectly return "Term Plan Y2" because they are semantically close. BM25 anchors specific nouns.
-**Rejected:** Pure vector search.
+## ADR 001: Vector Store & Storage Foundation
+- **Status:** Accepted
+- **Context:** The platform requires storing structured records, chunks, dense embeddings, BM25 full-text vectors, and operational telemetry (spans, nudges, calls) with low latency and relational integrity.
+- **Alternatives Considered:**
+  1. *Pinecone / Qdrant Cloud:* Pure vector search SaaS.
+  2. *ChromaDB:* Local embedded vector store.
+  3. *PostgreSQL 16 + pgvector:* Relational database with vector similarity extension.
+- **Decision:** **PostgreSQL 16 + pgvector** + Redis for streams/cooldowns.
+- **Rationale:**
+  - Complete co-location of relational metadata (`record_id`, `kb_version`, `pii_types`, `supersedes`) with high-dimensional chunk embeddings.
+  - Zero dual-write inconsistency between relational state and vector index.
+  - Support for HNSW index for sub-10ms approximate nearest neighbor queries, plus native GIN `tsvector` indexes for sparse search.
+  - Role-level security isolates `pii_vault` from the `retriever` DB role.
+- **Rejected Alternatives:**
+  - *ChromaDB:* Lacks transactional isolation, weak multi-attribute filtering, and no role-level row security.
+  - *Pinecone:* Proprietary SaaS with vendor lock-in and high variable cost for high-turn churn.
 
-## 4. Client-side Barge-in
-**What:** Canceling the TTS playback immediately when the user starts speaking (via VAD).
-**Why:** Feels vastly more natural than forcing the user to wait for the bot to finish its paragraph.
+---
 
-## 5. Duplicate Suppression via Lexicon and Cooldowns
-**What:** Nudges (insights) use strict 15-second cooldowns per topic and require a confidence threshold.
-**Why:** A supervisor dashboard flashing 5 times because a customer stuttered "manager... um... manager" is useless.
-**Rejected:** Sending every LLM classification raw.
+## ADR 002: Knowledge Base Hybrid Retrieval & Re-ranking Architecture
+- **Status:** Accepted
+- **Context:** An AI voice agent and human assistant cannot hallucinate financial numbers, grace periods, or interest rates. Dense vector search alone suffers from vocabulary mismatch and exact keyword blindness (e.g. policy IDs, specific numbers, and exact acronyms like "IRDAI" or "OJK").
+- **Alternatives Considered:**
+  1. *Dense-only vector search (Cosine top-k)*.
+  2. *BM25 Keyword search only*.
+  3. *Hybrid Dense (BGE-M3) + Sparse (BM25) with Reciprocal Rank Fusion (RRF) and Cross-Encoder Re-ranking*.
+- **Decision:** **Hybrid Dense + Sparse with RRF, Cross-Encoder Re-ranking, and strict Threshold Gating**.
+- **Rationale:**
+  - BM25 accurately matches exact product codes, fee amounts, and statutory identifiers.
+  - Multilingual dense embeddings (`BGE-M3`) capture semantic intent across mixed English, Taglish, and colloquial Bahasa.
+  - RRF normalizes score distributions across dense and sparse retrievals without manual weight tuning.
+  - A multilingual cross-encoder reranker scores question-context entailment.
+  - **Threshold Gate (`min_rerank_score = 0.55`):** If no candidate exceeds the confidence margin, the system returns `NO_MATCH` rather than a weak hallucinated guess.
+- **Consequences:**
+  - Slightly higher compute budget (~35ms rerank step), comfortably within the 400ms retrieval latency budget.
+
+---
+
+## ADR 003: Grounding & Sentence Gate (Fail-Closed Architecture)
+- **Status:** Accepted
+- **Context:** Large Language Models can hallucinate even when supplied with relevant context. We need deterministic guarantees that every spoken factual claim has proof.
+- **Alternatives Considered:**
+  1. *Prompt Engineering alone ("Only answer using the context provided")*.
+  2. *Post-call LLM Evaluation (detecting hallucinations after the user heard them)*.
+  3. *Pre-TTS Sentence Gate with Natural Language Inference (NLI) + Exact Match checks*.
+- **Decision:** **Pre-TTS Fail-Closed Sentence Gate**.
+- **Rationale:**
+  - Every response is parsed into discrete sentences before synthesis.
+  - Non-factual sentences (greetings, acknowledgments) pass through immediately.
+  - Factual statements are verified against retrieved chunks using numerical/date regex equality and entailment checks.
+  - If verified, the sentence is tagged with its citation `[record_id@version · source]` and forwarded to TTS.
+  - If unsupported, the sentence is blocked and replaced by a localized "I don't have that information" fallback.
+  - If the verifier service times out or errors, the gate fails closed (blocks the claim).
+- **Rejected Alternatives:**
+  - *Prompt-only:* Empirically suffers from a 2–6% hallucination rate under adversarial prompting. Unacceptable in regulated insurance/banking operations.
+
+---
+
+## ADR 004: Multilingual Voice Architecture & Market Pack Pattern
+- **Status:** Accepted
+- **Context:** The platform serves India (`in_en`), Philippines (`ph_tl`), and Indonesia (`id_id`). Hardcoding branching logic (`if market == 'ph': ...`) causes maintainability debt.
+- **Alternatives Considered:**
+  1. *Single monolithic prompt with instructions for all 3 markets*.
+  2. *Separate microservice codebases per country*.
+  3. *Market Pack Plugin Architecture (data-driven configuration)*.
+- **Decision:** **Market Pack Plugin Architecture**.
+- **Rationale:**
+  - Core "Due-Date Conversation Engine" finite-state machine is universal: identify → purpose → status → qualify → handle objection → commit → close.
+  - All market-specific assets (prompts, register rules, honorific rules "po/opo", glossary synonyms, fallback phrases, ASR acoustic profiles, and TTS voice IDs) reside in `market_packs/{market_id}/`.
+  - Adding a new country or language requires zero modifications to the core engine.
