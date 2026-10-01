@@ -1,0 +1,8 @@
+market,provider,accent,wer_estimate,notes
+ph_tl,Google STT (fil-PH),Metro Manila,15%,Good handling of basic Taglish
+ph_tl,Google STT (fil-PH),Regional,22%,Higher WER on heavy English mixing
+ph_tl,Deepgram Nova-2,en-PH fallback,35%,Loses pure Tagalog recognition entirely
+id_id,Google STT (id-ID),Jakarta Standard,12%,Excellent standard recognition
+id_id,Google STT (id-ID),Javanese Accent,20%,"d/dh confusion, vowel shifts"
+id_id,Google STT (id-ID),Sundanese Accent,25%,Vowel shift impacts
+id_id,Deepgram Nova-2,id-ID beta,14%,Competitive but lacks production track record

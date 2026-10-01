@@ -1,0 +1,105 @@
+{
+  "call_id": "call_ph_01",
+  "scenario": "ph_cooperative",
+  "market": "ph_tl",
+  "duration_s": 136.8,
+  "language": "fil-PH",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "fil-PH-Wavenet-A",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Magandang araw po! Ako po si Maria mula sa SecureLife Insurance. Kausap ko po ba si Jose Rizal?",
+      "tts_duration_ms": 7200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Opo, ako nga po.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.888
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "Ang tawag na ito ay maaaring i-record para sa kalidad at pagsunod sa regulasyon.",
+      "tts_duration_ms": 5600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Sige lang.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.855
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "Maaari po ba ninyong sabihin ang inyong edad?",
+      "tts_duration_ms": 3200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "Ako ay 30 years old.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.973
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "At ano po ang inyong taunang kita?",
+      "tts_duration_ms": 2800.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 8,
+      "speaker": "customer",
+      "text": "Mga 500 thousand pesos.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.906
+    },
+    {
+      "turn": 9,
+      "speaker": "agent",
+      "text": "Salamat po. Mayroon po kaming magandang term plan. Ang grace period para sa premium ay 30 days.",
+      "tts_duration_ms": 6800.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 10,
+      "speaker": "customer",
+      "text": "Sounds good. Interested ako diyan.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.933
+    },
+    {
+      "turn": 11,
+      "speaker": "agent",
+      "text": "Mabuti po! Maaari ko po bang makuha ang inyong phone number?",
+      "tts_duration_ms": 4400.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 12,
+      "speaker": "customer",
+      "text": "09171234567 po.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.922
+    },
+    {
+      "turn": 13,
+      "speaker": "agent",
+      "text": "Maraming salamat po, Sir Jose! Magandang araw po. Ito ay isang marketing communication mula sa SecureLife Insurance.",
+      "tts_duration_ms": 6800.0,
+      "asr_confidence": null
+    }
+  ]
+}

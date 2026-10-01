@@ -1,0 +1,7 @@
+{
+  "report_id": "drift_report_01",
+  "total_calls_analyzed": 4,
+  "total_drift_events": 0,
+  "events": [],
+  "gate_4_passed": true
+}

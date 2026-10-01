@@ -1,0 +1,105 @@
+{
+  "call_id": "call_id_01",
+  "scenario": "id_cooperative",
+  "market": "id_id",
+  "duration_s": 107.9,
+  "language": "id-ID",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "id-ID-Wavenet-A",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Selamat siang! Perkenalkan, saya Sari dari SecureLife Insurance. Apakah benar saya berbicara dengan Bapak Budi?",
+      "tts_duration_ms": 6000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Iya benar.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.947
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "Pembicaraan ini mungkin direkam untuk keperluan kualitas dan kepatuhan.",
+      "tts_duration_ms": 3600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Baiklah.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.822
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "Boleh saya tahu usia Bapak?",
+      "tts_duration_ms": 2000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "Umur saya 35 tahun.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.893
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "Dan kira-kira berapa penghasilan tahunan Bapak?",
+      "tts_duration_ms": 2400.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 8,
+      "speaker": "customer",
+      "text": "Sekitar seratus juta.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.868
+    },
+    {
+      "turn": 9,
+      "speaker": "agent",
+      "text": "Terima kasih, Bapak. Kami memiliki asuransi jiwa dengan masa tenggang pembayaran premi selama 30 hari.",
+      "tts_duration_ms": 6000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 10,
+      "speaker": "customer",
+      "text": "Bagus, saya tertarik.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.82
+    },
+    {
+      "turn": 11,
+      "speaker": "agent",
+      "text": "Luar biasa! Boleh saya catat nomor telepon Bapak?",
+      "tts_duration_ms": 3200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 12,
+      "speaker": "customer",
+      "text": "08123456789.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.96
+    },
+    {
+      "turn": 13,
+      "speaker": "agent",
+      "text": "Terima kasih banyak, Bapak Budi! Semoga harimu menyenangkan! Ini adalah komunikasi pemasaran dari SecureLife Insurance.",
+      "tts_duration_ms": 6000.0,
+      "asr_confidence": null
+    }
+  ]
+}

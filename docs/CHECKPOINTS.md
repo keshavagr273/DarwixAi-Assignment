@@ -114,32 +114,32 @@
 ## PHASE 4 — Native-Language Bots Q3 (Hours 30–38)
 
 ### 4A. Philippines (`ph_tl`)
-- ☐ Pack complete: persona (po/opo, sir/ma'am), glossary (premium, policy, beneficiary, rider, lapse, coverage, bank referral), fallbacks, disclosures, formats
-- ☐ ASR: ≥ 2 providers tried; phrase boosting configured; code-switching behavior documented
-- ☐ TTS: Filipino voice selected; SSML and loanword pronunciation overrides; compromises documented
-- ☐ ≥ 5 localization examples (literal translation vs localized, with reason)
-- ☐ 2 recorded calls covering: cooperative, sector-specific objection, mixed English finance terms, colloquial speech, human escalation
+- ☑ Pack complete: persona (po/opo, sir/ma'am), glossary (premium, policy, beneficiary, rider, lapse, coverage, bank referral), fallbacks, disclosures, formats
+- ☑ ASR: ≥ 2 providers tried; phrase boosting configured; code-switching behavior documented
+- ☑ TTS: Filipino voice selected; SSML and loanword pronunciation overrides; compromises documented
+- ☑ ≥ 5 localization examples (literal translation vs localized, with reason)
+- ☑ 2 recorded calls covering: cooperative, sector-specific objection, mixed English finance terms, colloquial speech, human escalation
 
 ### 4B. Indonesia (`id_id`)
-- ☐ Pack complete: Bapak/Ibu/Kak, formal vs colloquial rules, glossary (cicilan, tenor, denda, DP, jatuh tempo, angsuran, pembiayaan), fallbacks, collections-conduct rules (no threats, no third-party disclosure)
-- ☐ ASR: ≥ 2 providers tried; numerals/amount parsing ("tiga juta lima ratus", "3,5 jt") tested
-- ☐ Regional accent test set (≥ 3 minutes, provenance documented) vs standard Jakarta speech; errors catalogued
-- ☐ TTS: Indonesian voice; SSML for amounts/dates; compromises documented
-- ☐ ≥ 5 localization examples
-- ☐ 2 recorded calls covering: cooperative, objection, mixed finance English, colloquial, human escalation, regional accent
+- ☑ Pack complete: Bapak/Ibu/Kak, formal vs colloquial rules, glossary (cicilan, tenor, denda, DP, jatuh tempo, angsuran, pembiayaan), fallbacks, collections-conduct rules (no threats, no third-party disclosure)
+- ☑ ASR: ≥ 2 providers tried; numerals/amount parsing ("tiga juta lima ratus", "3,5 jt") tested
+- ☑ Regional accent test set (≥ 3 minutes, provenance documented) vs standard Jakarta speech; errors catalogued
+- ☑ TTS: Indonesian voice; SSML for amounts/dates; compromises documented
+- ☑ ≥ 5 localization examples
+- ☑ 2 recorded calls covering: cooperative, objection, mixed finance English, colloquial, human escalation, regional accent
 
 ### 4C. Shared
-- ☐ Language Router outputs `lang_mix` and `formality` per turn
-- ☐ Language Lock + drift detector implemented and run on all PH/ID transcripts
-- ☐ `docs/ASR_TTS_REPORT.md`: provider/model, languages tested, code-switching behavior, approximate quality (with sample size), observed errors, accent performance, latency, cost, choice and rationale
-- ☐ `docs/LOCALIZATION.md`: all examples, terminology, register rules, comparison between markets
-- ☐ Known native-speaker and compliance gaps listed
+- ☑ Language Router outputs `lang_mix` and `formality` per turn — `services/agent/language_router.py`
+- ☑ Language Lock + drift detector implemented and run on all PH/ID transcripts — `DriftDetector`
+- ☑ `docs/ASR_TTS_REPORT.md`: provider/model, languages tested, code-switching behavior, approximate quality (with sample size), observed errors, accent performance, latency, cost, choice and rationale
+- ☑ `docs/LOCALIZATION.md`: all examples, terminology, register rules, comparison between markets
+- ☑ Known native-speaker and compliance gaps listed
 
-🔒 **GATE 4:**
-- ☐ 4 recorded calls (2 per market) + transcripts
-- ☐ 0 unexpected English switches in fallback/escalation turns (drift report)
-- ☐ Accent observations documented with numbers and caveats
-- ☐ Fallback phrases verified in-language for both markets
+🔒 **GATE 4 (PASSED):**
+- ☑ 4 recorded calls (2 per market) + transcripts — `call_ph_01`, `call_ph_02`, `call_id_01`, `call_id_02`
+- ☑ 0 unexpected English switches in fallback/escalation turns (drift report) — 0 drift events reported
+- ☑ Accent observations documented with numbers and caveats
+- ☑ Fallback phrases verified in-language for both markets
 
 🧪 Evidence: `data/calls/ph_*`, `data/calls/id_*`, drift report, ASR bench CSV.
 

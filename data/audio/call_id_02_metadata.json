@@ -1,0 +1,77 @@
+{
+  "call_id": "call_id_02",
+  "scenario": "id_regional_accent",
+  "market": "id_id",
+  "duration_s": 70.3,
+  "language": "id-ID",
+  "asr_provider": "Mock (Web Speech API in production demo)",
+  "tts_provider": "Mock (Google WaveNet in production demo)",
+  "voice": "id-ID-Wavenet-A",
+  "audio_format": "mp3 (production) / browser AudioContext (demo)",
+  "note": "No real audio file: production audio is streamed via LiveKit rooms. Demo uses browser Web Speech API for real-time TTS/ASR. This metadata file represents the call session.",
+  "turns": [
+    {
+      "turn": 1,
+      "speaker": "agent",
+      "text": "Selamat siang! Perkenalkan, saya Sari dari SecureLife Insurance. Apakah benar saya berbicara dengan Ibu Kartini?",
+      "tts_duration_ms": 6000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 2,
+      "speaker": "customer",
+      "text": "Iya, ndak salah.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.862
+    },
+    {
+      "turn": 3,
+      "speaker": "agent",
+      "text": "Pembicaraan ini mungkin direkam untuk keperluan kualitas dan kepatuhan.",
+      "tts_duration_ms": 3600.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 4,
+      "speaker": "customer",
+      "text": "Yo wis, monggo.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.979
+    },
+    {
+      "turn": 5,
+      "speaker": "agent",
+      "text": "Boleh saya tahu usia Ibu?",
+      "tts_duration_ms": 2000.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 6,
+      "speaker": "customer",
+      "text": "Telung puluh... eh tiga puluh tahun.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.857
+    },
+    {
+      "turn": 7,
+      "speaker": "agent",
+      "text": "Terima kasih. Kami punya penawaran polis yang bagus.",
+      "tts_duration_ms": 3200.0,
+      "asr_confidence": null
+    },
+    {
+      "turn": 8,
+      "speaker": "customer",
+      "text": "Cicilannya pasti mahal. Mboten riyen, saya nggak tertarik.",
+      "tts_duration_ms": null,
+      "asr_confidence": 0.858
+    },
+    {
+      "turn": 9,
+      "speaker": "agent",
+      "text": "Saya mengerti, Ibu Kartini. Terima kasih atas waktunya. Selamat siang! Ini adalah komunikasi pemasaran dari SecureLife Insurance.",
+      "tts_duration_ms": 6800.0,
+      "asr_confidence": null
+    }
+  ]
+}
