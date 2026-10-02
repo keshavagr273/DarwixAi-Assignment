@@ -8,7 +8,6 @@ import { CommandPalette } from './components/common/CommandPalette';
 
 // Pages
 import { MissionControl } from './pages/MissionControl';
-import { LiveCockpit } from './pages/LiveCockpit';
 import { KbStudio } from './pages/KbStudio';
 import { RetrievalLab } from './pages/RetrievalLab';
 import { VoiceAgent } from './pages/VoiceAgent';
@@ -39,7 +38,6 @@ const AppLayout: React.FC = () => {
 
           <Routes>
             <Route path="/" element={<MissionControl />} />
-            <Route path="/live" element={<LiveCockpit />} />
             <Route path="/kb" element={<KbStudio />} />
             <Route path="/retrieval" element={<RetrievalLab />} />
             <Route path="/agent" element={<VoiceAgent />} />

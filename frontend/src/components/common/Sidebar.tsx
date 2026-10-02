@@ -33,7 +33,6 @@ const navGroups: NavGroup[] = [
     label: 'Operations',
     items: [
       { name: 'Mission Control', path: '/', icon: LayoutDashboard },
-      { name: 'Live Copilot', path: '/live', icon: Zap },
       { name: 'Voice Studio', path: '/agent', icon: Bot },
     ],
   },

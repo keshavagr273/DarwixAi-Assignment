@@ -53,8 +53,8 @@ export const SentenceGateStrip: React.FC<SentenceGateStripProps> = ({ gate }) =>
 
       {/* Row 2: Grounding Citation Row for Verified Turns */}
       {isVerified && gate.receipt && (
-        <div className="pt-1.5 border-t border-[#1F293D]/50 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-300 min-w-0 flex-1">
+        <div className="pt-1.5 border-t border-[#1F293D]/50 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-300 min-w-0">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span className="font-medium text-slate-300 shrink-0">Grounding Citation:</span>
             {gate.receipt.source_title && (
@@ -105,8 +105,8 @@ export const SentenceGateStrip: React.FC<SentenceGateStripProps> = ({ gate }) =>
           )}
 
           {gate.receipt && (
-            <div className="pt-2 border-t border-rose-500/20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 min-w-0">
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-300 min-w-0 flex-1">
+            <div className="pt-2 border-t border-rose-500/20 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-300 min-w-0">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span className="font-medium text-slate-300 shrink-0">Canonical Policy Citation:</span>
                 {gate.receipt.source_title && (
