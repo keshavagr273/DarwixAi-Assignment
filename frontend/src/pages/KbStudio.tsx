@@ -240,7 +240,7 @@ export const KbStudio: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-9 gap-3 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-2.5 text-xs">
             {[
               { num: '01', name: 'Fetch', inCount: '6 files', outCount: '6 raw blobs', delta: '100% fetched' },
               { num: '02', name: 'Parse', inCount: '6 blobs', outCount: '5 parsed, 1 bad', delta: '83% yield' },
@@ -254,22 +254,22 @@ export const KbStudio: React.FC = () => {
             ].map((stage) => (
               <div
                 key={stage.num}
-                className="p-3.5 bg-[#141C30] border border-[#1F293D] rounded-xl flex flex-col justify-between space-y-3 hover:border-indigo-500/40 transition-colors"
+                className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl flex flex-col justify-between space-y-2.5 hover:border-indigo-500/40 transition-colors min-w-0 overflow-hidden"
               >
-                <div>
+                <div className="min-w-0">
                   <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono">
-                    <span>STAGE {stage.num}</span>
-                    <span className="text-emerald-400">✓</span>
+                    <span className="truncate">STAGE {stage.num}</span>
+                    <span className="text-emerald-400 shrink-0 ml-1">✓</span>
                   </div>
-                  <div className="font-semibold text-sm text-white mt-1">
+                  <div className="font-semibold text-xs sm:text-[13px] text-white mt-1 truncate" title={stage.name}>
                     {stage.name}
                   </div>
                 </div>
 
-                <div className="text-[11px] space-y-0.5 text-slate-400 border-t border-[#1F293D] pt-2">
-                  <div>In: <span className="text-slate-200">{stage.inCount}</span></div>
-                  <div>Out: <span className="text-slate-200">{stage.outCount}</span></div>
-                  <div className="text-[10px] text-emerald-400 font-mono font-medium">{stage.delta}</div>
+                <div className="text-[10px] space-y-0.5 text-slate-400 border-t border-[#1F293D] pt-2 min-w-0">
+                  <div className="truncate">In: <span className="text-slate-200">{stage.inCount}</span></div>
+                  <div className="truncate">Out: <span className="text-slate-200">{stage.outCount}</span></div>
+                  <div className="text-[9px] text-emerald-400 font-mono font-medium truncate">{stage.delta}</div>
                 </div>
               </div>
             ))}
