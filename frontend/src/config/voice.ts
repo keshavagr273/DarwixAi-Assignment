@@ -5,7 +5,7 @@
 
 export const ELEVENLABS_API_KEY = (import.meta.env.VITE_ELEVENLABS_API_KEY as string) ||
   (import.meta.env.ELEVENLABS_API_KEY as string) ||
-  'sk_d91b75c197487c97b49940bb916d3e0dec420f2ed0d3d76a';
+  '';
 
 // ElevenLabs premade voice IDs for free tier accounts:
 // India (en-IN): Sarah — fluent multilingual Hindi & Indian English
