@@ -629,7 +629,34 @@ async def process_voice_turn(call_session_id: str, req: TurnInputRequest):
     retrieval_latency_ms = retrieve_result["latency_ms"]
 
     # ── 3. Response generation (Groq LLM or fallback) ─────────────────────
-    if retrieve_result["is_refusal"]:
+    action_texts = []
+    if dialogue.get("actions"):
+        from services.agent.market_loader import load_pack, get_disclosures
+        pack = load_pack(market)
+        disclosures = get_disclosures(market)
+        for action in dialogue["actions"]:
+            if "speak" in action:
+                speak_key = action["speak"]
+                if speak_key == "opener":
+                    action_texts.append(pack.get("persona", {}).get("opener", "").replace("{customer_name}", ""))
+                elif speak_key == "mandatory_opener_disclosure":
+                    action_texts.append(disclosures.get("mandatory_opener", ""))
+                elif speak_key == "mandatory_closer_disclosure":
+                    action_texts.append(disclosures.get("mandatory_closer", ""))
+                elif speak_key == "closer":
+                    action_texts.append(pack.get("persona", {}).get("closer", ""))
+
+    if action_texts:
+        draft_response = " ".join([t for t in action_texts if t])
+        
+        # Add acknowledgement if the user confirmed their name
+        if intent == "name_confirmed":
+            ack = {"in_en": "Thank you for confirming. ", "ph_tl": "Salamat po. ", "id_id": "Terima kasih. "}
+            draft_response = ack.get(market, "Thank you. ") + draft_response
+
+        llm_used = False
+        llm_latency_ms = 0.0
+    elif retrieve_result["is_refusal"] and intent in ["question_asked", "product_inquiry", "faq_question", "objection_raised", "objection"]:
         with open(FALLBACKS_PATH, encoding="utf-8") as f:
             draft_response = yaml.safe_load(f)[market]["unavailable_info_fallback"][0]
         llm_used = False

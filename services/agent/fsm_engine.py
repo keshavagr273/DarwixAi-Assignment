@@ -94,6 +94,9 @@ class DialogueFSM:
                 return "human_request"
 
         # Intent patterns
+        if self.session.current_state == "GREETING" and re.search(r"(yes|speaking|this is he|this is she|correct|right|haan|ji|ako nga|totoo|benar|betul|saya sendiri|i am|it is me)", text):
+            return "name_confirmed"
+
         if re.search(r"not interested|no thank|don.t (want|need)|not now", text):
             return "not_interested"
         if re.search(r"call.?back|call me (later|again|back)|another time", text):
