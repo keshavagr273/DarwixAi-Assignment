@@ -128,8 +128,19 @@ CRM_LOG_PATH = ROOT_DIR / "data" / "crm" / "leads.jsonl"
 CALLBACK_LOG_PATH = ROOT_DIR / "data" / "crm" / "callbacks.jsonl"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Phase 1: Health + Retrieval + KB endpoints
+# Root & Health endpoints
 # ─────────────────────────────────────────────────────────────────────────────
+
+@app.get("/")
+@app.head("/")
+async def root():
+    return {
+        "service": "parley-api",
+        "status": "healthy",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "health": "/api/v1/health"
+    }
 
 @app.get("/api/v1/health")
 async def health():

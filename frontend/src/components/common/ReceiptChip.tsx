@@ -26,10 +26,10 @@ export const ReceiptChip: React.FC<ReceiptChipProps> = ({ receipt, unsupported }
     <button
       onClick={() => openReceipt({ ...receipt, version: activeVersion })}
       title="Click to inspect Grounding Receipt & Source Lineage"
-      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-mono font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/40 rounded-lg transition-all text-left shadow-sm"
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/25 hover:border-emerald-500/40 rounded-lg transition-colors text-left shadow-sm max-w-full"
     >
       <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
-      <span>
+      <span className="truncate">
         {receipt.record_id} · {activeVersion} · {receipt.score.toFixed(2)}
       </span>
     </button>

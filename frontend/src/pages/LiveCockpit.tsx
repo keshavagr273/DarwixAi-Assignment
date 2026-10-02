@@ -317,12 +317,13 @@ export const LiveCockpit: React.FC = () => {
             <Zap className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="font-heading text-lg font-bold text-white tracking-tight">
                 Live Agent Copilot & Nudge Court
               </h1>
-              <span className="text-[11px] font-medium px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-mono">
-                {isLiveMode ? 'Live Telephony Stream' : 'Streaming Replay · 60 FPS'}
+              <span className="text-[11px] font-medium px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg font-mono whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span>{isLiveMode ? 'Live Telephony Stream' : 'Streaming Replay · 60 FPS'}</span>
               </span>
             </div>
             <p className="text-xs text-slate-300 mt-1 flex items-center gap-2 flex-wrap">

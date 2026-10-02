@@ -53,17 +53,17 @@ export const SentenceGateStrip: React.FC<SentenceGateStripProps> = ({ gate }) =>
 
       {/* Row 2: Grounding Citation Row for Verified Turns */}
       {isVerified && gate.receipt && (
-        <div className="pt-1.5 border-t border-[#1F293D]/50 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-300">
+        <div className="pt-1.5 border-t border-[#1F293D]/50 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-300 min-w-0 flex-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="font-medium text-slate-300">Grounding Citation:</span>
+            <span className="font-medium text-slate-300 shrink-0">Grounding Citation:</span>
             {gate.receipt.source_title && (
-              <span className="text-slate-400 font-normal truncate max-w-[240px] hidden sm:inline">
+              <span className="text-slate-400 font-normal truncate max-w-[200px] hidden md:inline">
                 {gate.receipt.source_title}
               </span>
             )}
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 max-w-full">
             <ReceiptChip receipt={gate.receipt} />
           </div>
         </div>
@@ -105,17 +105,17 @@ export const SentenceGateStrip: React.FC<SentenceGateStripProps> = ({ gate }) =>
           )}
 
           {gate.receipt && (
-            <div className="pt-2 border-t border-rose-500/20 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-300">
+            <div className="pt-2 border-t border-rose-500/20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-300 min-w-0 flex-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="font-medium text-slate-300">Canonical Policy Citation:</span>
+                <span className="font-medium text-slate-300 shrink-0">Canonical Policy Citation:</span>
                 {gate.receipt.source_title && (
-                  <span className="text-slate-400 font-normal truncate max-w-[220px] hidden sm:inline">
+                  <span className="text-slate-400 font-normal truncate max-w-[200px] hidden md:inline">
                     {gate.receipt.source_title}
                   </span>
                 )}
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 max-w-full">
                 <ReceiptChip receipt={gate.receipt} />
               </div>
             </div>
