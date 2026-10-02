@@ -77,7 +77,7 @@ const initialState: CallState = {
 // ── Language codes ────────────────────────────────────────────────────────────
 
 const MARKET_LANG: Record<string, string> = {
-  in_en: 'en-IN', ph_tl: 'fil-PH', id_id: 'id-ID',
+  in_en: 'en-US', ph_tl: 'fil-PH', id_id: 'id-ID',
 };
 
 const PERSONA_NAME: Record<string, string> = {

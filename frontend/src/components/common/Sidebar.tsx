@@ -55,7 +55,7 @@ const navGroups: NavGroup[] = [
     label: 'Observability',
     items: [
       { name: 'Call Library', path: '/calls', icon: PhoneCall },
-      { name: 'Evaluation', path: '/evaluation', icon: BarChart3 },
+
       { name: 'Architecture', path: '/architecture', icon: Layers },
       { name: 'Compliance & Gaps', path: '/gaps', icon: AlertTriangle },
       { name: 'Product Tour', path: '/demo', icon: PlaySquare },

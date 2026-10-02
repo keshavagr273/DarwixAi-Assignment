@@ -16,7 +16,7 @@ import { MarketPacks } from './pages/MarketPacks';
 import { AsrBench } from './pages/AsrBench';
 import { CallLibrary } from './pages/CallLibrary';
 import { CallBlackBox } from './pages/CallBlackBox';
-import { Evaluation } from './pages/Evaluation';
+
 import { Architecture } from './pages/Architecture';
 import { DemoStory } from './pages/DemoStory';
 import { GapsCompliance } from './pages/GapsCompliance';
@@ -50,7 +50,7 @@ const AppLayout: React.FC = () => {
             <Route path="/asr" element={<AsrBench />} />
             <Route path="/calls" element={<CallLibrary />} />
             <Route path="/trace/:traceId" element={<CallBlackBox />} />
-            <Route path="/evaluation" element={<Evaluation />} />
+
             <Route path="/architecture" element={<Architecture />} />
             <Route path="/demo" element={<DemoStory />} />
             <Route path="/gaps" element={<GapsCompliance />} />
