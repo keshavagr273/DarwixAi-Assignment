@@ -96,6 +96,8 @@ class DialogueFSM:
         # Intent patterns
         if self.session.current_state == "GREETING" and re.search(r"(yes|speaking|this is he|this is she|correct|right|haan|ji|ako nga|totoo|benar|betul|saya sendiri|i am|it is me)", text):
             return "name_confirmed"
+        if self.session.current_state == "COMPLIANCE_DISCLOSURE" and re.search(r"(ok|okay|sure|go on|proceed|no issue|yes|alright|fine|continue|yeah)", text):
+            return "disclosure_acknowledged"
 
         if re.search(r"not interested|no thank|don.t (want|need)|not now", text):
             return "not_interested"
