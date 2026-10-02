@@ -3,7 +3,8 @@
   <h1 align="center">PARLEY</h1>
   <p align="center">
     <strong>Enterprise-Grade Grounded Voice Operations Platform & Real-Time Agent Guidance Cockpit</strong><br/>
-    <em>Deterministic Dialogue FSM, Fail-Closed Pre-TTS Sentence Gate, 9-Stage KB Ingestion Pipeline, Native Taglish & Bahasa Voice Bots, and Real-Time Live Nudges.</em>
+    <em>Deterministic Dialogue FSM, Fail-Closed Pre-TTS Sentence Gate, 9-Stage KB Ingestion Pipeline, Native Taglish & Bahasa Voice Bots, and Real-Time Live Nudges.</em><br/><br/>
+    <strong>🎥 <a href="https://drive.google.com/file/d/18TUbrg9GQvr16nUzXsqxZA_9d1FsC9dM/view?usp=sharing">Watch the Video Demo / Recording</a></strong>
   </p>
   <p align="center">
     <a href="#-quick-start"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python"></a>
