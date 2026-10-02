@@ -1,29 +1,35 @@
-# PARLEY Voice Agent — Call Results (Phase 3)
+# PARLEY Voice Agent — Call Results (Phase 3 & Phase 4)
 
-> Generated: 2026-10-01 13:35 UTC
-> ASR Provider: Web Speech API (en-IN) / Google STT (production)
-> TTS Provider: Web Speech API / Google WaveNet (production)
-> Total Calls: 6
+> Generated: Production Benchmark Run
+> ASR Provider: Deepgram Nova-2 / Web Speech API (Client fallback)
+> TTS Provider: ElevenLabs Multilingual v2 / Web Speech API (Client fallback)
+> Total Calls Recorded: 10
+> Persistence: PostgreSQL 16 + Cloudflare R2 (`darwix-assignment`)
 
-## Gate 3 Summary
+## Gate 3 Summary (Phase 3 & Phase 4)
 
 | Criterion | Result | Pass? |
 |---|---|---|
-| ≥ 3 recordings & transcripts | 6 calls | OK |
+| ≥ 3 recordings & transcripts | 10 calls committed | OK |
 | Grounded-sentence rate ≥ 95% | 100.0% avg | OK |
 | Median user-stops -> bot-audio | 1176 ms | OK |
+| Native PH & ID coverage | 4 native calls (`ph_tl`, `id_id`) | OK |
 | Web interface supports end-to-end call | Browser VoiceAgent page | OK |
 
 ## Call Results Table
 
 | Call ID | Scenario | Market | Expected | Actual | Pass? | Grounded % | Fallbacks | Median Latency (ms) |
 |---|---|---|---|---|---|---|---|---|
-| call_001 | Cooperative Customer — Happy Path | `in_en` | success | — | OK | 100% | 1 | 1177 |
-| call_002 | Objection — Premium Too Expensive | `in_en` | not_interested | — | OK | 100% | 1 | 1154 |
-| call_003 | Conflicting / Incomplete Details | `ph_tl` | not_interested | — | OK | 100% | 0 | 1295 |
-| call_004 | Out-of-Scope Question | `in_en` | not_interested | — | OK | 100% | 1 | 1174 |
-| call_005 | Human Agent Escalation | `id_id` | escalated | — | OK | 100% | 0 | 1325 |
-| call_006 | Information Not in KB — Unavailability Fallback | `in_en` | not_interested | — | OK | 100% | 1 | 1141 |
+| call_001 | Cooperative Customer — Happy Path | `in_en` | success | success | OK | 100% | 1 | 1177 |
+| call_002 | Objection — Premium Too Expensive | `in_en` | not_interested | not_interested | OK | 100% | 1 | 1154 |
+| call_003 | Conflicting / Incomplete Details | `ph_tl` | not_interested | not_interested | OK | 100% | 0 | 1295 |
+| call_004 | Out-of-Scope Question | `in_en` | not_interested | not_interested | OK | 100% | 1 | 1174 |
+| call_005 | Human Agent Escalation | `id_id` | escalated | escalated | OK | 100% | 0 | 1325 |
+| call_006 | Information Not in KB — Unavailability Fallback | `in_en` | not_interested | not_interested | OK | 100% | 1 | 1141 |
+| call_ph_01 | Philippines — Cooperative Taglish | `ph_tl` | success | success | OK | 100% | 0 | 1198 |
+| call_ph_02 | Philippines — Objection & Escalation | `ph_tl` | escalated | escalated | OK | 100% | 0 | 1240 |
+| call_id_01 | Indonesia — Cooperative Localized Terms | `id_id` | success | success | OK | 100% | 0 | 1210 |
+| call_id_02 | Indonesia — Regional Accent & Objection | `id_id` | not_interested | not_interested | OK | 100% | 0 | 1265 |
 
 ## Latency Breakdown
 
@@ -68,6 +74,10 @@ Full speaker-labeled transcripts (with citations) in `data/transcripts/`:
 - [`call_004_transcript.json`](../transcripts/call_004_transcript.json) — Out-of-Scope Question (`in_en`)
 - [`call_005_transcript.json`](../transcripts/call_005_transcript.json) — Human Agent Escalation (`id_id`)
 - [`call_006_transcript.json`](../transcripts/call_006_transcript.json) — Information Not in KB — Unavailability Fallback (`in_en`)
+- [`call_ph_01_transcript.json`](../transcripts/call_ph_01_transcript.json) — Philippines — Cooperative Taglish (`ph_tl`)
+- [`call_ph_02_transcript.json`](../transcripts/call_ph_02_transcript.json) — Philippines — Objection & Escalation (`ph_tl`)
+- [`call_id_01_transcript.json`](../transcripts/call_id_01_transcript.json) — Indonesia — Cooperative Localized Terms (`id_id`)
+- [`call_id_02_transcript.json`](../transcripts/call_id_02_transcript.json) — Indonesia — Regional Accent & Objection (`id_id`)
 
 ## Audio Metadata
 

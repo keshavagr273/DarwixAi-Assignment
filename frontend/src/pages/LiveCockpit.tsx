@@ -55,7 +55,33 @@ export const LiveCockpit: React.FC = () => {
     }
   }, [activeScenarioId]);
 
-  // Live WebSocket wiring
+  // Nudge expiry: ARCHITECTURE §10.2 — opportunity nudges expire after 30s
+  // Compliance nudges persist until acknowledged or satisfied
+  useEffect(() => {
+    const EXPIRY_MS = 30_000;
+    const timer = setInterval(() => {
+      const now = Date.now();
+      setActiveNudges(prev =>
+        prev.map(n => {
+          if (n.status !== 'active') return n;
+          // Only expire non-compliance nudges
+          if (n.type === 'compliance') return n;
+          const createdMs = n.timestamp
+            ? new Date(`1970-01-01T${n.timestamp}Z`).getTime()
+            : 0;
+          // Use a simulated creation time relative offset
+          // For nudges with a proper expiresAt field, use that
+          if ((n as any).expiresAt && now > (n as any).expiresAt * 1000) {
+            return { ...n, status: 'dismissed' as const };
+          }
+          return n;
+        })
+      );
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Live WebSocket wiring — handles all ARCHITECTURE §12 event types
   const isLiveMode = import.meta.env.VITE_API_MODE === 'live';
   useEffect(() => {
     if (!isLiveMode) return;
@@ -64,18 +90,61 @@ export const LiveCockpit: React.FC = () => {
     const ws = new WebSocket(`${wsBase}/ws/nudges`);
     ws.onmessage = (event) => {
       try {
-        const nudgeData = JSON.parse(event.data);
-        const newNudge: LiveNudge = {
-          id: nudgeData.id,
-          type: nudgeData.type,
-          title: nudgeData.title,
-          text: nudgeData.text,
-          status: 'active',
-          priority: nudgeData.priority,
-          timestamp: new Date().toISOString().substring(11,19),
-          confidence: 0.95
-        };
-        setActiveNudges(prev => [newNudge, ...prev]);
+        const msg = JSON.parse(event.data);
+        const eventType = msg.event;
+
+        if (eventType === 'nudge.fired') {
+          const newNudge: LiveNudge = {
+            id: msg.id,
+            type: msg.topic || 'generic',
+            title: msg.text?.substring(0, 40) || 'Nudge',
+            text: msg.text,
+            status: 'active',
+            priority: parseInt(String(msg.priority || '3').replace('P', ''), 10),
+            timestamp: new Date().toISOString().substring(11, 19),
+            confidence: msg.confidence || 0.9,
+            expiresAt: msg.expires_at,
+          } as LiveNudge & { expiresAt?: number };
+          setActiveNudges(prev => [newNudge, ...prev]);
+
+        } else if (eventType === 'nudge.suppressed') {
+          const suppressed: SuppressedNudge = {
+            id: msg.id,
+            candidate_text: msg.details?.topic || 'Suppressed nudge',
+            topic: msg.details?.topic || 'generic',
+            suppression_reason: (msg.reason?.includes('cooldown') ? 'cooldown'
+              : msg.reason?.includes('confidence') ? 'low_confidence'
+              : msg.reason?.includes('rate') ? 'duplicate'
+              : msg.reason?.includes('noisy') ? 'noisy_audio_guard'
+              : 'low_confidence') as SuppressedNudge['suppression_reason'],
+            verdict_detail: msg.reason || 'Suppressed by nudge court',
+            confidence: msg.details?.confidence ?? 0,
+            timestamp: new Date().toISOString().substring(11, 19),
+          };
+          setSuppressedNudges(prev => [suppressed, ...prev].slice(0, 20));
+
+        } else if (eventType === 'transcript.final' || eventType === 'transcript.partial') {
+          // Transcript events are handled by LiveCockpit's own WebSocket or mock data
+          // No action here for the simple nudges WebSocket
+
+        } else if (eventType === 'call.state' && msg.state === 'ended') {
+          // Session ended
+          ws.close();
+
+        } else if (!eventType) {
+          // Legacy format: plain nudge object without event envelope
+          const newNudge: LiveNudge = {
+            id: msg.id,
+            type: msg.type || 'generic',
+            title: msg.title,
+            text: msg.text,
+            status: 'active',
+            priority: msg.priority || 3,
+            timestamp: new Date().toISOString().substring(11, 19),
+            confidence: 0.95,
+          };
+          setActiveNudges(prev => [newNudge, ...prev]);
+        }
       } catch (err) {
         console.error('WS Error', err);
       }

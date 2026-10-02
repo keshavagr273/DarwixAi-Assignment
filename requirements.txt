@@ -11,3 +11,24 @@ numpy>=1.26.0
 pandas>=2.2.0
 websockets>=12.0
 pytest>=8.0.0
+
+# Database (Aiven Cloud PostgreSQL + pgvector)
+asyncpg>=0.29.0
+
+# Cache (Upstash Redis / TLS)
+redis[hiredis]>=5.0.0
+
+# LLM (Groq fast inference)
+groq>=0.11.0
+
+# ASR (Deepgram streaming)
+deepgram-sdk>=3.0.0
+
+# TTS (ElevenLabs native voices)
+elevenlabs>=1.0.0
+
+# Object Storage (Cloudflare R2 / S3-compatible)
+boto3>=1.34.0
+
+# Embeddings (Cohere via httpx — already included above)
+# httpx is already listed above

@@ -34,15 +34,20 @@ Nudge Court (Suppression Policy: Deduplication, Cooldown, Noisy-Audio Guard)
 
 To eliminate alert fatigue and ensure agents only receive high-signal guidance, the engine enforces strict suppression policies:
 
-1. **Confidence Thresholds:** Signal-specific cutoffs (`compliance: 0.95`, `frustration: 0.85`, `opportunity: 0.80`, `generic: 0.70`).
-2. **Topic Cooldown:** 15-second mandatory cooldown per topic category to prevent spamming identical recommendations.
-3. **Duplicate Suppression:** Semantic similarity check against active nudges in the last 45 seconds.
-4. **Noisy-Audio Guard:** Turns with ASR confidence < 0.65 or degraded SNR (< 12 dB) require corroboration by 2 consecutive signals before firing.
-5. **Priority Queue:**
+1. **Confidence Thresholds:** Signal-specific cutoffs (`compliance: 0.95`, `frustration: 0.85`, `opportunity: 0.80`, `payment: 0.82`, `callback: 0.78`, `generic: 0.70`).
+2. **Topic Cooldown:** 20-second mandatory cooldown per topic category (compliance nudges use 30s re-fire window if still unmet). This prevents spamming identical recommendations.
+3. **Duplicate Suppression:** Semantic similarity check against active nudges in the same topic window.
+4. **Noisy-Audio Guard:** Turns with ASR confidence < 0.70 require corroboration by 2 consecutive signals before firing. Prevents false positives from low-quality audio.
+5. **Rate Limit:** Maximum 6 nudges per minute across all signal types to prevent alert fatigue.
+6. **Priority Queue:**
    - **P0 Compliance:** Prohibited claims, missing mandatory disclosures (must show immediately).
    - **P1 Sentiment/Frustration:** Rising anger, manager escalation triggers.
-   - **P2 Opportunity:** Cross-sell cues (dependents, multi-vehicle).
-   - **P3 Coaching:** Pacing, active listening cues.
+   - **P2 Opportunity/Payment:** Cross-sell cues (dependents, multi-vehicle), payment difficulty.
+   - **P3 Coaching/Callback:** Pacing, callback scheduling cues.
+
+### Implementation Stack:
+- **Fast Session & Cooldown Cache:** Powered by **Upstash Redis** (`rediss://`) via `services/cache.py` using atomic pipelines (`cooldown_check`, `cooldown_set`, `rate_limit_increment`, `dedup_seen`).
+- **Persistent Ledger:** All fired and suppressed nudge decisions are committed to **Aiven PostgreSQL** (`nudges` table) via `services/db.py` (`insert_nudge`) for post-call audit and analytics.
 
 ---
 

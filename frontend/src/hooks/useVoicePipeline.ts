@@ -14,10 +14,25 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
+interface BrowserSpeechRecognitionResult {
+  readonly length: number;
+  readonly isFinal: boolean;
+  [index: number]: { transcript: string; confidence: number };
+}
+
+interface BrowserSpeechRecognitionResultList {
+  readonly length: number;
+  [index: number]: BrowserSpeechRecognitionResult;
+}
+
+interface BrowserSpeechRecognitionEvent {
+  results: BrowserSpeechRecognitionResultList;
+}
+
 type BrowserSpeechRecognition = {
   lang: string; interimResults: boolean; maxAlternatives: number; continuous: boolean;
   start(): void; stop(): void;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
   onerror: ((event: { error: string }) => void) | null;
   onend: (() => void) | null;
 };
@@ -173,7 +188,7 @@ export function useVoicePipeline(market: string = 'in_en') {
 
     setState(s => ({ ...s, status: 'listening', currentInterim: '' }));
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
       const last = event.results[event.results.length - 1];
       const text = last[0].transcript;
       if (last.isFinal) {

@@ -216,18 +216,46 @@ def test_trace_and_replay_contracts(client):
 
 
 def test_websocket_live_stream_contract(client):
+    """Verify the full ARCHITECTURE s12 WebSocket event contract."""
     with client.websocket_connect("/ws/live/test-stream-sess") as ws:
+        # Initial call.state = connected
         init = ws.receive_json()
         assert init["event"] == "call.state" and init["state"] == "connected"
 
-        ws.send_json({"speaker": "agent", "text": "I guarantee 100% return on this policy"})
-        ev_transcript = ws.receive_json()
-        assert ev_transcript["event"] == "transcript.final"
+        # Send a turn that triggers a compliance signal
+        ws.send_json({"speaker": "agent", "text": "I guarantee 100% return on this policy", "asr_confidence": 0.95})
 
+        # 1. transcript.partial (streaming ASR partial arrives first)
+        ev_partial = ws.receive_json()
+        assert ev_partial["event"] == "transcript.partial", ev_partial.get("event")
+        assert ev_partial["speaker"] == "agent"
+
+        # 2. transcript.final
+        ev_final = ws.receive_json()
+        assert ev_final["event"] == "transcript.final", ev_final.get("event")
+        assert ev_final["speaker"] == "agent"
+
+        # 3. signal (compliance)
         ev_signal = ws.receive_json()
         assert ev_signal["event"] == "signal" and ev_signal["kind"] == "compliance"
 
+        # 4. nudge.fired (P1 compliance)
         ev_nudge = ws.receive_json()
         assert ev_nudge["event"] == "nudge.fired"
         assert ev_nudge["priority"] == "P1"
+        assert "expires_at" in ev_nudge
+
+        # 5. gate.event for agent turn (ARCHITECTURE s12)
+        ev_gate = ws.receive_json()
+        assert ev_gate["event"] == "gate.event"
+        assert "status" in ev_gate and "turn_id" in ev_gate and "citations" in ev_gate
+
+        # 6. latency.sample
+        ev_latency = ws.receive_json()
+        assert ev_latency["event"] == "latency.sample" and "ms" in ev_latency
+
+        # 7. register.update with market-specific lang_mix
+        ev_register = ws.receive_json()
+        assert ev_register["event"] == "register.update"
+        assert "lang_mix" in ev_register and "formality" in ev_register
 

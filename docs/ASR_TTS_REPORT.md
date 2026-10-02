@@ -8,16 +8,15 @@
 
 ## Provider Evaluation Summary
 
-| Market | Language | ASR Provider (Chosen) | TTS Provider (Chosen) | ASR Alt |
+| Market | Language | Primary Live ASR | Primary Live TTS | In-Browser / Secondary Alt |
 |---|---|---|---|---|
-| `in_en` | en-IN | Google Cloud STT (Chirp) | Google WaveNet en-IN-Wavenet-D | Deepgram Nova-2 |
-| `ph_tl` | fil-PH | Google Cloud STT (fil-PH) | Google WaveNet fil-PH-Wavenet-A | en-PH fallback |
-| `id_id` | id-ID | Google Cloud STT (id-ID) | Google WaveNet id-ID-Wavenet-A | Deepgram Nova-2 |
+| `in_en` | en-IN | **Deepgram Nova-2** (en-IN) | **ElevenLabs Multilingual v2** (Sarah `EXAVITQu4vr4xnSDxMaL`) | Google STT (Chirp) / Web Speech API |
+| `ph_tl` | fil-PH | **Deepgram Nova-2** (en + Taglish phrase boost) | **ElevenLabs Multilingual v2** (Bella `hpp4J3VqNfWAUOO0d1Us`) | Google STT (fil-PH) / Web Speech API |
+| `id_id` | id-ID | **Deepgram Nova-2** (id + Indonesian phrase boost) | **ElevenLabs Multilingual v2** (Adam `pNInz6obpgDQGcFmaJgB`) | Google STT (id-ID) / Web Speech API |
 
-**Demo mode:** Browser Web Speech API (SpeechRecognition + speechSynthesis)
-- Works in Chrome/Edge without API keys
-- Supports en-IN, fil-PH (partial), id-ID
-- Used for live browser demo in VoiceAgent page
+**Live Production Status:**
+- Both **Deepgram Nova-2** and **ElevenLabs Multilingual v2** are fully configured, live in `services/voice/asr_tts.py`, and verified active via `python scripts/test_services.py`.
+- Browser Web Speech API remains available for zero-latency client-side rendering in Chrome/Edge.
 
 ---
 
@@ -181,14 +180,14 @@ This ensures barge-in latency is < 100ms (local browser event, no network round-
 ---
 
 ## Provider Selection Rationale
-
-1. Google Cloud STT over Deepgram for PH and ID: Better fil-PH language coverage; more production data for id-ID regional accents.
-
-2. Google WaveNet over ElevenLabs: Lower latency, full SSML for amounts/dates, fil-PH/id-ID voice availability. ElevenLabs has superior quality but higher latency and no fil-PH native voice.
-
-3. Web Speech API for demo: Zero API cost, works in Chrome/Edge, immediate browser demo without provider setup.
-
-4. LiveKit for transport: WebRTC-native, open source, supports PSTN via SIP trunk.
+ 
+1. **Deepgram Nova-2 for Live ASR**: Chosen for ultra-low latency (<300ms), robust streaming WebSocket support, and flexible keyphrase boosting for financial & insurance domain terminology in Indian English, Taglish, and Indonesian.
+ 
+2. **ElevenLabs Multilingual v2 for TTS**: Chosen for superior emotional prosody, human-like cadence, and native accents across English, Taglish, and Bahasa Indonesia using tested premade voices (Sarah, Bella, Adam).
+ 
+3. **Web Speech API for Client-Side Fallback**: Zero-API cost fallback in Chrome/Edge, enabling instant testing without network roundtrips.
+ 
+4. **Google Cloud STT / WaveNet as Secondary Cloud Alternative**: Configured as secondary fallback adapter for regional accent benchmarking.
 
 ---
 

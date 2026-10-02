@@ -486,7 +486,39 @@ flowchart TB
   WRK --- MIN
 ```
 
-Environment is configured only through `.env` (template `.env.example`). Secrets are never committed; a secret-scanning pre-commit hook is required.
+### 13.1 Live Cloud Production Stack
+
+The live deployment topology utilizes managed cloud infrastructure for scale, persistent source-of-truth reliability, and sub-millisecond caching:
+
+```mermaid
+flowchart TB
+  FE[Frontend React / Vite]
+  API[FastAPI Backend :8000]
+  
+  subgraph DataLayer[Persistent Source of Truth & Cache]
+    PG[(Aiven PostgreSQL 16 + pgvector)]
+    RD[(Upstash Redis TLS rediss://)]
+    R2[(Cloudflare R2 darwix-assignment)]
+  end
+  
+  subgraph AIProviders[Live AI & Speech Services]
+    GROQ[[Groq LLM: openai/gpt-oss-120b]]
+    COHERE[[Cohere Embeddings: embed-multilingual-v3.0]]
+    DG[[Deepgram Nova-2 ASR]]
+    EL[[ElevenLabs Multilingual v2 TTS]]
+  end
+
+  FE <--> API
+  API <--> PG
+  API <--> RD
+  API <--> R2
+  API <--> GROQ
+  API <--> COHERE
+  API <--> DG
+  API <--> EL
+```
+
+Environment is configured strictly through `.env` (template `.env.example`). Secrets are never committed; a secret-scanning pre-commit hook is verified (`scripts/scan_secrets.py`). All 7 live services are tested and verified via `scripts/test_services.py`.
 
 ---
 

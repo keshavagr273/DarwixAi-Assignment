@@ -23,8 +23,8 @@ export const Navbar: React.FC = () => {
       {/* Left: Brand & Mode Segmented Control */}
       <div className="flex items-center gap-5">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 border border-indigo-500/30 group-hover:border-indigo-500/60 flex items-center justify-center transition-all shadow-sm">
-            <Radio className="w-4 h-4 text-indigo-400 group-hover:scale-105 transition-transform" />
+          <div className="w-8 h-8 rounded-lg border border-indigo-500/30 group-hover:border-indigo-500/60 flex items-center justify-center transition-all shadow-sm overflow-hidden bg-[#182238]">
+            <img src="/logo.png" alt="PARLEY Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <div className="flex items-center gap-2">

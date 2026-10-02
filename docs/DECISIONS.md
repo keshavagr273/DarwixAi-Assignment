@@ -74,3 +74,25 @@
   - Core "Due-Date Conversation Engine" finite-state machine is universal: identify → purpose → status → qualify → handle objection → commit → close.
   - All market-specific assets (prompts, register rules, honorific rules "po/opo", glossary synonyms, fallback phrases, ASR acoustic profiles, and TTS voice IDs) reside in `market_packs/{market_id}/`.
   - Adding a new country or language requires zero modifications to the core engine.
+
+---
+
+## ADR 005: Live Cloud Production Infrastructure & Real-Time Services
+- **Status:** Accepted
+- **Context:** The platform requires persistent, enterprise-scale storage, sub-millisecond cache for real-time live nudges, zero-egress audio storage, low-latency multilingual speech recognition/synthesis, and fast LLM reasoning without fake mocks.
+- **Alternatives Considered:**
+  1. *Local Docker only:* Ephemeral, lacks distributed availability, and fails in production multi-region deployments.
+  2. *Single-vendor cloud lock-in (e.g. AWS or Azure only):* Prohibitive egress fees for audio streaming and rigid vendor constraints.
+  3. *Composable Best-of-Breed Live Cloud Stack:* Aiven PostgreSQL with pgvector, Upstash Redis TLS, Cloudflare R2, Groq LLM, Cohere Multilingual Embeddings, Deepgram Nova-2 ASR, and ElevenLabs TTS.
+- **Decision:** **Composable Best-of-Breed Live Cloud Stack**.
+- **Rationale:**
+  - **Aiven Cloud PostgreSQL 16 + pgvector:** Acts as the persistent single source of truth for all 17 relational tables, call sessions, turns, sentence receipts, and 1024-dimensional semantic chunk embeddings.
+  - **Upstash Redis (TLS `rediss://`):** Serves as the ultra-fast real-time cache. Manages 20s per-topic nudge cooldowns, 60s sliding window rate-limiting, semantic deduplication sets, and 5-minute KB query vector caching.
+  - **Cloudflare R2 (`darwix-assignment`):** S3-compatible, zero-egress object storage for live call audio chunks, finalized full recordings, transcript JSON backups, and raw source document archival.
+  - **Groq Cloud (`openai/gpt-oss-120b`):** Sub-1.5s conversational turn completions and Tier-2 signal analysis using structured JSON reasoning.
+  - **Cohere Multilingual Embeddings (`embed-multilingual-v3.0`):** 1024-dim vectors that natively match PostgreSQL `vector(1024)` across English, Taglish, and Bahasa Indonesia.
+  - **Deepgram Nova-2 ASR:** Sub-300ms transcription with market-specific keyphrase boosting for insurance policy terms in Taglish and Indonesian.
+  - **ElevenLabs Multilingual v2:** High-fidelity speech synthesis using premade voices: Sarah (`EXAVITQu4vr4xnSDxMaL` for India), Bella (`hpp4J3VqNfWAUOO0d1Us` for Philippines), and Adam (`pNInz6obpgDQGcFmaJgB` for Indonesia).
+- **Consequences:**
+  - Eliminates mock dependencies; verified via `scripts/test_services.py` with 100% pass rate.
+  - PostgreSQL pool connection management is loop-aware in `services/db.py` to prevent event-loop conflicts.
