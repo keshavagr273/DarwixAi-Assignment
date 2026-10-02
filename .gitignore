@@ -57,6 +57,8 @@ data/audio/*.mp3
 data/audio/*.webm
 data/audio/*.ogg
 data/audio/*.flac
+!data/audio/sample_*.mp3
+
 
 # Local database files
 *.db
