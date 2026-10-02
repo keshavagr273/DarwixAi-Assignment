@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config'
 // https://vite.dev/config/
 export default defineConfig({
   envDir: '../',
+  envPrefix: ['VITE_', 'ELEVENLABS_'],
   plugins: [react()],
   test: {
     environment: 'jsdom',

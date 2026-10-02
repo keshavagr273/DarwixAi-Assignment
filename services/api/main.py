@@ -10,7 +10,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -759,6 +759,34 @@ def end_call(call_session_id: str):
         "total_turns": sess["turn_count"],
         **call_summary,
     }
+
+
+class VoiceTTSRequest(BaseModel):
+    text: str
+    market: str = "in_en"
+    voice_id: Optional[str] = None
+
+
+@app.post("/api/v1/voice/tts")
+async def synthesize_speech(req: VoiceTTSRequest):
+    """Synthesize speech using ElevenLabs and stream back audio/mpeg."""
+    try:
+        from services.voice.asr_tts import ElevenLabsTTS
+        tts = ElevenLabsTTS()
+        res = tts.synthesize(text=req.text, market=req.market, voice_id=req.voice_id)
+        if res.audio_bytes:
+            return Response(
+                content=res.audio_bytes,
+                media_type="audio/mpeg",
+                headers={
+                    "X-Latency-Ms": str(res.latency_ms),
+                    "X-Voice-Name": str(res.voice_name or ""),
+                    "X-Provider": "elevenlabs",
+                }
+            )
+        raise HTTPException(status_code=500, detail="Synthesis failed: no audio produced")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @app.get("/api/v1/voice/providers")

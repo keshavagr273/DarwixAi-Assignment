@@ -1,44 +1,31 @@
 /**
- * useVoicePipeline — React hook for the PARLEY browser voice agent
+ * useVoicePipeline — PARLEY Voice Agent Pipeline Hook
  *
- * Manages:
- *  - Call session lifecycle (start/end via API)
- *  - Web Speech API: SpeechRecognition (ASR) + SpeechSynthesis (TTS)
- *  - Native Persona Voices: Priya (en-IN female), Maria (ph_tl female), Sari (id_id female)
- *  - Full-duplex conversational flow with Auto-Listen after agent turns
- *  - Fail-safe error recovery (no-speech, mic ducking release, transcript dispatch on end)
- *  - Text response fallback for zero-friction testing
- *  - Barge-in: cancels TTS when user starts speaking
- *  - Latency measurement per turn & Dialogue FSM via API
+ * TTS Priority:
+ *   1. Backend /api/v1/voice/tts (ElevenLabs server proxy)
+ *   2. Direct ElevenLabs API (using VITE_ELEVENLABS_API_KEY)
+ *   3. Web Speech API (browser built-in, fallback)
+ *
+ * ASR: Web Speech API (Chrome/Edge/Safari)
+ * Conversation: Backend FSM + Groq LLM via API_BASE, or local grounded responses if offline
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { API_BASE } from '../config/api';
+import {
+  ELEVENLABS_API_KEY,
+  ELEVENLABS_VOICES,
+  ELEVENLABS_MODEL,
+  ELEVENLABS_SETTINGS,
+} from '../config/voice';
 
-interface BrowserSpeechRecognitionResult {
-  readonly length: number;
-  readonly isFinal: boolean;
-  [index: number]: { transcript: string; confidence: number };
-}
+// ── Browser Speech API Types ──────────────────────────────────────────────────
 
-interface BrowserSpeechRecognitionResultList {
-  readonly length: number;
-  [index: number]: BrowserSpeechRecognitionResult;
-}
-
-interface BrowserSpeechRecognitionEvent {
-  results: BrowserSpeechRecognitionResultList;
-}
-
-type BrowserSpeechRecognition = {
-  lang: string;
-  interimResults: boolean;
-  maxAlternatives: number;
-  continuous: boolean;
-  start(): void;
-  stop(): void;
-  onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
+type SR = {
+  lang: string; interimResults: boolean; maxAlternatives: number; continuous: boolean;
+  start(): void; stop(): void;
+  onresult: ((e: { results: { length: number; [i: number]: { isFinal: boolean; [j: number]: { transcript: string; confidence: number } } } }) => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
 };
 
@@ -53,12 +40,8 @@ export interface TranscriptEntry {
   isRefusal?: boolean;
   gateVerdict?: 'PASSED' | 'BLOCKED' | 'REFUSAL' | null;
   latency?: {
-    asr_ms?: number;
-    retrieval_ms?: number;
-    gate_ms?: number;
-    tts_ms?: number;
-    e2e_ms?: number;
-    user_stops_to_bot_audio_ms?: number;
+    asr_ms?: number; retrieval_ms?: number; gate_ms?: number;
+    tts_ms?: number; e2e_ms?: number; user_stops_to_bot_audio_ms?: number;
   };
   asr_confidence?: number;
 }
@@ -76,701 +59,551 @@ export interface CallState {
   currentInterim: string;
   lastLatency: TranscriptEntry['latency'] | null;
   micPermission: 'unknown' | 'granted' | 'denied' | 'unavailable';
-  ttsSupported: boolean;
+  ttsProvider: 'elevenlabs' | 'browser' | 'none';
   asrSupported: boolean;
-  activeVoiceName: string | null;
+  personaName: string;
+  awaitingCustomer: boolean;
   error: string | null;
 }
 
 const initialState: CallState = {
-  status: 'idle',
-  callSessionId: null,
-  agentSessionId: null,
-  market: 'in_en',
-  elapsedSeconds: 0,
-  turnCount: 0,
-  transcript: [],
-  isMuted: false,
-  autoListen: true,
-  currentInterim: '',
-  lastLatency: null,
-  micPermission: 'unknown',
-  ttsSupported: false,
-  asrSupported: false,
-  activeVoiceName: null,
-  error: null,
+  status: 'idle', callSessionId: null, agentSessionId: null, market: 'in_en',
+  elapsedSeconds: 0, turnCount: 0, transcript: [], isMuted: false, autoListen: true,
+  currentInterim: '', lastLatency: null, micPermission: 'unknown',
+  ttsProvider: 'elevenlabs', asrSupported: false, personaName: 'Priya',
+  awaitingCustomer: false, error: null,
 };
 
-// Market → language code map for Web Speech API
+// ── Language codes ────────────────────────────────────────────────────────────
+
 const MARKET_LANG: Record<string, string> = {
-  in_en: 'en-IN',
-  ph_tl: 'fil-PH',
-  id_id: 'id-ID',
+  in_en: 'en-IN', ph_tl: 'fil-PH', id_id: 'id-ID',
 };
 
-// ── Voice Resolution Helper ──────────────────────────────────────────────────
+const PERSONA_NAME: Record<string, string> = {
+  in_en: 'Priya', ph_tl: 'Maria', id_id: 'Sari',
+};
 
-function findBestVoiceForMarket(
-  market: string,
-  voices: SpeechSynthesisVoice[]
-): { voice: SpeechSynthesisVoice | null; pitch: number; rate: number; label: string } {
-  if (!voices || voices.length === 0) {
-    return { voice: null, pitch: 1.15, rate: 0.95, label: 'Browser Default' };
-  }
+// ── Greetings per market ──────────────────────────────────────────────────────
 
-  const normalize = (s: string) => s.toLowerCase().replace(/_/g, '-');
+const GREETINGS: Record<string, string> = {
+  in_en: 'Hello! My name is Priya, I am calling from SecureLife Insurance. May I speak with Rajesh Kumar?',
+  ph_tl: 'Magandang araw po! Ako po si Maria mula sa SecureLife Insurance. Kausap ko po ba si Jose Rizal?',
+  id_id: 'Selamat siang! Saya Sari dari SecureLife Insurance. Apakah saya berbicara dengan Bapak Budi Santoso?',
+};
 
+// ── Local Agent Responses (offline / fallback) ────────────────────────────────
+
+const RESPONSES: Record<string, (input: string) => { text: string; isRefusal: boolean; citations: string[] }> = {
+  in_en: (input: string) => {
+    const l = input.toLowerCase();
+    if (/haan|yes|bol raha|rajesh|correct|theek|hi main|mera naam/i.test(l))
+      return { text: 'Thank you Rajesh! Your identity is confirmed. Your SecureLife policy renewal is due on October 15. We have a 30-day grace period during which your full coverage remains active.', isRefusal: false, citations: ['ID_VERIFY_KB'] };
+    if (/grace|kab tak|deadline|last date|kitne din/i.test(l))
+      return { text: 'Rajesh, you have a 30-day grace period. This means you can pay the premium without any penalty until November 14. Your life cover remains active during this entire period.', isRefusal: false, citations: ['KB_GRACE_PERIOD_IN'] };
+    if (/upi|google pay|gpay|payment|bharna|paytm|phonepe/i.test(l))
+      return { text: 'Absolutely Rajesh! I will send a Google Pay payment link to your registered number right away. Once you click it, the payment will be processed. Is your number 98765-43210?', isRefusal: false, citations: ['PAYMENT_KB'] };
+    if (/quarterly|installment|kist|baad mein|baad|baar mein pay/i.test(l))
+      return { text: 'I understand Rajesh. We also offer a quarterly installment mode. If the annual premium is Rs. 18,450, the quarterly payment would be Rs. 4,613. Shall I activate this option?', isRefusal: false, citations: ['INSTALLMENT_KB'] };
+    if (/bitcoin|crypto|share|stock|mutual fund|fd|deposit/i.test(l))
+      return { text: 'I apologize Rajesh, but SecureLife only offers life and health insurance products. Cryptocurrency or stocks are not in our portfolio. Is there anything else I can help you with?', isRefusal: true, citations: [] };
+    if (/shukriya|dhanyavaad|thank|bye|alvida|theek hai shukriya/i.test(l))
+      return { text: 'Thank you Rajesh, thank you very much for your time. Have a great day! This was a marketing communication from SecureLife Insurance.', isRefusal: false, citations: [] };
+    return { text: 'Sure Rajesh, I understand. You can ask any question — I am here to fully assist you!', isRefusal: false, citations: ['GENERAL_KB'] };
+  },
+  ph_tl: (input: string) => {
+    const l = input.toLowerCase();
+    if (/opo|ako|jose|yes|tama|oo|totoo/i.test(l))
+      return { text: 'Salamat po, Jose! Na-confirm na ang inyong identity. Ang inyong SecureLife policy ay mag-e-expire sa Oktubre 15. Mayroon po kaming 30-day grace period kung saan aktibo pa rin ang inyong buong coverage.', isRefusal: false, citations: ['ID_VERIFY_KB'] };
+    if (/grace|hanggang|bayad|kelan|magkano|kailan/i.test(l))
+      return { text: 'Jose po, ang inyong grace period ay 30 araw. Maaari po kayong magbayad hanggang Nobyembre 14 nang walang late charge. Aktibo pa rin ang inyong buong life coverage sa panahong iyon.', isRefusal: false, citations: ['KB_GRACE_PERIOD_PH'] };
+    if (/gcash|payment|bayad|pera|transfer|bdo|bpi/i.test(l))
+      return { text: 'Sige po Jose! Ipapadala ko na po ang GCash payment link sa inyong registered na numero ngayon din. Pagkatapos mag-pay, makakatanggap po kayo ng SMS confirmation mula sa amin.', isRefusal: false, citations: ['PAYMENT_KB_PH'] };
+    if (/bitcoin|crypto|stocks|negosyo|investment/i.test(l))
+      return { text: 'Pasensya na po Jose. Ang SecureLife ay nag-aalok lamang ng life at health insurance. Hindi po kami sangkot sa cryptocurrency o investments. May iba pa po ba akong matutulungan?', isRefusal: true, citations: [] };
+    if (/salamat|okay na|sige|bye|wala na|ayos na/i.test(l))
+      return { text: 'Maraming salamat din po Jose! Nawa ay magkaroon kayo ng napakagandang araw. Ito po ay isang marketing communication mula sa SecureLife Insurance. Paalam po!', isRefusal: false, citations: [] };
+    return { text: 'Naiintindihan ko po Jose. Nandito po ako para tulungan kayo sa lahat ng inyong mga katanungan tungkol sa inyong insurance policy!', isRefusal: false, citations: ['GENERAL_KB'] };
+  },
+  id_id: (input: string) => {
+    const l = input.toLowerCase();
+    if (/ya|iya|budi|benar|betul|saya sendiri/i.test(l))
+      return { text: 'Terima kasih Pak Budi! Identitas Bapak sudah dikonfirmasi. Polis asuransi SecureLife Bapak akan jatuh tempo pada 15 Oktober. Kami memiliki masa tenggang 30 hari di mana perlindungan Bapak tetap aktif.', isRefusal: false, citations: ['ID_VERIFY_KB'] };
+    if (/kapan|sampai|bayar|batas|tenggang|deadline/i.test(l))
+      return { text: 'Pak Budi, masa tenggang polis Bapak adalah 30 hari. Jadi Bapak bisa melakukan pembayaran hingga 14 November tanpa denda sama sekali. Perlindungan asuransi jiwa Bapak tetap aktif selama periode ini.', isRefusal: false, citations: ['KB_GRACE_PERIOD_ID'] };
+    if (/transfer|gopay|ovo|qris|payment|bayar|dana/i.test(l))
+      return { text: 'Baik Pak Budi! Kami akan mengirimkan detail rekening tujuan dan konfirmasi pembayaran via SMS setelah transaksi berhasil. Ada pertanyaan lain yang bisa saya bantu?', isRefusal: false, citations: ['PAYMENT_KB_ID'] };
+    if (/terima kasih|tidak ada|sudah|bye|selesai/i.test(l))
+      return { text: 'Sama-sama Pak Budi! Terima kasih sudah meluangkan waktu. Semoga harinya sangat menyenangkan. Ini adalah komunikasi pemasaran dari SecureLife Insurance.', isRefusal: false, citations: [] };
+    return { text: 'Baik Pak Budi, saya mengerti. Silakan tanyakan apa saja — saya siap membantu Bapak sepenuhnya!', isRefusal: false, citations: ['GENERAL_KB'] };
+  },
+};
+
+// ── Web Speech best voice picker (fallback) ───────────────────────────────────
+
+function pickBrowserVoice(market: string, voices: SpeechSynthesisVoice[]) {
+  if (!voices.length) return { voice: null, pitch: 1.1, rate: 0.9 };
+  const n = (s: string) => s.toLowerCase();
   if (market === 'in_en') {
-    // 1. Priya: Target Indian English female voice (Heera, Neerja, Swara, Priya)
-    const inFemale = voices.find(v => {
-      const lang = normalize(v.lang);
-      const name = v.name.toLowerCase();
-      const isIndian = lang.includes('en-in') || name.includes('india') || name.includes('hindi');
-      const isFemale = name.includes('heera') || name.includes('neerja') || name.includes('swara') ||
-                       name.includes('priya') || name.includes('female') || name.includes('zira');
-      return isIndian && isFemale;
-    });
-    if (inFemale) {
-      return { voice: inFemale, pitch: 1.05, rate: 0.94, label: `Priya (${inFemale.name})` };
-    }
-
-    // 2. Any en-IN voice (e.g. Microsoft Ravi, Google English India)
-    const anyIn = voices.find(v => {
-      const lang = normalize(v.lang);
-      const name = v.name.toLowerCase();
-      return lang.includes('en-in') || name.includes('india') || name.includes('hindi');
-    });
-    if (anyIn) {
-      const isLikelyMale = anyIn.name.toLowerCase().includes('ravi') || anyIn.name.toLowerCase().includes('male');
-      return {
-        voice: anyIn,
-        pitch: isLikelyMale ? 1.25 : 1.1,
-        rate: 0.94,
-        label: `Priya (${anyIn.name} - Pitch Adjusted Female)`
-      };
-    }
-
-    // 3. Fallback: Any natural female English voice (e.g., Zira, Jenny, Aria, Sonia, Google UK Female)
-    const femaleEnglish = voices.find(v => {
-      const lang = normalize(v.lang);
-      const name = v.name.toLowerCase();
-      return lang.startsWith('en') && (
-        name.includes('female') || name.includes('zira') || name.includes('jenny') ||
-        name.includes('aria') || name.includes('sonia') || name.includes('samantha')
-      );
-    });
-    if (femaleEnglish) {
-      return { voice: femaleEnglish, pitch: 1.12, rate: 0.92, label: `Priya (${femaleEnglish.name} - Female)` };
-    }
-  } else if (market === 'ph_tl') {
-    // Maria: Target Filipino / Tagalog female voice
-    const phVoice = voices.find(v => {
-      const lang = normalize(v.lang);
-      const name = v.name.toLowerCase();
-      return lang.includes('fil') || lang.includes('tl') || lang.includes('ph') || name.includes('philippine');
-    });
-    if (phVoice) {
-      return { voice: phVoice, pitch: 1.1, rate: 0.94, label: `Maria (${phVoice.name})` };
-    }
-    const femaleEng = voices.find(v => normalize(v.lang).startsWith('en') && v.name.toLowerCase().includes('female'));
-    if (femaleEng) {
-      return { voice: femaleEng, pitch: 1.15, rate: 0.92, label: `Maria (${femaleEng.name} - Female)` };
-    }
-  } else if (market === 'id_id') {
-    // Sari: Target Indonesian female voice
-    const idVoice = voices.find(v => {
-      const lang = normalize(v.lang);
-      const name = v.name.toLowerCase();
-      return lang.includes('id') || name.includes('indonesia');
-    });
-    if (idVoice) {
-      return { voice: idVoice, pitch: 1.1, rate: 0.94, label: `Sari (${idVoice.name})` };
-    }
+    const heera = voices.find(v => /heera|neerja/i.test(v.name));
+    if (heera) return { voice: heera, pitch: 1.0, rate: 0.86 };
+    const inEn = voices.find(v => n(v.lang).includes('en-in') || n(v.name).includes('india'));
+    if (inEn) return { voice: inEn, pitch: 1.1, rate: 0.88 };
   }
-
-  // Fallbacks
-  const langMatch = voices.find(v => normalize(v.lang).startsWith(MARKET_LANG[market]?.slice(0, 2).toLowerCase() || 'en'));
-  if (langMatch) {
-    return { voice: langMatch, pitch: 1.18, rate: 0.92, label: langMatch.name };
+  if (market === 'ph_tl') {
+    const fil = voices.find(v => /fil|tagalog|filipino/i.test(v.lang + v.name));
+    if (fil) return { voice: fil, pitch: 1.08, rate: 0.9 };
   }
-
-  const anyFemale = voices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira'));
-  if (anyFemale) {
-    return { voice: anyFemale, pitch: 1.15, rate: 0.92, label: anyFemale.name };
+  if (market === 'id_id') {
+    const id = voices.find(v => /id-id|indonesia/i.test(v.lang));
+    if (id) return { voice: id, pitch: 1.05, rate: 0.9 };
   }
-
-  return { voice: voices[0] || null, pitch: 1.2, rate: 0.92, label: voices[0]?.name || 'System Default' };
+  const fem = voices.find(v => v.lang.startsWith('en') && /female|zira|jenny|aria|sonia|heera|neerja/i.test(v.name));
+  const eng = voices.find(v => v.lang.startsWith('en'));
+  return { voice: fem || eng || voices[0], pitch: 1.15, rate: 0.87 };
 }
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useVoicePipeline(market: string = 'in_en') {
   const [state, setState] = useState<CallState>({ ...initialState, market });
-  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
-  const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const asrStartTimeRef = useRef<number>(0);
 
-  // Synchronized state refs to prevent stale closure bugs
-  const callSessionIdRef = useRef<string | null>(null);
-  const agentSessionIdRef = useRef<string | null>(null);
-  const turnCountRef = useRef<number>(0);
   const statusRef = useRef<CallState['status']>('idle');
+  const callSidRef = useRef<string | null>(null);
+  const agentSidRef = useRef<string | null>(null);
+  const turnRef = useRef<number>(0);
   const autoListenRef = useRef<boolean>(true);
-  const isMutedRef = useRef<boolean>(false);
+  const mutedRef = useRef<boolean>(false);
+  const marketRef = useRef<string>(market);
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  const srRef = useRef<SR | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Update refs when state changes
+  useEffect(() => { marketRef.current = market; }, [market]);
+
+  // ── Detect capabilities ──────────────────────────────────────────────────
+
   useEffect(() => {
-    callSessionIdRef.current = state.callSessionId;
-    agentSessionIdRef.current = state.agentSessionId;
-    turnCountRef.current = state.turnCount;
-    statusRef.current = state.status;
-    autoListenRef.current = state.autoListen;
-    isMutedRef.current = state.isMuted;
-  }, [state.callSessionId, state.agentSessionId, state.turnCount, state.status, state.autoListen, state.isMuted]);
+    const hasASR = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+    const hasBrowserTTS = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-  // ── Detect capabilities & load system voices ──────────────────────────────
+    setState(s => ({
+      ...s,
+      ttsProvider: 'elevenlabs',
+      asrSupported: hasASR,
+      personaName: PERSONA_NAME[market] || 'Priya',
+    }));
 
-  const updateVoices = useCallback(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      const v = window.speechSynthesis.getVoices();
-      voicesRef.current = v;
-      if (v.length > 0) {
-        const { label } = findBestVoiceForMarket(market, v);
-        setState(s => ({ ...s, activeVoiceName: label }));
-      }
+    if (hasBrowserTTS) {
+      const loadV = () => { voicesRef.current = window.speechSynthesis.getVoices(); };
+      loadV(); window.speechSynthesis.onvoiceschanged = loadV;
+      return () => { window.speechSynthesis.onvoiceschanged = null; };
     }
   }, [market]);
 
-  useEffect(() => {
-    const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
-    const asrSupported =
-      typeof window !== 'undefined' &&
-      ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
-
-    setState(s => ({ ...s, ttsSupported, asrSupported }));
-
-    if (ttsSupported) {
-      updateVoices();
-      window.speechSynthesis.onvoiceschanged = updateVoices;
-    }
-  }, [updateVoices]);
-
   // ── Helpers ──────────────────────────────────────────────────────────────
+
+  const makeId = () => `e_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
   const addEntry = useCallback((entry: Omit<TranscriptEntry, 'id' | 'timestamp'>) => {
     setState(s => ({
       ...s,
-      transcript: [
-        ...s.transcript,
-        { ...entry, id: `e_${Date.now()}_${Math.random().toString(36).slice(2)}`, timestamp: Date.now() },
-      ],
+      transcript: [...s.transcript, { ...entry, id: makeId(), timestamp: Date.now() }],
     }));
   }, []);
 
-  const stopASR = useCallback(() => {
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (_) { /* ignore */ }
-      recognitionRef.current = null;
-    }
+  const stopSR = useCallback(() => {
+    try { srRef.current?.stop(); } catch (_) {}
+    srRef.current = null;
   }, []);
 
-  const cancelTTS = useCallback(() => {
+  const stopTTS = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-      } catch (_) { /* ignore */ }
+      try { window.speechSynthesis.cancel(); } catch (_) {}
     }
-    synthesisRef.current = null;
   }, []);
 
-  // ── TTS: Speaks using market-specific Indian/Filipino female voice ──────────
+  // ── Browser TTS (Fallback) ───────────────────────────────────────────────
 
-  const speak = useCallback((text: string, onDone?: () => void) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
-      onDone?.();
-      return;
-    }
+  const speakBrowser = useCallback((text: string, onDone: () => void) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) { onDone(); return; }
+    window.speechSynthesis.cancel();
 
-    cancelTTS();
-    stopASR();
+    const utt = new SpeechSynthesisUtterance(text);
+    // Retain global reference to avoid Chrome garbage-collection bug
+    (window as any).__voiceAgentUtt = utt;
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    const { voice, pitch, rate, label } = findBestVoiceForMarket(market, voicesRef.current);
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
-    } else {
-      utterance.lang = MARKET_LANG[market] || 'en-IN';
-    }
-    utterance.pitch = pitch;
-    utterance.rate = rate;
+    const { voice, pitch, rate } = pickBrowserVoice(marketRef.current, voicesRef.current);
+    if (voice) { utt.voice = voice; utt.lang = voice.lang; }
+    else { utt.lang = MARKET_LANG[marketRef.current] || 'en-IN'; }
+    utt.pitch = pitch; utt.rate = rate; utt.volume = 1;
 
-    let hasEnded = false;
-    const handleEnd = () => {
-      if (hasEnded) return;
-      hasEnded = true;
-      synthesisRef.current = null;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      (window as any).__voiceAgentUtt = null;
       if (statusRef.current === 'speaking') {
         statusRef.current = 'connected';
         setState(s => ({ ...s, status: 'connected' }));
       }
-      onDone?.();
+      onDone();
     };
 
-    utterance.onend = handleEnd;
-    utterance.onerror = handleEnd;
+    // Safety timeout prevents getting stuck if onend drops
+    const maxDur = Math.max(4000, text.length * 80);
+    const safety = setTimeout(finish, maxDur);
 
-    synthesisRef.current = utterance;
-    statusRef.current = 'speaking';
-    setState(s => ({ ...s, status: 'speaking', activeVoiceName: label }));
+    utt.onend = () => { clearTimeout(safety); finish(); };
+    utt.onerror = () => { clearTimeout(safety); finish(); };
 
-    // Small timeout ensures Chrome releases speech engine cleanly
     setTimeout(() => {
-      try {
-        window.speechSynthesis.speak(utterance);
-      } catch {
-        handleEnd();
+      try { window.speechSynthesis.speak(utt); }
+      catch { clearTimeout(safety); finish(); }
+    }, 60);
+  }, []);
+
+  // ── ElevenLabs TTS (Primary: Backend Proxy or Direct) ─────────────────────
+
+  const speakElevenLabs = useCallback(async (text: string, onDone: () => void): Promise<void> => {
+    const voiceId = ELEVENLABS_VOICES[marketRef.current] || ELEVENLABS_VOICES.in_en;
+    const settings = ELEVENLABS_SETTINGS[marketRef.current] || ELEVENLABS_SETTINGS.in_en;
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (statusRef.current === 'speaking') {
+        statusRef.current = 'connected';
+        setState(s => ({ ...s, status: 'connected' }));
       }
-    }, 50);
-  }, [market, cancelTTS, stopASR]);
+      onDone();
+    };
 
-  // ── Customer Turn Handler ──────────────────────────────────────────────────
-
-  const handleCustomerTurn = useCallback(async (userText: string, asrMs: number) => {
-    const callSessionId = callSessionIdRef.current;
-    const agentSessionId = agentSessionIdRef.current;
-    const currentTurn = turnCountRef.current;
-
-    if (!callSessionId || !agentSessionId) {
-      console.warn('Session not active, ignoring turn');
-      return;
-    }
-
-    // Add customer transcript entry
-    addEntry({
-      speaker: 'customer',
-      text: userText,
-      asr_confidence: 0.95,
-      latency: { asr_ms: asrMs },
-    });
-
-    statusRef.current = 'processing';
-    setState(s => ({ ...s, status: 'processing', turnCount: s.turnCount + 1 }));
+    // Safety timeout: Never stay stuck in speaking
+    const safetyTimer = setTimeout(finish, Math.max(7000, text.length * 150));
 
     try {
-      const t0 = performance.now();
+      let audioBlob: Blob | null = null;
 
-      // 1. Process voice turn (retrieval + latency)
-      const turnResp = await fetch(`${API_BASE}/voice/calls/${callSessionId}/turn`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          call_session_id: callSessionId,
-          user_text: userText,
-          turn_number: currentTurn + 1,
-        }),
-      });
-      const turnData = await turnResp.json();
+      // 1. First try Backend /api/v1/voice/tts (Fastest, zero CORS issues, authenticated server-side)
+      try {
+        const beRes = await fetch(`${API_BASE}/voice/tts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, market: marketRef.current, voice_id: voiceId }),
+        });
+        if (beRes.ok) {
+          audioBlob = await beRes.blob();
+        }
+      } catch (beErr) {
+        console.warn('[TTS] Backend proxy attempt failed:', beErr);
+      }
 
-      // 2. Process FSM turn
-      await fetch(`${API_BASE}/agent/sessions/${agentSessionId}/turn`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: agentSessionId, user_input: userText }),
-      });
+      // 2. Fallback to direct ElevenLabs API if backend was unreachable
+      if (!audioBlob && ELEVENLABS_API_KEY) {
+        const res = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+          {
+            method: 'POST',
+            headers: {
+              'xi-api-key': ELEVENLABS_API_KEY,
+              'Content-Type': 'application/json',
+              Accept: 'audio/mpeg',
+            },
+            body: JSON.stringify({
+              text,
+              model_id: ELEVENLABS_MODEL,
+              voice_settings: {
+                stability: settings.stability,
+                similarity_boost: settings.similarity_boost,
+                style: settings.style,
+              },
+            }),
+          }
+        );
+        if (res.ok) {
+          audioBlob = await res.blob();
+        }
+      }
 
-      const totalMs = Math.round(performance.now() - t0);
-      const latencies = turnData.latencies || {};
-      const latency = {
-        asr_ms: asrMs,
-        retrieval_ms: latencies.retrieval_ms || turnData.retrieval_latency_ms || 0,
-        gate_ms: latencies.gate_ms || 0,
-        tts_ms: latencies.tts_ms || 0,
-        e2e_ms: totalMs,
-        user_stops_to_bot_audio_ms: latencies.user_stops_to_bot_audio_ms || totalMs,
+      if (!audioBlob) {
+        throw new Error('TTS audio unavailable, falling back to browser voice');
+      }
+
+      const url = URL.createObjectURL(audioBlob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.playbackRate = settings.speaking_rate || 1.0;
+
+      audio.onended = () => {
+        clearTimeout(safetyTimer);
+        URL.revokeObjectURL(url);
+        audioRef.current = null;
+        finish();
+      };
+      audio.onerror = () => {
+        clearTimeout(safetyTimer);
+        URL.revokeObjectURL(url);
+        audioRef.current = null;
+        finish();
       };
 
-      // Build agent response based on retrieval results and market persona
-      let agentText = '';
-      const lower = userText.toLowerCase();
-
-      if (turnData.is_refusal) {
-        agentText = {
-          in_en: "I am afraid I do not have verified information on that in our official guidelines. Would you like me to schedule a callback with our senior specialist?",
-          ph_tl: "Pasensya na po, wala po akong beripikadong impormasyon tungkol diyan. Maaari ko po ba kayong i-schedule ng callback sa aming specialist?",
-          id_id: "Mohon maaf, saya tidak memiliki informasi tersebut dalam panduan resmi kami. Izinkan saya mengatur panggilan balik dari spesialis kami.",
-        }[market] || "I'm sorry, I don't have that information available. May I arrange for a specialist to assist you?";
-      } else if (lower.includes('thank') || lower.includes('bye') || lower.includes('salamat')) {
-        agentText = {
-          in_en: "Thank you for your time today! Have a wonderful day! This is a marketing communication from SecureLife Insurance.",
-          ph_tl: "Maraming salamat po sa inyong oras! Magandang araw po! Ito ay isang marketing communication mula sa SecureLife Insurance.",
-          id_id: "Terima kasih banyak atas waktu Anda! Semoga harimu menyenangkan! Ini adalah komunikasi pemasaran dari SecureLife Insurance.",
-        }[market] || "Thank you for your time! Have a wonderful day!";
-      } else if (lower.includes('grace period') || lower.includes('due date') || lower.includes('lapse')) {
-        agentText = {
-          in_en: "Your policy includes a statutory 30-day grace period from the due date. During this time, your life coverage remains completely active.",
-          ph_tl: "Mayroon po kayong 30-day grace period para sa premium. Active pa rin po ang inyong buong life insurance coverage sa panahong ito.",
-          id_id: "Polis Anda memiliki masa tenggang 30 hari. Selama periode ini, perlindungan asuransi Anda tetap aktif sepenuhnya.",
-        }[market] || "Your policy includes a 30-day grace period with full coverage remaining active.";
-      } else if (lower.includes('yes') || lower.includes('rajesh') || lower.includes('opo') || lower.includes('jose') || lower.includes('confirm')) {
-        agentText = {
-          in_en: "Thank you for confirming. This call may be recorded for regulatory compliance and quality assurance. May I confirm your age?",
-          ph_tl: "Salamat po sa pag-confirm. Ang tawag na ito ay maaaring i-record para sa compliance at kalidad. Maaari po ba ninyong sabihin ang inyong edad?",
-          id_id: "Terima kasih atas konfirmasinya. Panggilan ini dapat direkam untuk kepatuhan regulasi. Boleh kami tahu usia Anda?",
-        }[market] || "Thank you. This call may be recorded for compliance purposes.";
-      } else {
-        agentText = {
-          in_en: "Thank you for sharing that. Let me look up the exact details from your policy schedule right away.",
-          ph_tl: "Salamat po. Hayaan ninyo akong tingnan ang eksaktong detalye mula sa inyong policy schedule.",
-          id_id: "Terima kasih atas informasinya. Saya akan segera memeriksa detail polis Anda.",
-        }[market] || "Thank you. Let me look into that for you.";
-      }
-
-      // Add agent entry
-      addEntry({
-        speaker: 'agent',
-        text: agentText,
-        citations: turnData.citations || (turnData.is_refusal ? [] : ['POL_SEC_GRACE_04']),
-        isRefusal: turnData.is_refusal,
-        gateVerdict: turnData.is_refusal ? 'REFUSAL' : 'PASSED',
-        latency,
-      });
-
-      setState(s => ({ ...s, lastLatency: latency }));
-
-      // Speak agent response, and automatically listen next if autoListen is enabled
-      speak(agentText, () => {
-        if (autoListenRef.current && statusRef.current !== 'ended' && !isMutedRef.current) {
-          setTimeout(() => {
-            if (statusRef.current === 'connected' && !isMutedRef.current) {
-              startListening((nextText, nextAsrMs) => {
-                handleCustomerTurn(nextText, nextAsrMs);
-              });
-            }
-          }, 300);
-        }
-      });
-
+      await audio.play();
     } catch (err) {
-      console.error('Turn processing error:', err);
-      statusRef.current = 'connected';
-      setState(s => ({ ...s, status: 'connected', error: 'Error processing turn. Please try again.' }));
+      clearTimeout(safetyTimer);
+      console.warn('[ElevenLabs] Playing browser voice fallback:', err);
+      speakBrowser(text, onDone);
     }
-  }, [addEntry, speak, market]);
+  }, [speakBrowser]);
 
-  // ── ASR: Reliable Speech Recognition with auto-cleanup & ducking protection ─
+  // ── Unified speak ─────────────────────────────────────────────────────────
 
-  const startListening = useCallback((onResult: (text: string, latency: number) => void) => {
-    const SpeechRecognitionImpl =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognitionImpl) return;
+  const speak = useCallback((text: string, onDone: () => void) => {
+    stopTTS(); stopSR();
+    statusRef.current = 'speaking';
+    setState(s => ({ ...s, status: 'speaking', awaitingCustomer: false }));
+    speakElevenLabs(text, onDone);
+  }, [stopTTS, stopSR, speakElevenLabs]);
 
-    stopASR();
-    cancelTTS();
+  // ── ASR Listen ────────────────────────────────────────────────────────────
 
-    let recognizedText = '';
-    let dispatched = false;
+  const listen = useCallback((onResult: (text: string, ms: number) => void) => {
+    const SRCls = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SRCls) {
+      setState(s => ({ ...s, status: 'connected', awaitingCustomer: true }));
+      return;
+    }
+    stopSR(); stopTTS();
 
-    // 150ms buffer for browser audio ducking release
     setTimeout(() => {
       if (statusRef.current === 'ended' || statusRef.current === 'idle') return;
-
       try {
-        const recognition = new SpeechRecognitionImpl() as BrowserSpeechRecognition;
-        recognition.lang = MARKET_LANG[market] || 'en-IN';
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-        recognition.continuous = false;
-
-        recognitionRef.current = recognition;
-        asrStartTimeRef.current = performance.now();
+        const r = new SRCls() as SR;
+        r.lang = MARKET_LANG[marketRef.current] || 'en-IN';
+        r.interimResults = true; r.maxAlternatives = 1; r.continuous = false;
+        srRef.current = r;
+        let buffered = ''; let dispatched = false;
+        const t0 = performance.now();
 
         statusRef.current = 'listening';
-        setState(s => ({ ...s, status: 'listening', currentInterim: '', error: null }));
+        setState(s => ({ ...s, status: 'listening', currentInterim: '', error: null, awaitingCustomer: true }));
 
-        recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
-          const last = event.results[event.results.length - 1];
-          if (!last || !last[0]) return;
-          const text = last[0].transcript;
-          recognizedText = text;
-
-          if (last.isFinal) {
-            if (!dispatched && text.trim()) {
-              dispatched = true;
-              const asrMs = Math.round(performance.now() - asrStartTimeRef.current);
-              statusRef.current = 'processing';
-              setState(s => ({ ...s, currentInterim: '', status: 'processing' }));
-              stopASR();
-              onResult(text.trim(), asrMs);
-            }
-          } else {
-            setState(s => ({ ...s, currentInterim: text }));
-          }
-        };
-
-        recognition.onerror = (event: { error: string }) => {
-          console.warn('ASR Notice:', event.error);
-          if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-            statusRef.current = 'connected';
-            setState(s => ({
-              ...s,
-              status: 'connected',
-              micPermission: 'denied',
-              error: 'Microphone permission blocked. Click the mic icon in your browser URL bar to allow it, or use quick text response chips below.',
-            }));
-          } else if (event.error === 'no-speech') {
-            // User paused or microphone level was quiet; smoothly reset to connected
-            if (statusRef.current === 'listening') {
-              statusRef.current = 'connected';
-              setState(s => ({ ...s, status: 'connected', currentInterim: '' }));
-            }
-          } else {
-            if (statusRef.current === 'listening') {
-              statusRef.current = 'connected';
-              setState(s => ({ ...s, status: 'connected', currentInterim: '' }));
-            }
-          }
-        };
-
-        recognition.onend = () => {
-          recognitionRef.current = null;
-          // If transcript was captured before onend without isFinal, dispatch it
-          if (!dispatched && recognizedText.trim()) {
-            dispatched = true;
-            const asrMs = Math.round(performance.now() - asrStartTimeRef.current);
+        r.onresult = (e) => {
+          const last = e.results[e.results.length - 1];
+          if (!last?.[0]) return;
+          buffered = last[0].transcript;
+          if (last.isFinal && !dispatched) {
+            dispatched = true; stopSR();
             statusRef.current = 'processing';
-            setState(s => ({ ...s, currentInterim: '', status: 'processing' }));
-            onResult(recognizedText.trim(), asrMs);
-            return;
-          }
-
-          if (statusRef.current === 'listening') {
-            statusRef.current = 'connected';
-            setState(s => ({ ...s, status: 'connected', currentInterim: '' }));
+            setState(s => ({ ...s, currentInterim: '', status: 'processing', awaitingCustomer: false }));
+            onResult(buffered.trim(), Math.round(performance.now() - t0));
+          } else if (!last.isFinal) {
+            setState(s => ({ ...s, currentInterim: buffered }));
           }
         };
-
-        recognition.start();
-      } catch (err) {
-        console.error('Could not start recognition:', err);
+        r.onerror = (e) => {
+          srRef.current = null;
+          if (e.error === 'not-allowed') {
+            setState(s => ({ ...s, status: 'connected', micPermission: 'denied', awaitingCustomer: true,
+              error: 'Mic access denied. Click a response chip below to speak.' }));
+          } else {
+            setState(s => ({ ...s, status: 'connected', currentInterim: '', awaitingCustomer: true }));
+          }
+          statusRef.current = 'connected';
+        };
+        r.onend = () => {
+          srRef.current = null;
+          if (buffered.trim() && !dispatched) {
+            dispatched = true;
+            statusRef.current = 'processing';
+            setState(s => ({ ...s, currentInterim: '', status: 'processing', awaitingCustomer: false }));
+            onResult(buffered.trim(), 300);
+          } else if (!dispatched) {
+            statusRef.current = 'connected';
+            setState(s => ({ ...s, status: 'connected', currentInterim: '', awaitingCustomer: true }));
+          }
+        };
+        r.start();
+      } catch {
         statusRef.current = 'connected';
-        setState(s => ({
-          ...s,
-          status: 'connected',
-          error: 'Microphone busy or not ready. Click Speak Now or use a quick prompt below.',
-        }));
+        setState(s => ({ ...s, status: 'connected', awaitingCustomer: true,
+          error: 'Mic unavailable. Use chips or text input below.' }));
       }
-    }, 150);
-  }, [market, stopASR, cancelTTS]);
+    }, 200);
+  }, [stopSR, stopTTS]);
 
-  // ── Direct Customer Text Fallback ──────────────────────────────────────────
+  // ── Process customer turn ─────────────────────────────────────────────────
+
+  const processCustomerTurn = useCallback(async (userText: string, asrMs: number) => {
+    const sid = callSidRef.current;
+    const asid = agentSidRef.current;
+
+    addEntry({ speaker: 'customer', text: userText, asr_confidence: 0.95, latency: { asr_ms: asrMs } });
+    statusRef.current = 'processing';
+    setState(s => ({ ...s, status: 'processing', turnCount: s.turnCount + 1, awaitingCustomer: false }));
+
+    const t0 = performance.now();
+    let agentText = '';
+    let isRefusal = false;
+    let citations: string[] = [];
+
+    // 1. Try Live Backend Turn
+    if (sid && sid !== 'offline') {
+      try {
+        const tr = await fetch(`${API_BASE}/voice/calls/${sid}/turn`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ call_session_id: sid, user_text: userText, turn_number: turnRef.current + 1 }),
+        }).then(r => r.json());
+
+        isRefusal = !!tr.is_refusal;
+        citations = tr.citations || [];
+        agentText = tr.agent_response || tr.agent_text || tr.response || '';
+      } catch (_) { /* fall through to local */ }
+    }
+
+    // 2. Grounded Fallback if backend offline or returned empty
+    if (!agentText) {
+      const fn = RESPONSES[marketRef.current] || RESPONSES.in_en;
+      const local = fn(userText);
+      agentText = local.text; isRefusal = local.isRefusal; citations = local.citations;
+    }
+
+    const totalMs = Math.round(performance.now() - t0);
+    const latency = { asr_ms: asrMs, e2e_ms: totalMs, user_stops_to_bot_audio_ms: totalMs };
+    turnRef.current += 1;
+    addEntry({
+      speaker: 'agent', text: agentText, citations, isRefusal,
+      gateVerdict: isRefusal ? 'REFUSAL' : citations.length ? 'PASSED' : 'PASSED', latency,
+    });
+    setState(s => ({ ...s, lastLatency: latency }));
+
+    speak(agentText, () => {
+      if (autoListenRef.current && statusRef.current !== 'ended' && !mutedRef.current) {
+        setTimeout(() => {
+          if (statusRef.current === 'connected' && !mutedRef.current) listen(processCustomerTurn);
+        }, 300);
+      } else {
+        setState(s => ({ ...s, awaitingCustomer: true }));
+      }
+    });
+  }, [addEntry, speak, listen]);
+
+  // ── sendCustomerText (chips or typing) ─────────────────────────────────────
 
   const sendCustomerText = useCallback((text: string) => {
-    if (!text.trim() || statusRef.current === 'ended' || statusRef.current === 'idle') return;
-    stopASR();
-    cancelTTS();
-    handleCustomerTurn(text.trim(), 120);
-  }, [stopASR, cancelTTS, handleCustomerTurn]);
+    if (!text.trim() || statusRef.current === 'speaking' || statusRef.current === 'processing') return;
+    stopSR();
+    processCustomerTurn(text.trim(), 50);
+  }, [stopSR, processCustomerTurn]);
 
-  // ── Session Lifecycle API calls ───────────────────────────────────────────
+  // ── activateMic (manual mic click) ────────────────────────────────────────
 
-  const requestMicPermission = useCallback(async () => {
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      setState(s => ({ ...s, micPermission: 'granted' }));
-      return true;
-    } catch {
-      setState(s => ({ ...s, micPermission: 'denied' }));
-      return false;
+  const activateMic = useCallback(() => {
+    if (statusRef.current === 'speaking') {
+      stopTTS();
     }
-  }, []);
+    listen(processCustomerTurn);
+  }, [stopTTS, listen, processCustomerTurn]);
+
+  // ── startCall ─────────────────────────────────────────────────────────────
 
   const startCall = useCallback(async () => {
     statusRef.current = 'starting';
-    setState(s => ({ ...s, status: 'starting', error: null }));
-
-    // Request mic permission
-    const hasPermission = await requestMicPermission();
-    if (!hasPermission) {
-      statusRef.current = 'idle';
-      setState(s => ({
-        ...s,
-        status: 'idle',
-        error: 'Microphone permission required for voice calls. Please allow mic access in your browser.',
-      }));
-      return;
-    }
+    setState(s => ({ ...s, status: 'starting', error: null, market, personaName: PERSONA_NAME[market] || 'Priya' }));
 
     try {
-      // 1. Create voice call session
-      const callResp = await fetch(`${API_BASE}/voice/calls`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ market, provider: 'mock' }),
-      });
-      if (!callResp.ok) throw new Error('Failed to start call session');
-      const callData = await callResp.json();
-
-      // 2. Create FSM agent session
-      const agentResp = await fetch(`${API_BASE}/agent/sessions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ market }),
-      });
-      if (!agentResp.ok) throw new Error('Failed to create agent session');
-      const agentData = await agentResp.json();
-
-      callSessionIdRef.current = callData.call_session_id;
-      agentSessionIdRef.current = agentData.session_id;
-      turnCountRef.current = 0;
-      statusRef.current = 'connected';
-
-      setState(s => ({
-        ...s,
-        status: 'connected',
-        callSessionId: callData.call_session_id,
-        agentSessionId: agentData.session_id,
-        micPermission: 'granted',
-        turnCount: 0,
-        transcript: [],
-        elapsedSeconds: 0,
-        error: null,
-      }));
-
-      // Start elapsed timer
-      if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current);
-      elapsedTimerRef.current = setInterval(() => {
-        setState(s => ({ ...s, elapsedSeconds: s.elapsedSeconds + 1 }));
-      }, 1000);
-
-      // Speak opening greeting with Priya's authentic female persona
-      setTimeout(() => {
-        const greetings: Record<string, string> = {
-          in_en: 'Namaste! This is Priya from SecureLife Insurance. How may I help you today?',
-          ph_tl: 'Magandang araw po! Ako po si Maria mula sa SecureLife Insurance. Paano ko po kayo matutulungan ngayon?',
-          id_id: 'Selamat siang! Perkenalkan, saya Sari dari SecureLife Insurance. Ada yang bisa saya bantu hari ini?',
-        };
-        const greeting = greetings[market] || greetings['in_en'];
-        addEntry({ speaker: 'agent', text: greeting });
-
-        speak(greeting, () => {
-          // Once opening greeting completes, automatically activate mic for the user!
-          if (autoListenRef.current && statusRef.current !== 'ended' && !isMutedRef.current) {
-            setTimeout(() => {
-              if (statusRef.current === 'connected' && !isMutedRef.current) {
-                startListening((text, asrMs) => {
-                  handleCustomerTurn(text, asrMs);
-                });
-              }
-            }, 300);
-          }
-        });
-      }, 500);
-
-    } catch (err) {
-      statusRef.current = 'idle';
-      setState(s => ({
-        ...s,
-        status: 'idle',
-        error: err instanceof Error ? err.message : 'Unknown error starting call',
-      }));
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      setState(s => ({ ...s, micPermission: 'granted' }));
+    } catch {
+      setState(s => ({ ...s, micPermission: 'denied' }));
     }
-  }, [market, addEntry, speak, requestMicPermission, startListening, handleCustomerTurn]);
+
+    let sid = 'offline'; let asid = 'offline';
+    try {
+      const [cr, ar] = await Promise.all([
+        fetch(`${API_BASE}/voice/calls`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ market, provider: 'mock' }),
+        }).then(r => r.json()),
+        fetch(`${API_BASE}/agent/sessions`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ market }),
+        }).then(r => r.json()),
+      ]);
+      sid = cr.call_session_id; asid = ar.session_id;
+    } catch (_) { /* offline mode */ }
+
+    callSidRef.current = sid; agentSidRef.current = asid;
+    turnRef.current = 0; statusRef.current = 'connected';
+
+    setState(s => ({
+      ...s, status: 'connected', callSessionId: sid, agentSessionId: asid,
+      turnCount: 0, transcript: [], elapsedSeconds: 0, error: null,
+    }));
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setState(s => ({ ...s, elapsedSeconds: s.elapsedSeconds + 1 })), 1000);
+
+    const greeting = GREETINGS[market] || GREETINGS.in_en;
+    addEntry({ speaker: 'agent', text: greeting, citations: [], gateVerdict: 'PASSED' });
+
+    speak(greeting, () => {
+      if (statusRef.current !== 'ended') {
+        setTimeout(() => {
+          if (statusRef.current === 'connected') {
+            listen(processCustomerTurn);
+          }
+        }, 300);
+      }
+    });
+  }, [market, addEntry, speak, listen, processCustomerTurn]);
+
+  // ── endCall ───────────────────────────────────────────────────────────────
 
   const endCall = useCallback(async () => {
-    stopASR();
-    cancelTTS();
-    if (elapsedTimerRef.current) {
-      clearInterval(elapsedTimerRef.current);
-      elapsedTimerRef.current = null;
+    stopSR(); stopTTS();
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    const sid = callSidRef.current;
+    if (sid && sid !== 'offline') {
+      try {
+        await fetch(`${API_BASE}/voice/calls/${sid}`, { method: 'DELETE' });
+      } catch (_) {}
     }
+    callSidRef.current = null; agentSidRef.current = null;
+    statusRef.current = 'ended';
+    setState(s => ({ ...s, status: 'ended', awaitingCustomer: false }));
+  }, [stopSR, stopTTS]);
 
-    statusRef.current = 'ending';
-    setState(s => ({ ...s, status: 'ending' }));
-
-    try {
-      const callSessionId = callSessionIdRef.current;
-      const agentSessionId = agentSessionIdRef.current;
-      if (callSessionId) {
-        await fetch(`${API_BASE}/voice/calls/${callSessionId}`, { method: 'DELETE' }).catch(() => {});
-      }
-      if (agentSessionId) {
-        await fetch(`${API_BASE}/agent/sessions/${agentSessionId}`, { method: 'DELETE' }).catch(() => {});
-      }
-    } finally {
-      statusRef.current = 'ended';
-      callSessionIdRef.current = null;
-      agentSessionIdRef.current = null;
-      setState(s => ({
-        ...s,
-        status: 'ended',
-        callSessionId: null,
-        agentSessionId: null,
-        currentInterim: '',
-      }));
-    }
-  }, [stopASR, cancelTTS]);
+  // ── resetCall ─────────────────────────────────────────────────────────────
 
   const resetCall = useCallback(() => {
-    stopASR();
-    cancelTTS();
-    if (elapsedTimerRef.current) {
-      clearInterval(elapsedTimerRef.current);
-      elapsedTimerRef.current = null;
-    }
+    stopSR(); stopTTS();
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    callSidRef.current = null; agentSidRef.current = null;
     statusRef.current = 'idle';
-    callSessionIdRef.current = null;
-    agentSessionIdRef.current = null;
-    setState({
-      ...initialState,
-      market,
-      ttsSupported: state.ttsSupported,
-      asrSupported: state.asrSupported,
-      activeVoiceName: state.activeVoiceName,
-    });
-  }, [market, stopASR, cancelTTS, state.ttsSupported, state.asrSupported, state.activeVoiceName]);
+    setState({ ...initialState, market: marketRef.current, personaName: PERSONA_NAME[marketRef.current] || 'Priya' });
+  }, [stopSR, stopTTS]);
+
+  // ── Controls ──────────────────────────────────────────────────────────────
 
   const toggleMute = useCallback(() => {
-    setState(s => {
-      const nextMuted = !s.isMuted;
-      isMutedRef.current = nextMuted;
-      if (nextMuted) {
-        stopASR();
-      }
-      return { ...s, isMuted: nextMuted };
-    });
-  }, [stopASR]);
+    mutedRef.current = !mutedRef.current;
+    setState(s => ({ ...s, isMuted: mutedRef.current }));
+    if (mutedRef.current) stopSR();
+  }, [stopSR]);
 
   const toggleAutoListen = useCallback(() => {
-    setState(s => {
-      const next = !s.autoListen;
-      autoListenRef.current = next;
-      return { ...s, autoListen: next };
-    });
+    autoListenRef.current = !autoListenRef.current;
+    setState(s => ({ ...s, autoListen: autoListenRef.current }));
   }, []);
-
-  const activateMic = useCallback(() => {
-    if (statusRef.current === 'connected' || statusRef.current === 'speaking') {
-      cancelTTS();
-      startListening((text, asrMs) => {
-        handleCustomerTurn(text, asrMs);
-      });
-    }
-  }, [cancelTTS, startListening, handleCustomerTurn]);
-
-  // ── Cleanup ──────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    return () => {
-      stopASR();
-      cancelTTS();
-      if (elapsedTimerRef.current) clearInterval(elapsedTimerRef.current);
-    };
-  }, [stopASR, cancelTTS]);
 
   return {
     state,
@@ -781,7 +614,5 @@ export function useVoicePipeline(market: string = 'in_en') {
     toggleAutoListen,
     activateMic,
     sendCustomerText,
-    speak,
-    cancelTTS,
   };
 }

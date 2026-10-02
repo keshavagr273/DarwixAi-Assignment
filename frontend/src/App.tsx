@@ -43,6 +43,9 @@ const AppLayout: React.FC = () => {
             <Route path="/kb" element={<KbStudio />} />
             <Route path="/retrieval" element={<RetrievalLab />} />
             <Route path="/agent" element={<VoiceAgent />} />
+            <Route path="/voice" element={<VoiceAgent />} />
+            <Route path="/voice-agent" element={<VoiceAgent />} />
+            <Route path="/voice-studio" element={<VoiceAgent />} />
             <Route path="/markets" element={<MarketPacks />} />
             <Route path="/asr" element={<AsrBench />} />
             <Route path="/calls" element={<CallLibrary />} />
