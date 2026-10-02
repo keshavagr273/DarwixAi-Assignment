@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { mockEvidenceTable, mockSearchResults } from '../data/mockRetrievalData';
 import type { RetrievalEvidenceItem } from '../types';
@@ -16,13 +16,19 @@ import {
 } from 'lucide-react';
 
 export const RetrievalLab: React.FC = () => {
-  const { openReceipt } = useApp();
+  const { openReceipt, market, kbVersion, apiMode } = useApp();
   const [retrievalMode, setRetrievalMode] = useState<
     'dense' | 'sparse' | 'hybrid' | 'hybrid_rerank'
   >('hybrid_rerank');
   const [searchQuery, setSearchQuery] = useState('Are there discounts available if I work for an agency branch partner?');
   const [evidenceList, setEvidenceList] = useState<RetrievalEvidenceItem[]>(mockEvidenceTable);
   const [activeTab, setActiveTab] = useState<'evidence_table' | 'live_query'>('evidence_table');
+  const [marketFilter, setMarketFilter] = useState<string>(market);
+
+  // Keep filter in sync when market changes in navbar
+  useEffect(() => {
+    setMarketFilter(market);
+  }, [market]);
 
   const handleVerdictChange = (id: string, newVerdict: 'correct' | 'partially_correct' | 'incorrect') => {
     setEvidenceList((prev) =>
@@ -87,10 +93,10 @@ export const RetrievalLab: React.FC = () => {
       <div className="flex items-center gap-2 border-b border-[#1F293D] pb-3 text-xs">
         <button
           onClick={() => setActiveTab('evidence_table')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
             activeTab === 'evidence_table'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
+              ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+              : 'text-slate-400 hover:text-white hover:bg-[#141C30] border-transparent'
           }`}
         >
           <Database className="w-3.5 h-3.5" />
@@ -98,10 +104,10 @@ export const RetrievalLab: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('live_query')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
             activeTab === 'live_query'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
+              ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+              : 'text-slate-400 hover:text-white hover:bg-[#141C30] border-transparent'
           }`}
         >
           <Search className="w-3.5 h-3.5" />
@@ -121,9 +127,42 @@ export const RetrievalLab: React.FC = () => {
                 Covers Product, Policy, Qualification, FAQ, Objection, deliberate failure cases, and fail-closed refusal tests.
               </p>
             </div>
-            <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-              Interactive Verdict Edits Enabled
-            </span>
+            
+            {/* Market Filter Tabs */}
+            <div className="flex items-center gap-1.5 p-1 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs">
+              <button
+                onClick={() => setMarketFilter('all')}
+                className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  marketFilter === 'all' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                All Markets
+              </button>
+              <button
+                onClick={() => setMarketFilter('in_en')}
+                className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  marketFilter === 'in_en' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🇮🇳 India
+              </button>
+              <button
+                onClick={() => setMarketFilter('ph_tl')}
+                className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  marketFilter === 'ph_tl' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🇵🇭 Philippines
+              </button>
+              <button
+                onClick={() => setMarketFilter('id_id')}
+                className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                  marketFilter === 'id_id' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🇮🇩 Indonesia
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-[#1F293D]">
@@ -140,7 +179,9 @@ export const RetrievalLab: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1F293D] bg-[#0E1424]">
-                {evidenceList.map((item) => (
+                {evidenceList
+                  .filter((item) => marketFilter === 'all' || item.market === marketFilter)
+                  .map((item) => (
                   <tr key={item.id} className="hover:bg-[#141C30]/50 transition-colors">
                     <td className="py-3.5 px-4 font-medium text-slate-300 capitalize">
                       {item.category}

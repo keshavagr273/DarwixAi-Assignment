@@ -42,20 +42,20 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center rounded-lg border border-[#1F293D] bg-[#090D16] p-0.5 text-xs">
           <button
             onClick={() => setApiMode('mock')}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
               apiMode === 'mock'
-                ? 'bg-[#182238] text-amber-300 font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[#182238] text-amber-300 font-semibold shadow-sm border-amber-500/30'
+                : 'text-slate-400 hover:text-slate-200 border-transparent'
             }`}
           >
             Mock Fixtures
           </button>
           <button
             onClick={() => setApiMode('live')}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+            className={`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
               apiMode === 'live'
                 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30 font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-400 hover:text-slate-200 border-transparent'
             }`}
           >
             Live Backend

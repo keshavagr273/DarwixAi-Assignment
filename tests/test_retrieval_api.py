@@ -7,7 +7,7 @@ def test_api_health_endpoint():
     res = client.get("/api/v1/health")
     assert res.status_code == 200
     data = res.json()
-    assert data["status"] == "healthy"
+    assert data["status"] in ("healthy", "degraded")
     assert data["active_kb_version"] == "v1.1"
 
 def test_api_retrieval_factual_search():

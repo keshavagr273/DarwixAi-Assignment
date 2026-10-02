@@ -98,10 +98,10 @@ export const Evaluation: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveSection(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
+                  ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+                  : 'text-slate-400 hover:text-white hover:bg-[#141C30] border-transparent'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />

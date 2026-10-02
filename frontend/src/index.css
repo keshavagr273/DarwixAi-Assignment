@@ -79,3 +79,16 @@ body {
   font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   letter-spacing: -0.02em;
 }
+
+/* Eliminate browser focus rings, outline glitches and layout flashing on click */
+button,
+a,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}

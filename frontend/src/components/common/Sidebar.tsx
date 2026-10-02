@@ -89,17 +89,17 @@ export const Sidebar: React.FC = () => {
                   to={item.path}
                   end={item.path === '/'}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all relative group ${
+                    `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors duration-100 relative group outline-none focus:outline-none focus-visible:outline-none border ${
                       isActive
-                        ? 'bg-indigo-600/15 text-indigo-300 font-semibold border border-indigo-500/30 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-[#141C30]'
+                        ? 'bg-indigo-600/15 text-indigo-300 font-semibold border-indigo-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-[#141C30] border-transparent'
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
                       <Icon
-                        className={`w-4 h-4 shrink-0 transition-colors ${
+                        className={`w-4 h-4 shrink-0 transition-colors duration-100 ${
                           isActive
                             ? 'text-indigo-400'
                             : 'text-slate-400 group-hover:text-slate-200'
@@ -142,7 +142,7 @@ export const Sidebar: React.FC = () => {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-[#141C30] rounded-lg transition-colors ml-auto"
+          className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-[#141C30] rounded-lg transition-colors duration-100 ml-auto outline-none focus:outline-none focus-visible:outline-none border border-transparent"
           title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}

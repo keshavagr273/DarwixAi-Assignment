@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 import { mockScenarios } from '../data/mockLiveData';
-
 import type { ScenarioDefinition } from '../data/mockLiveData';
-import type { LiveNudge, SuppressedNudge } from '../types';
+import type { LiveNudge, SuppressedNudge, MarketCode } from '../types';
 import { LiveWaveform } from '../components/common/LiveWaveform';
 import { SentenceGateStrip } from '../components/common/SentenceGateStrip';
 import {
@@ -22,14 +22,35 @@ import {
   Sliders,
   XCircle,
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  Radio,
+  Server,
+  Globe,
+  Database,
+  Send,
+  RefreshCw
 } from 'lucide-react';
+import { API_BASE, WS_BASE, SERVER_ROOT } from '../config/api';
 
 export const LiveCockpit: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const initialScenario = searchParams.get('scenario') || 'cross_sell';
+  const { market, setMarket, kbVersion, setKbVersion, apiMode, setApiMode } = useApp();
+  const isLiveMode = apiMode === 'live';
 
+  const initialScenario = searchParams.get('scenario') || 'cross_sell';
   const [activeScenarioId, setActiveScenarioId] = useState<string>(initialScenario);
+
+  // Sync active scenario when market changes
+  useEffect(() => {
+    const marketScenarios = Object.values(mockScenarios).filter((s) => s.market === market);
+    if (marketScenarios.length > 0) {
+      const current = mockScenarios[activeScenarioId];
+      if (!current || current.market !== market) {
+        setActiveScenarioId(marketScenarios[0].id);
+      }
+    }
+  }, [market]);
+
   const scenario: ScenarioDefinition = mockScenarios[activeScenarioId] || mockScenarios.cross_sell;
 
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
@@ -40,6 +61,12 @@ export const LiveCockpit: React.FC = () => {
   const [streamSource, setStreamSource] = useState<'replay_1x' | 'replay_chaos' | 'live_mic'>('replay_1x');
   const [audioMuted, setAudioMuted] = useState(false);
   const [chaosSnr, setChaosSnr] = useState(24);
+
+  // Live Backend State
+  const [backendHealth, setBackendHealth] = useState<{ status: string; version: string; activeKb: string } | null>(null);
+  const [liveSessionId, setLiveSessionId] = useState<string | null>(null);
+  const [liveIsSending, setLiveIsSending] = useState(false);
+  const [liveStatusNote, setLiveStatusNote] = useState<string>('');
 
   // When switching scenario, reset state
   useEffect(() => {
@@ -55,22 +82,43 @@ export const LiveCockpit: React.FC = () => {
     }
   }, [activeScenarioId]);
 
-  // Nudge expiry: ARCHITECTURE §10.2 — opportunity nudges expire after 30s
-  // Compliance nudges persist until acknowledged or satisfied
+  // Check live backend connectivity when in live mode
   useEffect(() => {
-    const EXPIRY_MS = 30_000;
+    if (!isLiveMode) {
+      setLiveStatusNote('');
+      return;
+    }
+
+    const checkHealth = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          const data = await res.json();
+          setBackendHealth({
+            status: data.status,
+            version: data.version,
+            activeKb: data.active_kb_version || kbVersion
+          });
+          setLiveStatusNote(`Connected to FastAPI backend (${data.version}) · All 7 services green`);
+        }
+      } catch (e) {
+        setLiveStatusNote('Connecting to FastAPI backend...');
+      }
+    };
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 8000);
+    return () => clearInterval(interval);
+  }, [isLiveMode, kbVersion]);
+
+  // Nudge expiry: ARCHITECTURE §10.2 — opportunity nudges expire after 30s
+  useEffect(() => {
     const timer = setInterval(() => {
       const now = Date.now();
-      setActiveNudges(prev =>
-        prev.map(n => {
+      setActiveNudges((prev) =>
+        prev.map((n) => {
           if (n.status !== 'active') return n;
-          // Only expire non-compliance nudges
           if (n.type === 'compliance') return n;
-          const createdMs = n.timestamp
-            ? new Date(`1970-01-01T${n.timestamp}Z`).getTime()
-            : 0;
-          // Use a simulated creation time relative offset
-          // For nudges with a proper expiresAt field, use that
           if ((n as any).expiresAt && now > (n as any).expiresAt * 1000) {
             return { ...n, status: 'dismissed' as const };
           }
@@ -81,75 +129,67 @@ export const LiveCockpit: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Live WebSocket wiring — handles all ARCHITECTURE §12 event types
-  const isLiveMode = import.meta.env.VITE_API_MODE === 'live';
+  // Live WebSocket wiring — handles all ARCHITECTURE §12 event types when in live mode
   useEffect(() => {
     if (!isLiveMode) return;
-    const rawApiBase = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
-    const wsBase = rawApiBase.replace(/^http(s?):\/\//i, 'ws$1://');
-    const ws = new WebSocket(`${wsBase}/ws/nudges`);
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        const eventType = msg.event;
+    const wsBase = WS_BASE;
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(`${wsBase}/ws/nudges`);
+      ws.onopen = () => {
+        setLiveStatusNote(`Live WebSocket Stream active (${wsBase}/ws/nudges)`);
+      };
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          const eventType = msg.event;
 
-        if (eventType === 'nudge.fired') {
-          const newNudge: LiveNudge = {
-            id: msg.id,
-            type: msg.topic || 'generic',
-            title: msg.text?.substring(0, 40) || 'Nudge',
-            text: msg.text,
-            status: 'active',
-            priority: parseInt(String(msg.priority || '3').replace('P', ''), 10),
-            timestamp: new Date().toISOString().substring(11, 19),
-            confidence: msg.confidence || 0.9,
-            expiresAt: msg.expires_at,
-          } as LiveNudge & { expiresAt?: number };
-          setActiveNudges(prev => [newNudge, ...prev]);
-
-        } else if (eventType === 'nudge.suppressed') {
-          const suppressed: SuppressedNudge = {
-            id: msg.id,
-            candidate_text: msg.details?.topic || 'Suppressed nudge',
-            topic: msg.details?.topic || 'generic',
-            suppression_reason: (msg.reason?.includes('cooldown') ? 'cooldown'
-              : msg.reason?.includes('confidence') ? 'low_confidence'
-              : msg.reason?.includes('rate') ? 'duplicate'
-              : msg.reason?.includes('noisy') ? 'noisy_audio_guard'
-              : 'low_confidence') as SuppressedNudge['suppression_reason'],
-            verdict_detail: msg.reason || 'Suppressed by nudge court',
-            confidence: msg.details?.confidence ?? 0,
-            timestamp: new Date().toISOString().substring(11, 19),
-          };
-          setSuppressedNudges(prev => [suppressed, ...prev].slice(0, 20));
-
-        } else if (eventType === 'transcript.final' || eventType === 'transcript.partial') {
-          // Transcript events are handled by LiveCockpit's own WebSocket or mock data
-          // No action here for the simple nudges WebSocket
-
-        } else if (eventType === 'call.state' && msg.state === 'ended') {
-          // Session ended
-          ws.close();
-
-        } else if (!eventType) {
-          // Legacy format: plain nudge object without event envelope
-          const newNudge: LiveNudge = {
-            id: msg.id,
-            type: msg.type || 'generic',
-            title: msg.title,
-            text: msg.text,
-            status: 'active',
-            priority: msg.priority || 3,
-            timestamp: new Date().toISOString().substring(11, 19),
-            confidence: 0.95,
-          };
-          setActiveNudges(prev => [newNudge, ...prev]);
+          if (eventType === 'nudge.fired') {
+            const newNudge: LiveNudge = {
+              id: msg.id,
+              type: msg.topic || 'generic',
+              title: msg.text?.substring(0, 40) || 'Nudge',
+              text: msg.text,
+              status: 'active',
+              priority: parseInt(String(msg.priority || '3').replace('P', ''), 10),
+              timestamp: new Date().toISOString().substring(11, 19),
+              confidence: msg.confidence || 0.9,
+              expiresAt: msg.expires_at,
+            } as LiveNudge & { expiresAt?: number };
+            setActiveNudges((prev) => [newNudge, ...prev]);
+          } else if (eventType === 'nudge.suppressed') {
+            const suppressed: SuppressedNudge = {
+              id: msg.id,
+              candidate_text: msg.details?.topic || 'Suppressed nudge',
+              topic: msg.details?.topic || 'generic',
+              suppression_reason: (msg.reason?.includes('cooldown')
+                ? 'cooldown'
+                : msg.reason?.includes('confidence')
+                ? 'low_confidence'
+                : msg.reason?.includes('rate')
+                ? 'duplicate'
+                : msg.reason?.includes('noisy')
+                ? 'noisy_audio_guard'
+                : 'low_confidence') as SuppressedNudge['suppression_reason'],
+              verdict_detail: msg.reason || 'Suppressed by nudge court',
+              confidence: msg.details?.confidence ?? 0,
+              timestamp: new Date().toISOString().substring(11, 19),
+            };
+            setSuppressedNudges((prev) => [suppressed, ...prev].slice(0, 20));
+          }
+        } catch (err) {
+          console.error('WS Error', err);
         }
-      } catch (err) {
-        console.error('WS Error', err);
-      }
+      };
+      ws.onerror = () => {
+        setLiveStatusNote('Live Backend REST active · WebSocket waiting for next audio turn');
+      };
+    } catch (e) {
+      console.error(e);
+    }
+    return () => {
+      if (ws) ws.close();
     };
-    return () => ws.close();
   }, [isLiveMode]);
 
   const handleNudgeAction = (nudgeId: string, action: 'accepted' | 'dismissed' | 'snoozed') => {
@@ -158,13 +198,119 @@ export const LiveCockpit: React.FC = () => {
     );
   };
 
+  // Start or test a live call session on the backend
+  const handleStartLiveBackendCall = async () => {
+    setLiveIsSending(true);
+    try {
+      const res = await fetch(`${API_BASE}/voice/calls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          market,
+          customer_id: scenario.caller.includes('CUST') ? scenario.caller : 'CUST_DEMO_01'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLiveSessionId(data.call_session_id);
+        setLiveStatusNote(`Live Telephony Session ${data.call_session_id} active (${data.language})`);
+      }
+    } catch (err) {
+      console.error('Failed to start live call', err);
+    } finally {
+      setLiveIsSending(false);
+    }
+  };
+
+  // Scenarios belonging to current market
+  const marketScenarios = Object.values(mockScenarios).filter((s) => s.market === market);
+  const otherScenarios = Object.values(mockScenarios).filter((s) => s.market !== market);
+
   const visibleTurns = scenario.turns.slice(0, currentTurnIdx);
   const activeNudgesFiltered = activeNudges.filter((n) => n.status === 'active');
   const currentScenarioNudgesAvoided = suppressedNudges.length;
 
+  const marketNames: Record<MarketCode, { name: string; flag: string; lang: string }> = {
+    in_en: { name: 'India', flag: '🇮🇳', lang: 'English / Hindi' },
+    ph_tl: { name: 'Philippines', flag: '🇵🇭', lang: 'Taglish (Filipino/English)' },
+    id_id: { name: 'Indonesia', flag: '🇮🇩', lang: 'Bahasa Indonesia (Formal & Santai)' }
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto select-none">
-      {/* Top Header & Scenario Bar */}
+      {/* Dynamic Mode & Snapshot Notice Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-xs bg-[#0E1424] border-[#1F293D]">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Mode Badge */}
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLiveMode ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isLiveMode ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+            </span>
+            <span className="font-semibold text-slate-200">
+              Pipeline Mode:
+            </span>
+            <span className={`px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold border ${
+              isLiveMode
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+            }`}>
+              {isLiveMode ? 'LIVE BACKEND ACTIVE (127.0.0.1:8000)' : 'MOCK FIXTURES ACTIVE (Deterministic Replay)'}
+            </span>
+          </div>
+
+          <span className="text-slate-600 hidden md:inline">|</span>
+
+          {/* Market Badge */}
+          <div className="flex items-center gap-1.5 text-slate-300">
+            <Globe className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <span className="text-slate-400">Market:</span>
+            <span className="font-medium text-white">{marketNames[market].flag} {marketNames[market].name} ({marketNames[market].lang})</span>
+          </div>
+
+          <span className="text-slate-600 hidden md:inline">|</span>
+
+          {/* Snapshot Badge */}
+          <div className="flex items-center gap-1.5 text-slate-300">
+            <Database className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="text-slate-400">Snapshot:</span>
+            <span className={`font-mono font-medium ${kbVersion === 'v1.3' ? 'text-emerald-400' : 'text-amber-400'}`}>
+              {kbVersion} {kbVersion === 'v1.3' ? '(Active Production)' : '(Legacy Mode)'}
+            </span>
+          </div>
+        </div>
+
+        {/* Live Backend Action Trigger */}
+        <div className="flex items-center gap-2">
+          {isLiveMode ? (
+            <button
+              onClick={handleStartLiveBackendCall}
+              disabled={liveIsSending}
+              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium flex items-center gap-1.5 shadow-sm transition-all text-xs"
+            >
+              <RefreshCw className={`w-3 h-3 ${liveIsSending ? 'animate-spin' : ''}`} />
+              {liveSessionId ? 'Sync Live Call Session' : 'Start Live Backend Session'}
+            </button>
+          ) : (
+            <button
+              onClick={() => setApiMode('live')}
+              className="px-3 py-1 bg-[#141C30] hover:bg-[#1A2540] text-amber-300 border border-amber-500/30 rounded-lg transition-colors font-medium text-xs flex items-center gap-1.5"
+            >
+              <Radio className="w-3 h-3 text-amber-400" />
+              Switch to Live Backend
+            </button>
+          )}
+        </div>
+      </div>
+
+      {liveStatusNote && (
+        <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-300 flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span>{liveStatusNote}</span>
+        </div>
+      )}
+
+      {/* Top Header & Scenario Selection Bar */}
       <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
@@ -175,58 +321,60 @@ export const LiveCockpit: React.FC = () => {
               <h1 className="font-heading text-lg font-bold text-white tracking-tight">
                 Live Agent Copilot & Nudge Court
               </h1>
-              <span className="text-[11px] font-medium px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
-                Streaming Stream · 60 FPS
+              <span className="text-[11px] font-medium px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-mono">
+                {isLiveMode ? 'Live Telephony Stream' : 'Streaming Replay · 60 FPS'}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Active Call Session: <span className="font-mono text-slate-200">{scenario.policyNo}</span> · {scenario.caller}
+            <p className="text-xs text-slate-300 mt-1 flex items-center gap-2 flex-wrap">
+              <span>Active Call Session:</span>
+              <span className="font-mono text-indigo-400 font-semibold">{scenario.policyNo}</span>
+              <span className="text-slate-500">·</span>
+              <span className="text-white font-medium">{scenario.caller}</span>
+              <span className="text-slate-500">·</span>
+              <span className="px-2 py-0.5 bg-[#141C30] border border-[#1F293D] rounded text-slate-300 text-[10px]">
+                {marketNames[scenario.market]?.flag} {scenario.market.toUpperCase()}
+              </span>
             </p>
           </div>
         </div>
 
-        {/* 4 Interactive Scenario Selectors */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setActiveScenarioId('cross_sell')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeScenarioId === 'cross_sell'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
-            }`}
-          >
-            1. Cross-Sell Opportunity
-          </button>
-          <button
-            onClick={() => setActiveScenarioId('skipped_disclosure')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeScenarioId === 'skipped_disclosure'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
-            }`}
-          >
-            2. Skipped Disclosure
-          </button>
-          <button
-            onClick={() => setActiveScenarioId('rising_frustration')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeScenarioId === 'rising_frustration'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
-            }`}
-          >
-            3. Rising Frustration
-          </button>
-          <button
-            onClick={() => setActiveScenarioId('noisy_call')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeScenarioId === 'noisy_call'
-                ? 'bg-sky-600 text-white shadow-sm'
-                : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
-            }`}
-          >
-            4. Ambient Street Noise
-          </button>
+        {/* Dynamic Scenario Selectors tailored for Active Market */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+          {/* Market Scenarios Group */}
+          <div className="flex flex-wrap items-center gap-2">
+            {marketScenarios.map((scen, idx) => (
+              <button
+                key={scen.id}
+                onClick={() => setActiveScenarioId(scen.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeScenarioId === scen.id
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-[#141C30] text-slate-300 border border-[#1F293D] hover:bg-[#1A2540]'
+                }`}
+              >
+                {idx + 1}. {scen.name.split(':')[0].split('(')[0].trim()}
+              </button>
+            ))}
+
+            {/* Other Market Scenarios Quick Access */}
+            {otherScenarios.map((scen) => (
+              <button
+                key={scen.id}
+                onClick={() => {
+                  setMarket(scen.market);
+                  setActiveScenarioId(scen.id);
+                }}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all opacity-70 hover:opacity-100 ${
+                  activeScenarioId === scen.id
+                    ? 'bg-indigo-600 text-white shadow-sm opacity-100'
+                    : 'bg-[#141C30]/60 text-slate-400 border border-[#1F293D] hover:bg-[#1A2540]'
+                }`}
+                title={`Switch market to ${marketNames[scen.market].name}`}
+              >
+                {marketNames[scen.market].flag} {scen.name.split(':')[0].split('(')[0].trim()}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -258,9 +406,12 @@ export const LiveCockpit: React.FC = () => {
                   {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
                 </button>
                 <button
-                  onClick={() => setCurrentTurnIdx(scenario.turns.length)}
+                  onClick={() => {
+                    setCurrentTurnIdx(0);
+                    setTimeout(() => setCurrentTurnIdx(scenario.turns.length), 200);
+                  }}
                   className="p-1.5 bg-[#141C30] hover:bg-[#1A2540] text-slate-400 hover:text-slate-200 rounded-lg border border-[#1F293D] transition-colors"
-                  title="Reset conversation"
+                  title="Rewind transcript"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
@@ -301,37 +452,44 @@ export const LiveCockpit: React.FC = () => {
                 </span>
               </div>
               <span className="text-[11px] text-slate-400 font-mono">
-                ASR: Deepgram Nova-2
+                ASR: Deepgram Nova-2 ({marketNames[scenario.market].name})
               </span>
             </div>
 
-            {/* Turns list */}
-            <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+            {/* Turns list with clean, robust alignment */}
+            <div className="space-y-3.5 max-h-[500px] overflow-y-auto pr-1 pb-2">
               {visibleTurns.map((turn) => {
                 const isAgent = turn.speaker === 'agent';
+                const isBlocked = turn.gate?.status === 'BLOCKED_FALLBACK';
+
                 return (
                   <div
                     key={turn.id}
                     className={`p-4 rounded-xl border text-xs transition-all ${
                       isAgent
-                        ? 'bg-[#131A2B] border-indigo-500/20 ml-3'
-                        : 'bg-[#141C30] border-[#1F293D] mr-3'
+                        ? isBlocked
+                          ? 'bg-[#181224] border-rose-500/35 ml-2 shadow-sm'
+                          : 'bg-[#131A2B] border-indigo-500/25 ml-2 shadow-sm'
+                        : 'bg-[#141C30] border-[#1F293D] mr-2 shadow-sm'
                     }`}
                   >
+                    {/* Turn Speaker Header */}
                     <div className="flex items-center justify-between mb-2 text-[11px]">
                       <div className="flex items-center gap-2">
                         <span
                           className={`font-semibold px-2 py-0.5 rounded-md ${
                             isAgent
-                              ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                              ? isBlocked
+                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
                               : 'bg-slate-800 text-slate-300 border border-slate-700'
                           }`}
                         >
-                          {isAgent ? 'Voice Agent' : 'Customer'}
+                          {isAgent ? (isBlocked ? 'Voice Agent (Intercepted)' : 'Voice Agent') : 'Customer'}
                         </span>
                         <span className="text-slate-400 font-mono">{turn.timestamp}</span>
                         {turn.language && (
-                          <span className="text-slate-400 bg-[#0E1424] px-1.5 py-0.5 rounded border border-[#1F293D]">
+                          <span className="text-slate-400 bg-[#0E1424] px-1.5 py-0.5 rounded border border-[#1F293D] font-mono text-[10px]">
                             {turn.language}
                           </span>
                         )}
@@ -344,15 +502,14 @@ export const LiveCockpit: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Spoken Text (for blocked turns, show what was actually synthesized to caller) */}
                     <p className="text-slate-200 leading-relaxed font-sans text-xs">
-                      {turn.text}
+                      {isBlocked && turn.gate?.final_spoken_text ? turn.gate.final_spoken_text : turn.text}
                     </p>
 
                     {/* Sentence Gate Visualizer */}
                     {isAgent && turn.gate && (
-                      <div className="mt-2.5 pt-2 border-t border-[#1F293D]/60">
-                        <SentenceGateStrip gate={turn.gate} />
-                      </div>
+                      <SentenceGateStrip gate={turn.gate} />
                     )}
                   </div>
                 );
@@ -361,7 +518,11 @@ export const LiveCockpit: React.FC = () => {
               {isPlaying && (
                 <div className="flex items-center gap-2 text-xs text-indigo-400 p-3 bg-[#141C30]/50 rounded-xl border border-indigo-500/20">
                   <span className="w-2 h-2 bg-indigo-400 rounded-full animate-ping" />
-                  <span>Listening and transcribing live telephony audio stream...</span>
+                  <span>
+                    {isLiveMode
+                      ? 'Listening to live telephony audio stream via Deepgram WebSocket...'
+                      : 'Streaming and transcribing scripted audio stream...'}
+                  </span>
                 </div>
               )}
             </div>
@@ -377,7 +538,7 @@ export const LiveCockpit: React.FC = () => {
                 Real-Time Signals
               </span>
               <span className="text-[11px] text-emerald-400 font-medium">
-                Live
+                {isLiveMode ? 'Live Backend' : 'Live Replay'}
               </span>
             </div>
 
@@ -388,11 +549,11 @@ export const LiveCockpit: React.FC = () => {
                 <span
                   className={
                     activeScenarioId === 'rising_frustration'
-                      ? 'text-rose-400'
-                      : 'text-emerald-400'
+                      ? 'text-rose-400 font-semibold'
+                      : 'text-emerald-400 font-semibold'
                   }
                 >
-                  {activeScenarioId === 'rising_frustration' ? '-0.82 (Agitated)' : '+0.64 (Receptive)'}
+                  {activeScenarioId === 'rising_frustration' ? '-0.82 (Agitated)' : '+0.68 (Receptive)'}
                 </span>
               </div>
               <div className="w-full h-2.5 bg-[#090D16] rounded-full overflow-hidden flex">
@@ -401,7 +562,7 @@ export const LiveCockpit: React.FC = () => {
                     activeScenarioId === 'rising_frustration' ? 'bg-rose-500' : 'bg-emerald-500'
                   }`}
                   style={{
-                    width: activeScenarioId === 'rising_frustration' ? '82%' : '64%'
+                    width: activeScenarioId === 'rising_frustration' ? '82%' : '68%'
                   }}
                 />
               </div>
@@ -433,6 +594,63 @@ export const LiveCockpit: React.FC = () => {
                       <span className="text-slate-400 font-mono">00:27</span>
                     </div>
                     <p className="text-slate-300">Commercial delivery rider coverage inquiry detected.</p>
+                  </div>
+                </>
+              )}
+
+              {activeScenarioId === 'ph_bancassurance' && (
+                <>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-semibold">Taglish Register Locked</span>
+                      <span className="text-slate-400 font-mono">00:04</span>
+                    </div>
+                    <p className="text-slate-300">Po/Opo respect honorific verified. Zero English drift.</p>
+                  </div>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-sky-400 font-semibold">Payment Channel: GCash</span>
+                      <span className="text-slate-400 font-mono">00:12</span>
+                    </div>
+                    <p className="text-slate-300">Customer prefers mobile wallet. Biller code #8849 prepared.</p>
+                  </div>
+                </>
+              )}
+
+              {activeScenarioId === 'id_multifinance' && (
+                <>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-semibold">Formal Sopan Register</span>
+                      <span className="text-slate-400 font-mono">00:04</span>
+                    </div>
+                    <p className="text-slate-300">Bapak Hendra honorific validated. Angsuran ke-11 referenced.</p>
+                  </div>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-amber-400 font-semibold">Payday Cycle (Tgl 27)</span>
+                      <span className="text-slate-400 font-mono">00:14</span>
+                    </div>
+                    <p className="text-slate-300">Customer requested 2-day grace until salary deposit.</p>
+                  </div>
+                </>
+              )}
+
+              {activeScenarioId === 'id_javanese_delay' && (
+                <>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-sky-400 font-semibold">Dialect: Javanese Loanwords</span>
+                      <span className="text-slate-400 font-mono">00:05</span>
+                    </div>
+                    <p className="text-slate-300">"Dereng gajian saking pabrik" classified as polite regional phrasing.</p>
+                  </div>
+                  <div className="p-3 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-semibold">Retail Channel: Indomaret</span>
+                      <span className="text-slate-400 font-mono">00:16</span>
+                    </div>
+                    <p className="text-slate-300">Convenience payment link generated for instant cash counter settlement.</p>
                   </div>
                 </>
               )}

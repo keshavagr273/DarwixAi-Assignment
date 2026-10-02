@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
 import { LiveWaveform } from '../components/common/LiveWaveform';
 import { SentenceGateStrip } from '../components/common/SentenceGateStrip';
 import { useVoicePipeline } from '../hooks/useVoicePipeline';
@@ -23,9 +24,9 @@ import {
 
 export const VoiceAgent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'test_call' | 'flow' | 'config' | 'crm_action' | 'test_matrix'>('test_call');
-  const [selectedMarket, setSelectedMarket] = useState<string>('in_en');
+  const { market, setMarket } = useApp();
 
-  const { state: voiceState, startCall, endCall, resetCall, toggleMute, activateMic } = useVoicePipeline(selectedMarket);
+  const { state: voiceState, startCall, endCall, resetCall, toggleMute, activateMic } = useVoicePipeline(market);
 
   const callActive = voiceState.status !== 'idle' && voiceState.status !== 'ended';
   const isMuted = voiceState.isMuted;
@@ -179,10 +180,10 @@ export const VoiceAgent: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
+                  ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+                  : 'text-slate-400 hover:text-white hover:bg-[#141C30] border-transparent'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -230,8 +231,8 @@ export const VoiceAgent: React.FC = () => {
                 {!callActive && (
                   <select
                     id="market-select"
-                    value={selectedMarket}
-                    onChange={(e) => setSelectedMarket(e.target.value)}
+                    value={market}
+                    onChange={(e) => setMarket(e.target.value as any)}
                     className="px-3 py-2 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs text-slate-200 cursor-pointer focus:outline-none"
                     aria-label="Select market"
                   >

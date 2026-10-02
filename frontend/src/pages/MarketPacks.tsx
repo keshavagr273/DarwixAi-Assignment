@@ -67,30 +67,30 @@ export const MarketPacks: React.FC = () => {
         <div className="flex items-center gap-1.5 bg-[#141C30] border border-[#1F293D] p-1 rounded-xl text-xs">
           <button
             onClick={() => setMarket('in_en')}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 font-medium ${
+            className={`px-3 py-1.5 rounded-lg transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border flex items-center gap-2 font-medium ${
               market === 'in_en'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+                : 'text-slate-400 hover:text-white border-transparent'
             }`}
           >
             <span>🇮🇳</span> India (in_en)
           </button>
           <button
             onClick={() => setMarket('ph_tl')}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 font-medium ${
+            className={`px-3 py-1.5 rounded-lg transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border flex items-center gap-2 font-medium ${
               market === 'ph_tl'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+                : 'text-slate-400 hover:text-white border-transparent'
             }`}
           >
             <span>🇵🇭</span> Philippines (ph_tl)
           </button>
           <button
             onClick={() => setMarket('id_id')}
-            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 font-medium ${
+            className={`px-3 py-1.5 rounded-lg transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border flex items-center gap-2 font-medium ${
               market === 'id_id'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+                : 'text-slate-400 hover:text-white border-transparent'
             }`}
           >
             <span>🇮🇩</span> Indonesia (id_id)
@@ -123,10 +123,10 @@ export const MarketPacks: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-colors duration-100 outline-none focus:outline-none focus-visible:outline-none border ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-[#141C30]'
+                  ? 'bg-indigo-600 text-white shadow-sm border-indigo-500'
+                  : 'text-slate-400 hover:text-white hover:bg-[#141C30] border-transparent'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />

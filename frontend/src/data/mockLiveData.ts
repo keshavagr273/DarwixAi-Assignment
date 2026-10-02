@@ -466,5 +466,289 @@ export const mockScenarios: Record<string, ScenarioDefinition> = {
         timestamp: '00:08'
       }
     ]
+  },
+
+  ph_bancassurance: {
+    id: 'ph_bancassurance',
+    name: 'Bancassurance Renewal & GCash (Taglish)',
+    description: 'Taglish bancassurance policy renewal with GCash/Maya e-wallet preference and IC disclosure.',
+    expectedOutcome: 'System detects Taglish register, enforces po/opo politeness, and fires GCash payment instruction nudge.',
+    caller: 'Maria Clara (Masked [CUST_ID_044])',
+    policyNo: 'POL-PH-2025-9012',
+    market: 'ph_tl',
+    turns: [
+      {
+        id: 'turn_ph1',
+        speaker: 'agent',
+        timestamp: '00:04',
+        text: 'Magandang araw po Ma’am Maria! Meridian Life po ito, tumatawag po para sa inyong policy renewal na due sa October 15.',
+        gate: {
+          turn_id: 'gate_ph1',
+          status: 'VERIFIED',
+          draft_text: 'Magandang araw po Ma’am Maria! Meridian Life po ito, tumatawag po para sa inyong policy renewal na due sa October 15.',
+          final_spoken_text: 'Magandang araw po Ma’am Maria! Meridian Life po ito, tumatawag po para sa inyong policy renewal na due sa October 15.',
+          receipt: {
+            citation: 'kb_ph_life_009 · v1.3 · 0.96',
+            record_id: 'kb_ph_life_009',
+            version: 'v1.3',
+            score: 0.96,
+            source_title: 'Philippine Life Insurance Grace Period and Bancassurance Taglish Rules',
+            source_file: 'Bancassurance_PH_Bilingual_Brochure_Taglish.pdf',
+            chunk_text: 'Bancassurance renewal outreach conducts respectful initial inquiry with po/opo particle in Taglish register...',
+            score_breakdown: { dense: 0.95, bm25: 0.97, rerank: 0.96 }
+          }
+        },
+        asr_latency_ms: 150,
+        confidence: 0.99,
+        language: 'Taglish (PH)'
+      },
+      {
+        id: 'turn_ph2',
+        speaker: 'customer',
+        timestamp: '00:12',
+        text: 'Opo, hello po! Gusto ko po sana i-renew pero pwede po ba bayaran thru GCash or Maya? Wala po kasi akong checkbook eh.',
+        asr_latency_ms: 180,
+        confidence: 0.97,
+        language: 'Taglish (PH)'
+      },
+      {
+        id: 'turn_ph3',
+        speaker: 'agent',
+        timestamp: '00:20',
+        text: 'Opo naman po Ma’am Maria! Napakadali po mag-settle via GCash Bills Payment under Meridian Life, instantly credited po iyon.',
+        gate: {
+          turn_id: 'gate_ph3',
+          status: 'VERIFIED',
+          draft_text: 'Opo naman po Ma’am Maria! Napakadali po mag-settle via GCash Bills Payment under Meridian Life, instantly credited po iyon.',
+          final_spoken_text: 'Opo naman po Ma’am Maria! Napakadali po mag-settle via GCash Bills Payment under Meridian Life, instantly credited po iyon.',
+          receipt: {
+            citation: 'kb_ph_pay_012 · v1.3 · 0.94',
+            record_id: 'kb_ph_pay_012',
+            version: 'v1.3',
+            score: 0.94,
+            source_title: 'Philippine Digital Payment Channels & E-Wallet Integration',
+            source_file: 'PH_Payment_Guidelines_GCash_Maya.pdf',
+            chunk_text: 'Policyholders may settle renewal premiums via GCash Bills Payment or Maya with real-time settlement acknowledgement...',
+            score_breakdown: { dense: 0.93, bm25: 0.95, rerank: 0.94 }
+          }
+        },
+        asr_latency_ms: 165,
+        confidence: 0.98,
+        language: 'Taglish (PH)'
+      }
+    ],
+    nudges: [
+      {
+        id: 'nudge_ph_01',
+        priority: 'P1',
+        imperative_text: 'Send SMS Payment Link for GCash Biller Code #8849',
+        rationale: 'Customer requested GCash bills payment option; immediate SMS delivery has 91% conversion in Metro Manila.',
+        confidence: 0.92,
+        topic: 'payment_digital_wallet',
+        expires_in_sec: 20,
+        fired_at: '00:15',
+        status: 'active',
+        waterfall_latency_ms: {
+          chunk: 55,
+          asr: 160,
+          signal: 85,
+          llm: 250,
+          delivery: 35,
+          total: 585
+        }
+      }
+    ],
+    suppressedNudges: [
+      {
+        id: 'sup_ph1',
+        candidate_text: 'Offer Auto-Debit Arrangement via BDO/BPI Credit Card',
+        topic: 'credit_card_upsell',
+        suppression_reason: 'low_confidence',
+        verdict_detail: 'Suppressed: Customer preferred mobile e-wallet; pushing bank credit card violates empathy guideline.',
+        confidence: 0.44,
+        timestamp: '00:16'
+      }
+    ]
+  },
+
+  id_multifinance: {
+    id: 'id_multifinance',
+    name: 'Multifinance Angsuran & Tanggal Gajian (Bahasa)',
+    description: 'Indonesian motorcycle multifinance instalment reminder aligned with payday cycle (tanggal gajian).',
+    expectedOutcome: 'System detects payday obstacle; offers Virtual Account BCA payment link and late-fee grace guidance.',
+    caller: 'Bapak Hendra (Masked [CUST_ID_512])',
+    policyNo: 'POL-ID-2024-5512',
+    market: 'id_id',
+    turns: [
+      {
+        id: 'turn_id1',
+        speaker: 'agent',
+        timestamp: '00:04',
+        text: 'Selamat siang Bapak Hendra. Saya dengan Dina dari Meridian Multifinance, ingin konfirmasi untuk angsuran motor ke-11 yang jatuh tempo tanggal 25.',
+        gate: {
+          turn_id: 'gate_id1',
+          status: 'VERIFIED',
+          draft_text: 'Selamat siang Bapak Hendra. Saya dengan Dina dari Meridian Multifinance, ingin konfirmasi untuk angsuran motor ke-11 yang jatuh tempo tanggal 25.',
+          final_spoken_text: 'Selamat siang Bapak Hendra. Saya dengan Dina dari Meridian Multifinance, ingin konfirmasi untuk angsuran motor ke-11 yang jatuh tempo tanggal 25.',
+          receipt: {
+            citation: 'kb_id_fin_001 · v1.3 · 0.98',
+            record_id: 'kb_id_fin_001',
+            version: 'v1.3',
+            score: 0.98,
+            source_title: 'Pedoman Penagihan Multifinance & Regulasi OJK',
+            source_file: 'Meridian_Multifinance_SOP_Indonesia.pdf',
+            chunk_text: 'Petugas penagihan wajib menggunakan sapaan hormat Bapak/Ibu dan menjelaskan nomor kontrak serta tanggal jatuh tempo...',
+            score_breakdown: { dense: 0.97, bm25: 0.99, rerank: 0.98 }
+          }
+        },
+        asr_latency_ms: 155,
+        confidence: 0.99,
+        language: 'Bahasa Indonesia'
+      },
+      {
+        id: 'turn_id2',
+        speaker: 'customer',
+        timestamp: '00:14',
+        text: 'Iya siang Bu Dina. Ini kantor saya baru gajian tanggal 27. Apakah bisa bayar tanggal 27 tanpa kena denda keterlambatan?',
+        asr_latency_ms: 175,
+        confidence: 0.98,
+        language: 'Bahasa Indonesia'
+      },
+      {
+        id: 'turn_id3',
+        speaker: 'agent',
+        timestamp: '00:23',
+        text: 'Bisa sekali Bapak Hendra. Sesuai ketentuan, terdapat masa tenggang 3 hari kerja sebelum denda harian tercatat. Kami buatkan janji bayar tanggal 27 ya Pak.',
+        gate: {
+          turn_id: 'gate_id3',
+          status: 'VERIFIED',
+          draft_text: 'Bisa sekali Bapak Hendra. Sesuai ketentuan, terdapat masa tenggang 3 hari kerja sebelum denda harian tercatat. Kami buatkan janji bayar tanggal 27 ya Pak.',
+          final_spoken_text: 'Bisa sekali Bapak Hendra. Sesuai ketentuan, terdapat masa tenggang 3 hari kerja sebelum denda harian tercatat. Kami buatkan janji bayar tanggal 27 ya Pak.',
+          receipt: {
+            citation: 'kb_id_fin_004 · v1.3 · 0.97',
+            record_id: 'kb_id_fin_004',
+            version: 'v1.3',
+            score: 0.97,
+            source_title: 'Ketentuan Denda dan Masa Tenggang Multifinance',
+            source_file: 'Meridian_Multifinance_SOP_Indonesia.pdf',
+            chunk_text: 'Konsumen diberikan kelonggaran 3 hari kalender dari tanggal jatuh tempo tanpa pengenaan denda keterlambatan...',
+            score_breakdown: { dense: 0.96, bm25: 0.98, rerank: 0.97 }
+          }
+        },
+        asr_latency_ms: 160,
+        confidence: 0.98,
+        language: 'Bahasa Indonesia'
+      }
+    ],
+    nudges: [
+      {
+        id: 'nudge_id_01',
+        priority: 'P1',
+        imperative_text: 'Catat Janji Bayar (PTP) tanggal 27 dan kirimkan VA BCA',
+        rationale: 'Konsumen menyebut tanggal gajian tanggal 27. Masa tenggang 3 hari melindungi dari denda OJK.',
+        confidence: 0.95,
+        topic: 'promise_to_pay',
+        expires_in_sec: 25,
+        fired_at: '00:16',
+        status: 'active',
+        waterfall_latency_ms: {
+          chunk: 50,
+          asr: 155,
+          signal: 80,
+          llm: 240,
+          delivery: 35,
+          total: 560
+        }
+      }
+    ],
+    suppressedNudges: [
+      {
+        id: 'sup_id1',
+        candidate_text: 'Peringatkan denda sita unit kendaraan bermotor',
+        topic: 'threat_warning',
+        suppression_reason: 'low_confidence',
+        verdict_detail: 'Suppressed by OJK Compliance Guard: Larangan intimidasi saat nasabah kooperatif dan dalam masa tenggang.',
+        confidence: 0.08,
+        timestamp: '00:15'
+      }
+    ]
+  },
+
+  id_javanese_delay: {
+    id: 'id_javanese_delay',
+    name: 'Javanese Dialect Payday Delay (Bahasa/Jawa)',
+    description: 'Customer with regional Javanese dialect inquiring about angsuran payment flexibility.',
+    expectedOutcome: 'System accommodates Javanese loanwords ("dereng gajian"), maintains warm sopan register, and routes to Virtual Account.',
+    caller: 'Bapak Slamet (Masked [CUST_ID_789])',
+    policyNo: 'POL-ID-2024-7890',
+    market: 'id_id',
+    turns: [
+      {
+        id: 'turn_jv1',
+        speaker: 'customer',
+        timestamp: '00:05',
+        text: 'Nyuwun sewu Mbak, niki kulo Slamet. Dereng gajian saking pabrik, saget nyuwun wekdal rong dinten mboten nggih?',
+        asr_latency_ms: 210,
+        confidence: 0.93,
+        language: 'Javanese / Bahasa'
+      },
+      {
+        id: 'turn_jv2',
+        speaker: 'agent',
+        timestamp: '00:16',
+        text: 'Inggih Bapak Slamet, mboten punapa-punapa Pak. Kami catat perpanjangan waktu pembayaran 2 hari nggih. Nanti kami kirimkan nomor Virtual Account lewat WhatsApp.',
+        gate: {
+          turn_id: 'gate_jv2',
+          status: 'VERIFIED',
+          draft_text: 'Inggih Bapak Slamet, mboten punapa-punapa Pak. Kami catat perpanjangan waktu pembayaran 2 hari nggih.',
+          final_spoken_text: 'Inggih Bapak Slamet, mboten punapa-punapa Pak. Kami catat perpanjangan waktu pembayaran 2 hari nggih. Nanti kami kirimkan nomor Virtual Account lewat WhatsApp.',
+          receipt: {
+            citation: 'kb_id_reg_008 · v1.3 · 0.94',
+            record_id: 'kb_id_reg_008',
+            version: 'v1.3',
+            score: 0.94,
+            source_title: 'Pelayanan Ramah Bahasa Daerah & Kebijakan Relaksasi',
+            source_file: 'Meridian_Multifinance_SOP_Indonesia.pdf',
+            chunk_text: 'Petugas diperkenankan merespons dengan kesantunan bahasa lokal yang wajar untuk menjaga kenyamanan nasabah...',
+            score_breakdown: { dense: 0.92, bm25: 0.95, rerank: 0.94 }
+          }
+        },
+        asr_latency_ms: 170,
+        confidence: 0.97,
+        language: 'Javanese / Bahasa'
+      }
+    ],
+    nudges: [
+      {
+        id: 'nudge_jv_01',
+        priority: 'P2',
+        imperative_text: 'Kirim link pembayaran Alfamart/Indomaret via WhatsApp',
+        rationale: 'Konsumen lebih nyaman pembayaran tunai ritel terdekat jika ATM jauh dari lokasi pabrik.',
+        confidence: 0.88,
+        topic: 'convenience_retail_payment',
+        expires_in_sec: 25,
+        fired_at: '00:10',
+        status: 'active',
+        waterfall_latency_ms: {
+          chunk: 60,
+          asr: 175,
+          signal: 90,
+          llm: 260,
+          delivery: 35,
+          total: 620
+        }
+      }
+    ],
+    suppressedNudges: [
+      {
+        id: 'sup_jv1',
+        candidate_text: 'Tawarkan restrukturisasi kredit jangka panjang',
+        topic: 'refinancing',
+        suppression_reason: 'low_confidence',
+        verdict_detail: 'Suppressed: Keterlambatan hanya 2 hari karena siklus gaji pabrik; bukan gagal bayar struktural.',
+        confidence: 0.35,
+        timestamp: '00:11'
+      }
+    ]
   }
 };
