@@ -446,13 +446,13 @@ export const LiveCockpit: React.FC = () => {
 
           {/* Streaming Transcript Lanes */}
           <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#1F293D]">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap">
                   Dual-Lane Streaming Transcript
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-slate-400 font-mono whitespace-nowrap shrink-0">
                 ASR: Deepgram Nova-2 ({marketNames[scenario.market].name})
               </span>
             </div>
@@ -533,12 +533,12 @@ export const LiveCockpit: React.FC = () => {
         {/* ================= COLUMN 2: Signals & Sentiment Swimlanes (3 cols) ================= */}
         <div className="lg:col-span-3 space-y-5">
           <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm flex flex-col h-full">
-            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#1F293D]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2 whitespace-nowrap">
+                <Activity className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 Real-Time Signals
               </span>
-              <span className="text-[11px] text-emerald-400 font-medium">
+              <span className="text-[11px] text-emerald-400 font-medium whitespace-nowrap shrink-0">
                 {isLiveMode ? 'Live Backend' : 'Live Replay'}
               </span>
             </div>
@@ -720,18 +720,19 @@ export const LiveCockpit: React.FC = () => {
         <div className="lg:col-span-4 space-y-5">
           {/* Active Nudge Stack */}
           <div className="bg-[#0E1424] border border-[#1F293D] rounded-2xl p-5 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-[#1F293D]">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-white">
+            <div className="pb-3 border-b border-[#1F293D] space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">
                   Active Live Nudges
                 </span>
-                <span className="text-[11px] font-medium px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
+                <span className="text-[11px] font-medium px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full whitespace-nowrap shrink-0">
                   {activeNudgesFiltered.length} Actionable
                 </span>
               </div>
-              <span className="text-[11px] text-slate-400 font-mono">
-                ≤ 18 Words Standard
-              </span>
+              <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                <span className="text-slate-400">Playbook Delivery</span>
+                <span className="text-slate-400 font-medium">≤ 18 Words Standard</span>
+              </div>
             </div>
 
             {/* Nudge Cards */}
@@ -842,7 +843,7 @@ export const LiveCockpit: React.FC = () => {
                   Suppression Court
                 </h2>
               </div>
-              <span className="text-[11px] font-medium px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-mono">
+              <span className="text-[11px] font-medium px-2.5 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full font-mono whitespace-nowrap shrink-0">
                 {currentScenarioNudgesAvoided} Filtered
               </span>
             </div>

@@ -19,18 +19,57 @@ import {
   Send,
   FileCheck,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Volume2,
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 
 export const VoiceAgent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'test_call' | 'flow' | 'config' | 'crm_action' | 'test_matrix'>('test_call');
   const { market, setMarket } = useApp();
 
-  const { state: voiceState, startCall, endCall, resetCall, toggleMute, activateMic } = useVoicePipeline(market);
+  const {
+    state: voiceState,
+    startCall,
+    endCall,
+    resetCall,
+    toggleMute,
+    toggleAutoListen,
+    activateMic,
+    sendCustomerText,
+  } = useVoicePipeline(market);
+
+  const [typedInput, setTypedInput] = useState('');
+
+  const handleSendText = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!typedInput.trim()) return;
+    sendCustomerText(typedInput.trim());
+    setTypedInput('');
+  };
+
+  const quickChips = market === 'in_en' ? [
+    { label: 'Confirm Name', text: 'Yes, this is Rajesh.' },
+    { label: 'Acknowledge Recording', text: "That's fine, please proceed." },
+    { label: 'State Age & Income', text: 'I am 35 years old and my annual income is 5 lakh.' },
+    { label: 'Ask Grace Period', text: 'What is the grace period for premium payment?' },
+    { label: 'Ask Bitcoin (Refusal Test)', text: 'Can I purchase insurance coverage for Bitcoin?' },
+    { label: 'Confirm Renewal', text: 'Sounds good, please send me the renewal link.' },
+  ] : market === 'ph_tl' ? [
+    { label: 'Confirm Name (Taglish)', text: 'Opo, ako nga po si Jose.' },
+    { label: 'Acknowledge Recording', text: 'Sige lang po, ayos lang.' },
+    { label: 'Age & Income', text: '30 years old po ako, mga 500 thousand pesos ang kita.' },
+    { label: 'Ask Grace Period', text: 'Mayroon po bang grace period kapag late ang premium?' },
+    { label: 'Ask GCash Payment', text: 'Puwede po ba magbayad gamit ang GCash bills payment?' },
+  ] : [
+    { label: 'Konfirmasi Nama', text: 'Ya, saya sendiri.' },
+    { label: 'Masa Tenggang', text: 'Apakah ada masa tenggang untuk pembayaran angsuran?' },
+    { label: 'Konfirmasi Pembayaran', text: 'Baik, saya akan bayar lewat transfer bank hari ini.' },
+  ];
 
   const callActive = voiceState.status !== 'idle' && voiceState.status !== 'ended';
   const isMuted = voiceState.isMuted;
-  const [pushToTalk, setPushToTalk] = useState(false);
   const callElapsedSec = voiceState.elapsedSeconds;
 
   const formatElapsed = (s: number) => {
@@ -300,6 +339,55 @@ export const VoiceAgent: React.FC = () => {
                     {voiceState.status === 'listening' ? 'Listening...' : 'Speak Now'}
                   </button>
                 )}
+
+                <button
+                  id="toggle-autolisten-btn"
+                  onClick={toggleAutoListen}
+                  disabled={!callActive}
+                  title="When enabled, the bot automatically listens for your voice when it finishes speaking"
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-colors ${
+                    voiceState.autoListen
+                      ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40'
+                      : 'bg-[#141C30] text-slate-400 border-[#1F293D]'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Auto-Listen: {voiceState.autoListen ? 'ON' : 'OFF'}
+                </button>
+              </div>
+
+              {/* Persona Voice Indicator */}
+              <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-[#1F293D]/60 gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Volume2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <span>
+                    Voice Persona:{' '}
+                    <strong className="text-slate-200">
+                      {market === 'in_en'
+                        ? 'Priya (Female · Indian English)'
+                        : market === 'ph_tl'
+                        ? 'Maria (Female · Filipino/Taglish)'
+                        : 'Sari (Female · Indonesian)'}
+                    </strong>
+                  </span>
+                  {voiceState.activeVoiceName && (
+                    <span className="text-slate-500 font-mono text-[10px] hidden sm:inline">
+                      [{voiceState.activeVoiceName}]
+                    </span>
+                  )}
+                </div>
+                {callActive && (
+                  <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {voiceState.status === 'listening'
+                      ? 'Listening for voice...'
+                      : voiceState.status === 'speaking'
+                      ? 'Priya Speaking (TTS)'
+                      : voiceState.autoListen
+                      ? 'Full-Duplex Auto-Listen Ready'
+                      : 'Ready for Push-to-Talk'}
+                  </span>
+                )}
               </div>
 
               {voiceState.error && (
@@ -311,8 +399,9 @@ export const VoiceAgent: React.FC = () => {
 
               {/* Interim ASR */}
               {voiceState.currentInterim && (
-                <div className="px-3.5 py-2 bg-[#141C30] border border-[#1F293D] rounded-xl text-xs text-slate-300 italic">
-                  Listening: {voiceState.currentInterim}...
+                <div className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 italic flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Heard: "{voiceState.currentInterim}"...
                 </div>
               )}
 
@@ -322,6 +411,51 @@ export const VoiceAgent: React.FC = () => {
                 onToggleMute={toggleMute}
                 noiseLevelDb={callActive ? 26 : 0}
               />
+
+              {/* Quick Interactive Customer Response Chips & Direct Text Fallback */}
+              {callActive && (
+                <div className="space-y-2.5 pt-3 border-t border-[#1F293D]">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400">
+                    <span className="font-semibold text-slate-300">Quick Test Responses (Click to speak for customer):</span>
+                    <span className="text-[10px] text-indigo-400 font-mono">1-Click Simulated Turn</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {quickChips.map((chip, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => sendCustomerText(chip.text)}
+                        disabled={voiceState.status === 'processing'}
+                        title={chip.text}
+                        className="px-2.5 py-1 bg-[#141C30] hover:bg-indigo-900/30 text-slate-300 hover:text-indigo-200 border border-[#1F293D] hover:border-indigo-500/40 rounded-lg text-[11px] transition-all disabled:opacity-50"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Direct Text Input Fallback */}
+                  <form onSubmit={handleSendText} className="flex gap-2 pt-1">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={typedInput}
+                        onChange={(e) => setTypedInput(e.target.value)}
+                        placeholder="Or type customer response here and press Enter..."
+                        disabled={voiceState.status === 'processing'}
+                        className="w-full px-3 py-2 bg-[#090D16] border border-[#1F293D] rounded-xl text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={!typedInput.trim() || voiceState.status === 'processing'}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm shrink-0"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      Send Turn
+                    </button>
+                  </form>
+                </div>
+              )}
             </div>
 
             {/* Live Transcript Pane */}
