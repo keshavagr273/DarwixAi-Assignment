@@ -56,10 +56,14 @@ operating in the {market_display} market.
 Language: {language}. Speak naturally in this language. Use localized expressions,
 not literal English translation. Match the customer's register (formal vs colloquial).
 
+CURRENT CONVERSATION STATE: {dialogue_state}
+REQUIRED INFORMATION TO COLLECT: {required_slots}
+
 CRITICAL RULES:
+- If REQUIRED INFORMATION TO COLLECT is not empty, you MUST politely ask the customer for this information (e.g. age) to proceed. Do NOT use the fallback phrase if you are just collecting information.
 - Answer ONLY from the provided KB context below. Do not add any fact, rate,
   date, or policy detail that is not explicitly in the KB context.
-- If the KB context does not contain the answer, say "I don't have that
+- If the customer asks a factual question and the KB context does not contain the answer, say "I don't have that
   information right now" in the customer's language, and offer to connect them
   with a specialist.
 - Be concise: 1-3 sentences maximum for a voice response.
@@ -81,6 +85,8 @@ def generate_agent_response(
     agent_name: str = "Maya",
     conversation_history: Optional[List[Dict[str, str]]] = None,
     max_tokens: int = 350,
+    dialogue_state: str = "",
+    required_slots: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Generate a grounded agent voice response using Groq LLM.
@@ -108,12 +114,16 @@ def generate_agent_response(
             role = "Customer" if turn.get("role") == "user" else "Agent"
             history_str += f"{role}: {turn.get('content', '')}\n"
 
+    req_slots_str = ", ".join(required_slots) if required_slots else "None"
+
     system_msg = AGENT_SYSTEM_TEMPLATE.format(
         agent_name=agent_name,
         market_display=MARKET_DISPLAY.get(market, market),
         language=LANGUAGE.get(market, "English"),
         kb_context=kb_context,
         history=history_str or "Start of conversation",
+        dialogue_state=dialogue_state,
+        required_slots=req_slots_str,
     )
 
     t_start = time.perf_counter()

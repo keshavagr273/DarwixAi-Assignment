@@ -96,20 +96,20 @@ class DialogueFSM:
         # Intent patterns
         if self.session.current_state == "GREETING" and re.search(r"(yes|speaking|this is he|this is she|correct|right|haan|ji|ako nga|totoo|benar|betul|saya sendiri|i am|it is me)", text):
             return "name_confirmed"
-        if self.session.current_state == "COMPLIANCE_DISCLOSURE" and re.search(r"(ok|okay|sure|go on|proceed|no issue|yes|alright|fine|continue|yeah)", text):
+        if self.session.current_state == "COMPLIANCE_DISCLOSURE" and re.search(r"(ok|okay|sure|go on|proceed|no issue|yes|alright|fine|continue|yeah|sige|oo|tuloy|baik|baiklah|ya|lanjut|lanjutkan|silakan)", text):
             return "disclosure_acknowledged"
 
-        if re.search(r"not interested|no thank|don.t (want|need)|not now", text):
+        if re.search(r"(not interested|no thank|don\.t (want|need)|not now|ayoko|hindi na|wag na|hindi interesado|tidak tertarik|tidak mau|tidak usah|jangan sekarang)", text):
             return "not_interested"
-        if re.search(r"call.?back|call me (later|again|back)|another time", text):
+        if re.search(r"(call.?back|call me (later|again|back)|another time|tawag ka ulit|mamaya na|ibang oras|hubungi saya lagi|telepon nanti|nanti saja)", text):
             return "callback_requested"
-        if re.search(r"how (much|many)|what is|what are|tell me|explain|details about", text):
+        if re.search(r"(how (much|many)|what is|what are|tell me|explain|details about|magkano|ano|paano|paliwanag|detalye|berapa|apa|bagaimana|jelaskan|detail)", text):
             return "question_asked"
-        if re.search(r"(interested|sounds good|tell me more|yes|sure|okay|proceed)", text):
+        if re.search(r"(interested|sounds good|tell me more|yes|sure|okay|proceed|sige|gusto ko|maganda yan|tertarik|kedengarannya bagus|beritahu saya lebih)", text):
             return "interested"
-        if re.search(r"too expensive|can.t afford|not affordable|price is high|costly", text):
+        if re.search(r"(too expensive|can\.t afford|not affordable|price is high|costly|mahal|walang pera|di kaya|terlalu mahal|tidak mampu|biaya tinggi)", text):
             return "objection_raised"
-        if re.search(r"(wrong number|you.ve got|you have the wrong|mistake)", text):
+        if re.search(r"(wrong number|you\.ve got|you have the wrong|mistake|mali|wala dito|salah sambung|salah nomor|tidak ada)", text):
             return "name_rejected"
 
         return "continue"

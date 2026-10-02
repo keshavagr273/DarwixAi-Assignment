@@ -669,6 +669,8 @@ async def process_voice_turn(call_session_id: str, req: TurnInputRequest):
                 kb_chunks=retrieve_result["results"],
                 market=market,
                 conversation_history=history,
+                dialogue_state=dialogue.get("state", ""),
+                required_slots=dialogue.get("required_slots", []),
             )
             draft_response = llm_result["text"]
             llm_latency_ms = llm_result["latency_ms"]
